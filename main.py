@@ -5,15 +5,7 @@
 
 from graphics import *
 import tkinter
+import Congkak.CongkakBoardModel as CongkakGame
 
-win = GraphWin('test',200,400)
 
-def helloCallBack():
-   tkinter.messageBox.showinfo( "Hello Python", "Hello World")
-
-B = tkinter.Button(win, text ="Hello", command = helloCallBack)
-
-B.place(x = 20, y = 20)
-
-win.getMouse()
-win.close()
+congkak = CongkakGame.BoardModel()
