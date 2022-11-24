@@ -1,108 +1,114 @@
 from graphics import *
+from PyQt6.QtWidgets import QApplication, QWidget
+from PyQt6.QtWidgets import *
+from PyQt6.QtGui import QPixmap, QPainter, QPen
+from PyQt6 import QtCore, QtGui, QtWidgets, uic
+from PyQt6.QtCore import QPoint
+import sys
 
 
-class BoardGraphic:
-
+class BoardGraphic(QWidget):
     def __init__(self):
+        super().__init__()
 
         self.house_a_positions = []
         self.house_b_positions = []
         self.storeroom_a_position = Point(0, 0)
         self.storeroom_b_position = Point(0, 0)
 
-        self.win = GraphWin("Congkak", 800, 600)
-        self.init_draw_board()
+        self.house_a_text_labels = []
+        self.house_b_text_labels = []
+        self.storeroom_a_text_label = QLabel()
+        self.storeroom_b_text_label = QLabel()
 
-    def init_draw_board(self):
+        self.display_must_update = True
+
+        self.acceptDrops()
+        # set the title
+        self.setWindowTitle("Congkak")
+
+        # setting the geometry of window
+        self.setGeometry(100, 100, 800, 600)
+
+        self.generate_points()
+
+        self.create_UI()
+
+
+
+        #
+        # label = QLabel(self)
+        # label.move(30, 200)
+        # label.setText("tefdsfgsf edfshbsgshrgyhgd")
+
+        # show all the widgets
+        self.show()
+
+    def paintEvent(self, QPaintEvent):
+
         storeroom_diameter = 45
 
+        house_diameter = 25
+
+        if self.display_must_update:
+
+            painter = QPainter(self)
+            pen = QtGui.QPen()
+            pen.setWidth(5)
+            pen.setColor(QtGui.QColor('brown'))
+            painter.setPen(pen)
+
+            # storeroom B
+            painter.drawEllipse(self.storeroom_a_position, storeroom_diameter, storeroom_diameter)
+
+            # house a
+            for pos in self.house_a_positions:
+                painter.drawEllipse(pos, house_diameter, house_diameter)
+
+            # storeroom A
+            painter.drawEllipse(self.storeroom_b_position, storeroom_diameter, storeroom_diameter)
+
+            # house b
+            for pos in self.house_b_positions:
+                painter.drawEllipse(pos, house_diameter, house_diameter)
+
+            painter.end()
+
+            #self.create_UI()
+            self.display_must_update = False
+
+    def generate_points(self):
+
         storeroom_b_x_pos = 100
+        storeroom_y_pos = 250
 
-        storeroom_y_pos = 150
-
-        house_a_y_pos = 100
-        house_b_y_pos = 200
+        house_a_y_pos = 200
+        house_b_y_pos = 300
 
         storeroom_house_offset = 90
         house_x_pos_init = storeroom_b_x_pos + storeroom_house_offset
         house_x_pos_offset = 70
 
-        house_diameter = 25
+        # storeroom B
+        self.storeroom_b_position = QPoint(storeroom_b_x_pos, storeroom_y_pos)
 
-        self.storeroom_b_position = Point(storeroom_b_x_pos, storeroom_y_pos)
-
-        storeroom_b = Circle(self.storeroom_b_position, storeroom_diameter)
-
-        storeroom_b.draw(self.win)
-
+        # house a
         house_x_pos = house_x_pos_init
+        for x in range(7):
+            self.house_a_positions.append(QPoint(house_x_pos, house_a_y_pos))
+            house_x_pos += house_x_pos_offset
+        house_x_pos -= house_x_pos_offset
+        self.house_a_positions.reverse()
 
-        house_a_7 = Circle(Point(house_x_pos, house_a_y_pos), house_diameter)
-        self.house_a_positions.append(Point(house_x_pos, house_a_y_pos))
-        house_x_pos += house_x_pos_offset
-        house_a_6 = Circle(Point(house_x_pos, house_a_y_pos), house_diameter)
-        self.house_a_positions.append(Point(house_x_pos, house_a_y_pos))
-        house_x_pos += house_x_pos_offset
-        house_a_5 = Circle(Point(house_x_pos, house_a_y_pos), house_diameter)
-        self.house_a_positions.append(Point(house_x_pos, house_a_y_pos))
-        house_x_pos += house_x_pos_offset
-        house_a_4 = Circle(Point(house_x_pos, house_a_y_pos), house_diameter)
-        self.house_a_positions.append(Point(house_x_pos, house_a_y_pos))
-        house_x_pos += house_x_pos_offset
-        house_a_3 = Circle(Point(house_x_pos, house_a_y_pos), house_diameter)
-        self.house_a_positions.append(Point(house_x_pos, house_a_y_pos))
-        house_x_pos += house_x_pos_offset
-        house_a_2 = Circle(Point(house_x_pos, house_a_y_pos), house_diameter)
-        self.house_a_positions.append(Point(house_x_pos, house_a_y_pos))
-        house_x_pos += house_x_pos_offset
-        house_a_1 = Circle(Point(house_x_pos, house_a_y_pos), house_diameter)
-        self.house_a_positions.append(Point(house_x_pos, house_a_y_pos))
-
-        house_a_1.draw(self.win)
-        house_a_2.draw(self.win)
-        house_a_3.draw(self.win)
-        house_a_4.draw(self.win)
-        house_a_5.draw(self.win)
-        house_a_6.draw(self.win)
-        house_a_7.draw(self.win)
-
+        # storeroom A
         storeroom_a_x_pos = house_x_pos + storeroom_house_offset
+        self.storeroom_a_position = QPoint(storeroom_a_x_pos, storeroom_y_pos)
 
-        storeroom_a = Circle(Point(storeroom_a_x_pos, storeroom_y_pos), storeroom_diameter)
-        storeroom_a.draw(self.win)
+        # house b
+        for x in range(7):
+            self.house_b_positions.append(QPoint(house_x_pos, house_b_y_pos))
+            house_x_pos -= house_x_pos_offset
 
-        self.storeroom_a_position = Point(storeroom_a_x_pos, storeroom_y_pos)
-
-        house_b_7 = Circle(Point(house_x_pos, house_b_y_pos), house_diameter)
-        self.house_b_positions.append(Point(house_x_pos, house_b_y_pos))
-        house_x_pos -= house_x_pos_offset
-        house_b_6 = Circle(Point(house_x_pos, house_b_y_pos), house_diameter)
-        self.house_b_positions.append(Point(house_x_pos, house_b_y_pos))
-        house_x_pos -= house_x_pos_offset
-        house_b_5 = Circle(Point(house_x_pos, house_b_y_pos), house_diameter)
-        self.house_b_positions.append(Point(house_x_pos, house_b_y_pos))
-        house_x_pos -= house_x_pos_offset
-        house_b_4 = Circle(Point(house_x_pos, house_b_y_pos), house_diameter)
-        self.house_b_positions.append(Point(house_x_pos, house_b_y_pos))
-        house_x_pos -= house_x_pos_offset
-        house_b_3 = Circle(Point(house_x_pos, house_b_y_pos), house_diameter)
-        self.house_b_positions.append(Point(house_x_pos, house_b_y_pos))
-        house_x_pos -= house_x_pos_offset
-        house_b_2 = Circle(Point(house_x_pos, house_b_y_pos), house_diameter)
-        self.house_b_positions.append(Point(house_x_pos, house_b_y_pos))
-        house_x_pos -= house_x_pos_offset
-        house_b_1 = Circle(Point(house_x_pos, house_b_y_pos), house_diameter)
-        self.house_b_positions.append(Point(house_x_pos, house_b_y_pos))
-
-        self.house_b_positions.reverse()
-
-        house_b_1.draw(self.win)
-        house_b_2.draw(self.win)
-        house_b_3.draw(self.win)
-        house_b_4.draw(self.win)
-        house_b_5.draw(self.win)
-        house_b_6.draw(self.win)
-        house_b_7.draw(self.win)
 
     def update_values(self, house_a_values, house_b_values, storeroom_a_value, storeroom_b_value):
 
@@ -119,3 +125,28 @@ class BoardGraphic:
 
         label = Text(self.storeroom_b_position, storeroom_b_value)
         label.draw(self.win)
+
+    def create_UI(self):
+
+        offset = QPoint(-4, -7)
+
+        # creating text label for all the holes.
+        for x in self.house_a_positions:
+            label = QLabel(self)
+            label.move(x+offset)
+            label.setText("7")
+            self.house_a_text_labels.append(QLabel())
+
+        for x in self.house_b_positions:
+            label = QLabel(self)
+            label.move(x + offset)
+            label.setText("1")
+            self.house_a_text_labels.append(QLabel())
+
+        self.storeroom_a_text_label = QLabel(self)
+        self.storeroom_a_text_label.move(self.storeroom_a_position + offset)
+        self.storeroom_a_text_label.setText("0")
+
+        self.storeroom_b_text_label = QLabel(self)
+        self.storeroom_b_text_label.move(self.storeroom_b_position + offset)
+        self.storeroom_b_text_label.setText("0")

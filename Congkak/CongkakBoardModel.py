@@ -1,5 +1,7 @@
 from graphics import *
 from Congkak.CongkakBoardGraphics import BoardGraphic
+from PyQt6.QtWidgets import *
+from PyQt6.QtGui import QPixmap
 
 class BoardModel:
 
@@ -16,21 +18,12 @@ class BoardModel:
     def __init__(self):
         #self.win = GraphWin("Congkak", 800, 600)
 
+        App = QApplication(sys.argv)
         self.board_graphic = BoardGraphic()
+        sys.exit(App.exec())
 
         self.house_a_values = [7, 6, 5, 4, 3, 2, 1]
         self.house_b_values = [1, 2, 3, 4, 5, 6, 7]
 
         self.storeroom_a_value = 12
         self.storeroom_b_value = 17
-
-        while True:
-
-            self.board_graphic.update_values(self.house_a_values, self.house_b_values, self.storeroom_a_value, self.storeroom_b_value)
-
-            click_point = self.board_graphic.win.getMouse()
-
-            if click_point is None:
-                print('none')
-
-        self.board_graphic.win.close()
