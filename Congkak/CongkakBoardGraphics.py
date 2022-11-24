@@ -21,6 +21,9 @@ class BoardGraphic(QWidget):
         self.storeroom_a_text_label = QLabel()
         self.storeroom_b_text_label = QLabel()
 
+        self.house_a_buttons = []
+        self.house_b_buttons = []
+
         self.display_must_update = True
 
         self.acceptDrops()
@@ -32,7 +35,8 @@ class BoardGraphic(QWidget):
 
         self.generate_points()
 
-        self.create_UI()
+        self.create_hole_text()
+        self.create_buttons()
 
 
 
@@ -43,39 +47,6 @@ class BoardGraphic(QWidget):
 
         # show all the widgets
         self.show()
-
-    def paintEvent(self, QPaintEvent):
-
-        storeroom_diameter = 45
-
-        house_diameter = 25
-
-        if self.display_must_update:
-
-            painter = QPainter(self)
-            pen = QtGui.QPen()
-            pen.setWidth(5)
-            pen.setColor(QtGui.QColor('brown'))
-            painter.setPen(pen)
-
-            # storeroom B
-            painter.drawEllipse(self.storeroom_a_position, storeroom_diameter, storeroom_diameter)
-
-            # house a
-            for pos in self.house_a_positions:
-                painter.drawEllipse(pos, house_diameter, house_diameter)
-
-            # storeroom A
-            painter.drawEllipse(self.storeroom_b_position, storeroom_diameter, storeroom_diameter)
-
-            # house b
-            for pos in self.house_b_positions:
-                painter.drawEllipse(pos, house_diameter, house_diameter)
-
-            painter.end()
-
-            #self.create_UI()
-            self.display_must_update = False
 
     def generate_points(self):
 
@@ -109,6 +80,89 @@ class BoardGraphic(QWidget):
             self.house_b_positions.append(QPoint(house_x_pos, house_b_y_pos))
             house_x_pos -= house_x_pos_offset
 
+    def paintEvent(self, QPaintEvent):
+
+        storeroom_diameter = 45
+
+        house_diameter = 25
+
+        painter = QPainter(self)
+        pen = QtGui.QPen()
+        pen.setWidth(5)
+        pen.setColor(QtGui.QColor('brown'))
+        painter.setPen(pen)
+
+        # storeroom B
+        painter.drawEllipse(self.storeroom_a_position, storeroom_diameter, storeroom_diameter)
+
+        # house a
+        for pos in self.house_a_positions:
+            painter.drawEllipse(pos, house_diameter, house_diameter)
+
+        # storeroom A
+        painter.drawEllipse(self.storeroom_b_position, storeroom_diameter, storeroom_diameter)
+
+        # house b
+        for pos in self.house_b_positions:
+            painter.drawEllipse(pos, house_diameter, house_diameter)
+
+        painter.end()
+
+        #self.create_UI()
+
+    def create_hole_text(self):
+
+        offset = QPoint(-4, -7)
+
+        # creating text label for all the holes.
+        for pos in self.house_a_positions:
+            label = QLabel(self)
+            label.move(pos + offset)
+            label.setText("7")
+            self.house_a_text_labels.append(label)
+
+        for pos in self.house_b_positions:
+            label = QLabel(self)
+            label.move(pos + offset)
+            label.setText("7")
+            self.house_b_text_labels.append(label)
+
+        self.storeroom_a_text_label = QLabel(self)
+        self.storeroom_a_text_label.move(self.storeroom_a_position + offset)
+        self.storeroom_a_text_label.setText("0")
+
+        self.storeroom_b_text_label = QLabel(self)
+        self.storeroom_b_text_label.move(self.storeroom_b_position + offset)
+        self.storeroom_b_text_label.setText("0")
+
+    def create_buttons(self):
+
+        offset = QPoint(-22, -60)
+
+        count = 7
+
+        for pos in self.house_a_positions:
+            button = QPushButton(self)
+            button.resize(40, 25)
+            button.move(pos + offset)
+            button.setText("Pick")
+            self.house_a_buttons.append(button)
+
+            count -= 1
+
+        count = 7
+
+        offset = QPoint(-22, 40)
+
+        for pos in self.house_b_positions:
+            button = QPushButton(self)
+            button.resize(40, 25)
+            button.move(pos + offset)
+            button.setText("Pick")
+            self.house_b_buttons.append(button)
+
+            count -= 1
+
 
     def update_values(self, house_a_values, house_b_values, storeroom_a_value, storeroom_b_value):
 
@@ -126,27 +180,4 @@ class BoardGraphic(QWidget):
         label = Text(self.storeroom_b_position, storeroom_b_value)
         label.draw(self.win)
 
-    def create_UI(self):
 
-        offset = QPoint(-4, -7)
-
-        # creating text label for all the holes.
-        for x in self.house_a_positions:
-            label = QLabel(self)
-            label.move(x+offset)
-            label.setText("7")
-            self.house_a_text_labels.append(QLabel())
-
-        for x in self.house_b_positions:
-            label = QLabel(self)
-            label.move(x + offset)
-            label.setText("1")
-            self.house_a_text_labels.append(QLabel())
-
-        self.storeroom_a_text_label = QLabel(self)
-        self.storeroom_a_text_label.move(self.storeroom_a_position + offset)
-        self.storeroom_a_text_label.setText("0")
-
-        self.storeroom_b_text_label = QLabel(self)
-        self.storeroom_b_text_label.move(self.storeroom_b_position + offset)
-        self.storeroom_b_text_label.setText("0")
