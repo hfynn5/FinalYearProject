@@ -3,7 +3,7 @@ from PyQt6.QtWidgets import QApplication, QWidget
 from PyQt6.QtWidgets import *
 from PyQt6.QtGui import QPixmap, QPainter, QPen
 from PyQt6 import QtCore, QtGui, QtWidgets, uic
-from PyQt6.QtCore import QPoint
+from PyQt6.QtCore import QPoint, Qt
 import sys
 
 
@@ -24,7 +24,10 @@ class BoardGraphic(QWidget):
         self.house_a_buttons = []
         self.house_b_buttons = []
 
-        self.display_must_update = True
+        self.player_a_dropdown = QComboBox()
+        self.player_b_dropdown = QComboBox()
+
+        self.play_speed_slider = QSlider()
 
         self.acceptDrops()
         # set the title
@@ -37,13 +40,7 @@ class BoardGraphic(QWidget):
 
         self.create_hole_text()
         self.create_buttons()
-
-
-
-        #
-        # label = QLabel(self)
-        # label.move(30, 200)
-        # label.setText("tefdsfgsf edfshbsgshrgyhgd")
+        self.create_UI()
 
         # show all the widgets
         self.show()
@@ -108,8 +105,6 @@ class BoardGraphic(QWidget):
 
         painter.end()
 
-        #self.create_UI()
-
     def create_hole_text(self):
 
         offset = QPoint(-4, -7)
@@ -163,6 +158,26 @@ class BoardGraphic(QWidget):
 
             count -= 1
 
+    def create_UI(self):
+
+        self.player_a_dropdown = QComboBox(self)
+        self.player_a_dropdown.move(650, 100)
+        self.player_a_dropdown.addItems(['Minimax', 'MCTS', 'Human'])
+
+        self.player_b_dropdown = QComboBox(self)
+        self.player_b_dropdown.move(650, 380)
+        self.player_b_dropdown.addItems(['Minimax', 'MCTS', 'Human'])
+
+        slider_label = QLabel(self)
+        slider_label.move(150,420)
+        slider_label.setText("Moves Per Second")
+
+        self.play_speed_slider = QSlider(Qt.Orientation.Horizontal, self)
+        self.play_speed_slider.setGeometry(200, 450, 400, 50)
+        self.play_speed_slider.setMinimum(1)
+        self.play_speed_slider.setMaximum(20)
+        self.play_speed_slider.setTickPosition(QSlider.TickPosition.TicksBelow)
+        self.play_speed_slider.setTickInterval(1)
 
     def update_values(self, house_a_values, house_b_values, storeroom_a_value, storeroom_b_value):
 
