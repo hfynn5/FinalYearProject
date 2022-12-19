@@ -1,13 +1,13 @@
 from graphics import *
 from PyQt6.QtWidgets import QApplication, QWidget
 from PyQt6.QtWidgets import *
-from PyQt6.QtGui import QPixmap, QPainter, QPen
+from PyQt6.QtGui import QPixmap, QPainter, QPen, QAction, QIcon
 from PyQt6 import QtCore, QtGui, QtWidgets, uic
 from PyQt6.QtCore import QPoint, Qt
 import sys
 
 
-class BoardGraphic(QWidget):
+class BoardGraphic(QMainWindow):
     def __init__(self):
         super().__init__()
 
@@ -28,6 +28,7 @@ class BoardGraphic(QWidget):
         self.player_b_dropdown = QComboBox()
 
         self.play_speed_slider = QSlider()
+        self.play_button = QPushButton()
 
         self.acceptDrops()
         # set the title
@@ -39,11 +40,25 @@ class BoardGraphic(QWidget):
         self.generate_points()
 
         self.create_hole_text()
-        self.create_buttons()
+        # self.create_buttons()
         self.create_UI()
 
         # show all the widgets
         self.show()
+
+        # comment out afterwards
+
+        msg = QMessageBox()
+        msg.setWindowTitle("Round Robin Result")
+        msg.setText("Results\n\n"
+                    "Rounds: 100\n"
+                    "Random: 2 wins"
+                    "Minimax: 60 wins\n"
+                    "MCTS: 40 wins\n"
+                    "Q-Learning: 40 wins"
+                    )
+
+        x = msg.exec()
 
     def generate_points(self):
 
@@ -107,7 +122,7 @@ class BoardGraphic(QWidget):
 
     def create_hole_text(self):
 
-        offset = QPoint(-4, -7)
+        offset = QPoint(-4, -15)
 
         # creating text label for all the holes.
         for pos in self.house_a_positions:
@@ -162,14 +177,14 @@ class BoardGraphic(QWidget):
 
         self.player_a_dropdown = QComboBox(self)
         self.player_a_dropdown.move(650, 100)
-        self.player_a_dropdown.addItems(['Minimax', 'MCTS', 'Human'])
+        self.player_a_dropdown.addItems(['Random', 'Minimax', 'MCTS', 'Human'])
 
         self.player_b_dropdown = QComboBox(self)
         self.player_b_dropdown.move(650, 380)
-        self.player_b_dropdown.addItems(['Minimax', 'MCTS', 'Human'])
+        self.player_b_dropdown.addItems(['Random', 'Minimax', 'MCTS', 'Human'])
 
         slider_label = QLabel(self)
-        slider_label.move(150,420)
+        slider_label.move(360, 500)
         slider_label.setText("Moves Per Second")
 
         self.play_speed_slider = QSlider(Qt.Orientation.Horizontal, self)
@@ -178,6 +193,72 @@ class BoardGraphic(QWidget):
         self.play_speed_slider.setMaximum(20)
         self.play_speed_slider.setTickPosition(QSlider.TickPosition.TicksBelow)
         self.play_speed_slider.setTickInterval(1)
+
+        self.play_button = QPushButton(self)
+        self.play_button.setGeometry(150,450,40,25)
+        self.play_button.setText("Play")
+
+        menu_bar = self.menuBar()
+
+
+
+        # save games?
+        file_menu = menu_bar.addMenu("File")
+
+        button_action = QAction("New Game", self)
+        # button_action.setStatusTip("This is your button")
+        # button_action.triggered.connect(self.onMyToolBarButtonClick)
+        # button_action.setCheckable(True)
+        file_menu.addAction(button_action)
+
+        button_action = QAction("", self)
+        file_menu.addAction(button_action)
+
+        button_action = QAction("Save Game", self)
+        file_menu.addAction(button_action)
+
+        button_action = QAction("Load Game", self)
+        file_menu.addAction(button_action)
+
+
+
+        # edit games?
+        edit_menu = menu_bar.addMenu("Edit")
+
+        submenu = edit_menu.addMenu("Edit Player")
+
+        button_action = QAction("Player A", self)
+        submenu.addAction(button_action)
+
+        button_action = QAction("Player B", self)
+        submenu.addAction(button_action)
+
+        button_action = QAction("Edit Marble Count", self)
+        edit_menu.addAction(button_action)
+
+        button_action = QAction("Change Speed", self)
+        edit_menu.addAction(button_action)
+
+        train_menu = menu_bar.addMenu("Training")
+
+        # views
+        view_menu = menu_bar.addMenu("View")
+
+        button_action = QAction("idk", self)
+        view_menu.addAction(button_action)
+        #
+        game_menu = menu_bar.addMenu("Game")
+
+        button_action = QAction("Run Multiple Games...", self)
+        game_menu.addAction(button_action)
+
+        button_action = QAction("Run Round Robin Tournament...", self)
+        game_menu.addAction(button_action)
+
+        help_menu = menu_bar.addMenu("Help")
+
+        about_menu = menu_bar.addMenu("About")
+
 
     def update_values(self, house_a_values, house_b_values, storeroom_a_value, storeroom_b_value):
 
