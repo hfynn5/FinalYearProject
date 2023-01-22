@@ -41,24 +41,24 @@ class BoardGraphic(QMainWindow):
 
         self.create_hole_text()
         # self.create_buttons()
-        self.create_UI()
+        self.create_ui()
 
         # show all the widgets
         self.show()
 
         # comment out afterwards
 
-        msg = QMessageBox()
-        msg.setWindowTitle("Round Robin Result")
-        msg.setText("Results\n\n"
-                    "Rounds: 100\n"
-                    "Random: 2 wins"
-                    "Minimax: 60 wins\n"
-                    "MCTS: 40 wins\n"
-                    "Q-Learning: 40 wins"
-                    )
-
-        x = msg.exec()
+        # msg = QMessageBox()
+        # msg.setWindowTitle("Round Robin Result")
+        # msg.setText("Results\n\n"
+        #             "Rounds: 100\n"
+        #             "Random: 2 wins"
+        #             "Minimax: 60 wins\n"
+        #             "MCTS: 40 wins\n"
+        #             "Q-Learning: 40 wins"
+        #             )
+        #
+        # x = msg.exec()
 
     def generate_points(self):
 
@@ -91,6 +91,7 @@ class BoardGraphic(QMainWindow):
         for x in range(7):
             self.house_b_positions.append(QPoint(house_x_pos, house_b_y_pos))
             house_x_pos -= house_x_pos_offset
+        self.house_b_positions.reverse()
 
     def paintEvent(self, QPaintEvent):
 
@@ -149,7 +150,7 @@ class BoardGraphic(QMainWindow):
 
         offset = QPoint(-22, -60)
 
-        count = 7
+        # count = 7
 
         for pos in self.house_a_positions:
             button = QPushButton(self)
@@ -158,9 +159,9 @@ class BoardGraphic(QMainWindow):
             button.setText("Pick")
             self.house_a_buttons.append(button)
 
-            count -= 1
+            # count -= 1
 
-        count = 7
+        # count = 7
 
         offset = QPoint(-22, 40)
 
@@ -171,9 +172,7 @@ class BoardGraphic(QMainWindow):
             button.setText("Pick")
             self.house_b_buttons.append(button)
 
-            count -= 1
-
-    def create_UI(self):
+    def create_ui(self):
 
         self.player_a_dropdown = QComboBox(self)
         self.player_a_dropdown.move(650, 100)
@@ -259,21 +258,30 @@ class BoardGraphic(QMainWindow):
 
         about_menu = menu_bar.addMenu("About")
 
-
     def update_values(self, house_a_values, house_b_values, storeroom_a_value, storeroom_b_value):
 
-        for x in range(len(self.house_a_positions)):
-            label = Text(self.house_a_positions[x], house_a_values[x])
-            label.draw(self.win)
+        for i, label in enumerate(self.house_a_text_labels):
+            label.setText(str(house_a_values[i]))
 
-        for x in range(len(self.house_b_positions)):
-            label = Text(self.house_b_positions[x], house_b_values[x])
-            label.draw(self.win)
+        for i, label in enumerate(self.house_b_text_labels):
+            label.setText(str(house_b_values[i]))
 
-        label = Text(self.storeroom_a_position, storeroom_a_value)
-        label.draw(self.win)
+        self.storeroom_a_text_label.setText(str(storeroom_a_value))
+        self.storeroom_b_text_label.setText(str(storeroom_b_value))
 
-        label = Text(self.storeroom_b_position, storeroom_b_value)
-        label.draw(self.win)
+
+        # for x in range(len(self.house_a_positions)):
+        #     label = Text(self.house_a_positions[x], house_a_values[x])
+        #     label.draw(self.win)
+        #
+        # for x in range(len(self.house_b_positions)):
+        #     label = Text(self.house_b_positions[x], house_b_values[x])
+        #     label.draw(self.win)
+        #
+        # label = Text(self.storeroom_a_position, storeroom_a_value)
+        # label.draw(self.win)
+        #
+        # label = Text(self.storeroom_b_position, storeroom_b_value)
+        # label.draw(self.win)
 
 
