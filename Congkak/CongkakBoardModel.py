@@ -31,14 +31,44 @@ class BoardModel:
 
         # time.sleep(1)
 
-        self.iterate_main_step(player='a', hole=1)
+        self.iterate_sowing(player='a', hole=1)
 
         self.update_board()
 
 
         sys.exit(App.exec())
 
-    def iterate_main_step(self, player, hole):
+    def iterate_sowing(self, player, hole):
+
+        CONTINUE_SOWING = 1
+        STOP_SOWING = 2
+        PROMPT_SOWING = 3
+
+        status = CONTINUE_SOWING
+
+        while status == CONTINUE_SOWING:
+
+            new_hand_pos = self.sow_once(player = player, hole = hole)
+
+            if new_hand_pos == 28 or new_hand_pos == 18:
+                new_hand_pos -= 1
+
+            if (new_hand_pos < 20 and self.house_a_values[new_hand_pos-11] == 0) or (new_hand_pos > 20 and self.house_b_values[new_hand_pos - 21] == 0):
+                status = STOP_SOWING
+                print("sowing stopped")
+            elif new_hand_pos == 17 or new_hand_pos == 27:
+                status = PROMPT_SOWING
+                print("user needs to input hole")
+            else:
+                status = CONTINUE_SOWING
+                hole = new_hand_pos % 10
+                print("continuing starting with: " + str(hole))
+
+
+
+
+
+    def sow_once(self, player, hole):
 
         hand_value = 0
         hand_pos = hole
@@ -81,10 +111,7 @@ class BoardModel:
                 self.house_b_values[hand_pos-21] += 1
                 hand_value -= 1
 
-
-
-
-        pass
+        return hand_pos
 
     def update_board(self):
         self.board_graphic.update_values(house_a_values=self.house_a_values, house_b_values=self.house_b_values,
