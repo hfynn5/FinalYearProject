@@ -53,7 +53,7 @@ class BoardModel:
             if new_hand_pos == 28 or new_hand_pos == 18:
                 new_hand_pos -= 1
 
-            if (new_hand_pos < 20 and self.house_a_values[new_hand_pos-11] == 0) or (new_hand_pos > 20 and self.house_b_values[new_hand_pos - 21] == 0):
+            if (new_hand_pos < 20 and self.house_a_values[new_hand_pos-11] == 1) or (new_hand_pos > 20 and self.house_b_values[new_hand_pos - 21] == 1):
                 status = STOP_SOWING
                 print("sowing stopped")
             elif new_hand_pos == 17 or new_hand_pos == 27:
