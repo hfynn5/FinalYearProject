@@ -5,7 +5,7 @@
 
 from graphics import *
 import tkinter
-import Congkak.CongkakBoardModel as CongkakGame
+import Congkak.GameManager as CongkakGame
 
 
-congkak = CongkakGame.BoardModel()
+congkak = CongkakGame.GameManager()

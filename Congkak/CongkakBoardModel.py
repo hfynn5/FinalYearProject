@@ -1,30 +1,17 @@
-from graphics import *
-from Congkak.CongkakBoardGraphics import BoardGraphic
-from PyQt6.QtWidgets import *
-from PyQt6.QtGui import QPixmap
+import sys
+import time
 
 class Hand:
     player = 'n'
-    hole_pos = 0;
-    counter_count = 0;
+    hole_pos = 0
+    counter_count = 0
 
     def __init__(self, player, hole_pos, counter_count):
         self.player = player
         self.hole_pos = hole_pos
         self.counter_count = counter_count
 
-
 class BoardModel:
-
-    # hand_a_dict = {
-    #     'hole': 0,
-    #     'counter_count': 0
-    # }
-    #
-    # hand_b_dict = {
-    #     'hole': 0,
-    #     'counter_count': 0
-    # }
 
     # player A is top with storeroom on right.
     # player B is bottom with storeroom on left.
@@ -37,26 +24,14 @@ class BoardModel:
     house_b_values = [0, 0, 0, 0, 0, 0, 0]
 
     def __init__(self):
-        #self.win = GraphWin("Congkak", 800, 600)
-
-        App = QApplication(sys.argv)
-        self.board_graphic = BoardGraphic()
-
         self.house_a_values = [1, 7, 7, 7, 7, 7, 7]
         self.house_b_values = [1, 0, 0, 0, 0, 0, 0]
 
         self.storeroom_a_value = 0
         self.storeroom_b_value = 0
 
-        self.update_board()
+        # self.iterate_sowing(player='a', hole=6)
 
-        # time.sleep(1)
-
-        self.iterate_sowing(player='a', hole=6)
-
-        self.update_board()
-
-        sys.exit(App.exec())
 
     def iterate_sowing(self, player, hole):
 
@@ -107,14 +82,15 @@ class BoardModel:
 
         while player_hand.counter_count > 0:
 
-            # time.sleep(1)
-            self.update_board()
-
             player_hand.hole_pos -= 1
 
-            # hand_pos -= 1
+            start = time.time()
 
-            player_hand = self.drop_counter(player_hand)
+            while time.time() - start < 1:
+                print(time.time() - start)
+                self.update_board()
+
+            self.drop_counter(player_hand)
 
         return player_hand.hole_pos
 
@@ -140,10 +116,7 @@ class BoardModel:
 
 
 
-    def update_board(self):
-        self.board_graphic.update_values(house_a_values=self.house_a_values, house_b_values=self.house_b_values,
-                                         storeroom_a_value=self.storeroom_a_value,
-                                         storeroom_b_value=self.storeroom_b_value)
+
 
 
 
