@@ -24,8 +24,8 @@ class BoardModel:
     house_b_values = [0, 0, 0, 0, 0, 0, 0]
 
     def __init__(self):
-        self.house_a_values = [1, 7, 7, 7, 7, 7, 7]
-        self.house_b_values = [1, 0, 0, 0, 0, 0, 0]
+        self.house_a_values = [7, 7, 7, 7, 7, 7, 7]
+        self.house_b_values = [7, 7, 7, 7, 7, 7, 7]
 
         self.storeroom_a_value = 0
         self.storeroom_b_value = 0
@@ -48,7 +48,8 @@ class BoardModel:
             if new_hand_pos == 28 or new_hand_pos == 18:
                 new_hand_pos -= 1
 
-            if (new_hand_pos < 20 and self.house_a_values[new_hand_pos-11] == 1) or (new_hand_pos > 20 and self.house_b_values[new_hand_pos - 21] == 1):
+            if (new_hand_pos < 20 and (self.house_a_values[new_hand_pos-11] == 1 or self.house_a_values[new_hand_pos-11] == 0 )) or \
+                    (new_hand_pos > 20 and (self.house_b_values[new_hand_pos - 21] == 1 or self.house_b_values[new_hand_pos - 21] == 0)):
                 status = STOP_SOWING
                 print("sowing stopped")
             elif new_hand_pos == 17 or new_hand_pos == 27:
@@ -59,37 +60,27 @@ class BoardModel:
                 hole = new_hand_pos % 10
                 print("continuing starting with: " + str(hole))
 
+        self.print_holes()
+
     def sow_once(self, player, hole):
 
         hand_value = 0
         hand_pos = hole
 
         if player == 'a':
-
             hand_pos = 10 + hole
-
             hand_value = self.house_a_values[hole-1]
             self.house_a_values[hole-1] = 0
 
         elif player == 'b':
-
             hand_pos = 20 + hole
-
             hand_value = self.house_b_values[hole-1]
             self.house_b_values[hole-1] = 0
 
         player_hand = Hand(player=player, hole_pos=hand_pos, counter_count=hand_value)
 
         while player_hand.counter_count > 0:
-
             player_hand.hole_pos -= 1
-
-            start = time.time()
-
-            while time.time() - start < 1:
-                print(time.time() - start)
-                self.update_board()
-
             self.drop_counter(player_hand)
 
         return player_hand.hole_pos
@@ -114,6 +105,12 @@ class BoardModel:
 
         return hand
 
+
+    def print_holes(self):
+        print("house a: " + str(self.house_a_values))
+        print("house b: " + str(self.house_b_values))
+        print("store a: " + str(self.storeroom_a_value))
+        print("store b: " + str(self.storeroom_b_value))
 
 
 
