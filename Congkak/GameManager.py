@@ -116,10 +116,11 @@ class GameManager:
         self.threadpool.start(worker)
 
     def sow(self,player,hole):
-        self.board_model.iterate_sowing(player=player, hole=hole)
-        self.update_board_graphics(board_graphic=self.board_graphic, board_model=self.board_model)
+        self.board_graphic.set_enable_inputs(False)
+        self.board_model.iterate_sowing(player=player, hole=hole, sowing_speed=0.5)
+        self.board_graphic.set_enable_inputs(True)
 
-    def constant_update_board_graphics(self, blank):
+    def constant_update_board_graphics(self):
         while True:
             self.update_board_graphics(board_graphic=self.board_graphic, board_model=self.board_model)
 

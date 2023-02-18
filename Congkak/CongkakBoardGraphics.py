@@ -269,19 +269,10 @@ class BoardGraphic(QMainWindow):
         self.storeroom_a_text_label.setText(str(storeroom_a_value))
         self.storeroom_b_text_label.setText(str(storeroom_b_value))
 
-
-        # for x in range(len(self.house_a_positions)):
-        #     label = Text(self.house_a_positions[x], house_a_values[x])
-        #     label.draw(self.win)
-        #
-        # for x in range(len(self.house_b_positions)):
-        #     label = Text(self.house_b_positions[x], house_b_values[x])
-        #     label.draw(self.win)
-        #
-        # label = Text(self.storeroom_a_position, storeroom_a_value)
-        # label.draw(self.win)
-        #
-        # label = Text(self.storeroom_b_position, storeroom_b_value)
-        # label.draw(self.win)
+    def set_enable_inputs(self, enable):
+        for button in self.house_a_buttons:
+            button.setEnabled(enable)
+        for button in self.house_b_buttons:
+            button.setEnabled(enable)
 
 
