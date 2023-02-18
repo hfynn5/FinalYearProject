@@ -40,7 +40,7 @@ class BoardGraphic(QMainWindow):
         self.generate_points()
 
         self.create_hole_text()
-        # self.create_buttons()
+        self.create_buttons()
         self.create_ui()
 
         # show all the widgets

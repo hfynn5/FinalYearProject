@@ -26,8 +26,8 @@ class Worker(QRunnable):
 
         # Store constructor arguments (re-used for processing)
         self.fn = fn
-        # self.args = args
-        # self.kwargs = kwargs
+        self.args = args
+        self.kwargs = kwargs
 
         self.signals = WorkerSignals()
 
@@ -38,15 +38,16 @@ class Worker(QRunnable):
         # Retrieve args/kwargs here; and fire processing using them
 
         try:
-            for x in range(5):
+            # for x in range(5):
+            #
+            #     start_time = time.time()
+            #
+            #     while time.time() - start_time < 1:
+            #         pass
+            #     print("ping")
+            #     result = self.fn()
 
-                start_time = time.time()
-
-                while time.time() - start_time < 1:
-                    pass
-                print("ping")
-                result = self.fn()
-
+            result = self.fn(*self.args, **self.kwargs)
 
         except:
             traceback.print_exc()
@@ -90,23 +91,31 @@ class GameManager:
         App = QApplication(sys.argv)
         self.board_graphic = BoardGraphic()
 
-        self.curr_value = 7
+        print(self.board_graphic.house_a_buttons)
+
+        for i, button in enumerate(self.board_graphic.house_a_buttons):
+            print(i)
+            button.clicked.connect(lambda checked, value = i+1: self.temp('a', value))
+
+
+        self.curr_value = 1
 
         self.update_board(board_graphic=self.board_graphic, board_model=self.board_model)
 
-        self.temp()
+        # self.temp()
 
         self.update_board(board_graphic=self.board_graphic, board_model=self.board_model)
 
         sys.exit(App.exec())
 
-    def temp(self):
-        worker = Worker(self.sow, board=self.board_model)
+    def temp(self, player, hole):
+        print(hole)
+        worker = Worker(self.sow, player=player, hole=hole)
         self.threadpool.start(worker)
 
-    def sow(self):
-        self.board_model.iterate_sowing(player='a', hole=self.curr_value)
-        self.curr_value -= 1
+    def sow(self,player,hole):
+        self.board_model.iterate_sowing(player=player, hole=hole)
+        # self.curr_value += 1
         self.update_board(board_graphic=self.board_graphic, board_model=self.board_model)
 
 

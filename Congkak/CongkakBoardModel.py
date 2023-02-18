@@ -60,7 +60,7 @@ class BoardModel:
                 hole = new_hand_pos % 10
                 print("continuing starting with: " + str(hole))
 
-        self.print_holes()
+        # self.print_holes()
 
     def sow_once(self, player, hole):
 
