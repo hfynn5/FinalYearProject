@@ -60,6 +60,7 @@ class BoardGraphic(QMainWindow):
         #
         # x = msg.exec()
 
+    # Generate points for the circles
     def generate_points(self):
 
         storeroom_b_x_pos = 100
@@ -93,6 +94,8 @@ class BoardGraphic(QMainWindow):
             house_x_pos -= house_x_pos_offset
         self.house_b_positions.reverse()
 
+    # Draws all the circles
+    # TODO: add a list of all the circles to edit and show hand position
     def paintEvent(self, QPaintEvent):
 
         storeroom_diameter = 45
@@ -121,6 +124,7 @@ class BoardGraphic(QMainWindow):
 
         painter.end()
 
+    # create the label for all the holes
     def create_hole_text(self):
 
         offset = QPoint(-4, -15)
@@ -146,6 +150,7 @@ class BoardGraphic(QMainWindow):
         self.storeroom_b_text_label.move(self.storeroom_b_position + offset)
         self.storeroom_b_text_label.setText("0")
 
+    # create all buttons
     def create_buttons(self):
 
         offset = QPoint(-22, -60)
@@ -172,6 +177,8 @@ class BoardGraphic(QMainWindow):
             button.setText("Pick")
             self.house_b_buttons.append(button)
 
+    # creats the UI.
+    # TODO split into inputs and menus
     def create_ui(self):
 
         self.player_a_dropdown = QComboBox(self)
@@ -258,6 +265,7 @@ class BoardGraphic(QMainWindow):
 
         about_menu = menu_bar.addMenu("About")
 
+    # updates the labels
     def update_values(self, house_a_values, house_b_values, storeroom_a_value, storeroom_b_value):
 
         for i, label in enumerate(self.house_a_text_labels):
@@ -269,6 +277,7 @@ class BoardGraphic(QMainWindow):
         self.storeroom_a_text_label.setText(str(storeroom_a_value))
         self.storeroom_b_text_label.setText(str(storeroom_b_value))
 
+    # enable or disable the inputs
     def set_enable_inputs(self, enable):
         for button in self.house_a_buttons:
             button.setEnabled(enable)

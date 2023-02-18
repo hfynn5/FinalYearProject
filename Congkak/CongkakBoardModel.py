@@ -30,9 +30,10 @@ class BoardModel:
         self.storeroom_a_value = 0
         self.storeroom_b_value = 0
 
-        # self.iterate_sowing(player='a', hole=6)
+        # TODO: create hands for player A and B. Use this hand in all needed functions below
 
-
+    # do repeated sowing
+    # TODO: replace player and hole with hand
     def iterate_sowing(self, player, hole, sowing_speed):
 
         CONTINUE_SOWING = 1
@@ -59,8 +60,8 @@ class BoardModel:
                 hole = new_hand_pos
                 print("continuing starting with: " + str(hole))
 
-        # self.print_holes()
-
+    # sows once
+    # TODO: replace player and hole with hand.
     def sow_once(self, player, hole, sowing_speed):
 
         hand_value = 0
@@ -76,15 +77,13 @@ class BoardModel:
         player_hand = Hand(player=player, hole_pos=hand_pos, counter_count=hand_value)
 
         while player_hand.counter_count > 0:
-
             time.sleep(sowing_speed)
-
             player_hand.hole_pos -= 1
             self.drop_counter(player_hand)
 
-
         return player_hand.hole_pos
 
+    # drops a counter a the position the hand is at
     def drop_counter(self, hand):
         if hand.hole_pos == 10:
             if hand.player == 'a':
@@ -105,7 +104,7 @@ class BoardModel:
 
         return hand
 
-
+    # print holes
     def print_holes(self):
         print("house a: " + str(self.house_a_values))
         print("house b: " + str(self.house_b_values))

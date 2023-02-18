@@ -83,47 +83,52 @@ class GameManager:
 
     def __init__(self):
 
+        # declare threadpool
         self.threadpool = QThreadPool()
-
         print("Multithreading with maximum %d threads" % self.threadpool.maxThreadCount())
 
+        # declare board model
         self.board_model = BoardModel()
 
+        # declare graphics
         App = QApplication(sys.argv)
         self.board_graphic = BoardGraphic()
 
+        # connect buttons with corresponding functions
         for i, button in enumerate(self.board_graphic.house_a_buttons):
             button.clicked.connect(lambda checked, value = i+11: self.start_worker_sowing('a', value))
 
         for i, button in enumerate(self.board_graphic.house_b_buttons):
             button.clicked.connect(lambda checked, value = i+21: self.start_worker_sowing('b', value))
 
-        self.update_board_graphics(board_graphic=self.board_graphic, board_model=self.board_model)
-
+        # start constantly updating graphics
         self.start_worker_updating()
 
         sys.exit(App.exec())
 
+    # makes worker to start sowing
     def start_worker_sowing(self, player, hole):
-        # print(hole)
         worker = Worker(self.sow, player=player, hole=hole)
-
         self.threadpool.start(worker)
 
+    # makes worker constantly update graphics
+    # TODO: find how to disable this worker when app exits
     def start_worker_updating(self):
-        worker = Worker(self.constant_update_board_graphics)
-
+        worker = Worker(self.update_board_graphics_constantly)
         self.threadpool.start(worker)
 
+    # iterate sowing in board model
     def sow(self,player,hole):
         self.board_graphic.set_enable_inputs(False)
         self.board_model.iterate_sowing(player=player, hole=hole, sowing_speed=0.5)
         self.board_graphic.set_enable_inputs(True)
 
-    def constant_update_board_graphics(self):
+    # updates board graphics constantly
+    def update_board_graphics_constantly(self):
         while True:
             self.update_board_graphics(board_graphic=self.board_graphic, board_model=self.board_model)
 
+    # updates board graphic
     def update_board_graphics(self, board_graphic: BoardGraphic, board_model: BoardModel):
 
         board_graphic.update_values(house_a_values=board_model.house_a_values, house_b_values=board_model.house_b_values,
