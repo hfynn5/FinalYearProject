@@ -80,8 +80,12 @@ class BoardModel:
         player_hand = Hand(player=player, hole_pos=hand_pos, counter_count=hand_value)
 
         while player_hand.counter_count > 0:
+
+            time.sleep(0.1)
+
             player_hand.hole_pos -= 1
             self.drop_counter(player_hand)
+
 
         return player_hand.hole_pos
 

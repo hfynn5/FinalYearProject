@@ -84,6 +84,7 @@ class GameManager:
     def __init__(self):
 
         self.threadpool = QThreadPool()
+
         print("Multithreading with maximum %d threads" % self.threadpool.maxThreadCount())
 
         self.board_model = BoardModel()
@@ -91,43 +92,40 @@ class GameManager:
         App = QApplication(sys.argv)
         self.board_graphic = BoardGraphic()
 
-        print(self.board_graphic.house_a_buttons)
-
         for i, button in enumerate(self.board_graphic.house_a_buttons):
-            print(i)
-            button.clicked.connect(lambda checked, value = i+1: self.temp('a', value))
+            button.clicked.connect(lambda checked, value = i+1: self.start_worker_sowing('a', value))
 
+        for i, button in enumerate(self.board_graphic.house_b_buttons):
+            button.clicked.connect(lambda checked, value = i+1: self.start_worker_sowing('b', value))
 
-        self.curr_value = 1
+        self.update_board_graphics(board_graphic=self.board_graphic, board_model=self.board_model)
 
-        self.update_board(board_graphic=self.board_graphic, board_model=self.board_model)
-
-        # self.temp()
-
-        self.update_board(board_graphic=self.board_graphic, board_model=self.board_model)
+        self.start_worker_updating()
 
         sys.exit(App.exec())
 
-    def temp(self, player, hole):
-        print(hole)
+    def start_worker_sowing(self, player, hole):
+        # print(hole)
         worker = Worker(self.sow, player=player, hole=hole)
+
+        self.threadpool.start(worker)
+
+    def start_worker_updating(self):
+        worker = Worker(self.constant_update_board_graphics, True)
+
         self.threadpool.start(worker)
 
     def sow(self,player,hole):
         self.board_model.iterate_sowing(player=player, hole=hole)
-        # self.curr_value += 1
-        self.update_board(board_graphic=self.board_graphic, board_model=self.board_model)
+        self.update_board_graphics(board_graphic=self.board_graphic, board_model=self.board_model)
 
+    def constant_update_board_graphics(self, blank):
+        while True:
+            self.update_board_graphics(board_graphic=self.board_graphic, board_model=self.board_model)
 
-
-    def update_board(self, board_graphic: BoardGraphic, board_model: BoardModel):
+    def update_board_graphics(self, board_graphic: BoardGraphic, board_model: BoardModel):
 
         board_graphic.update_values(house_a_values=board_model.house_a_values, house_b_values=board_model.house_b_values,
                                              storeroom_a_value=board_model.storeroom_a_value,
                                              storeroom_b_value=board_model.storeroom_b_value)
-
-        # def update_board(self):
-        #     self.board_graphic.update_values(house_a_values=self.house_a_values, house_b_values=self.house_b_values,
-        #                                      storeroom_a_value=self.storeroom_a_value,
-        #                                      storeroom_b_value=self.storeroom_b_value)
 
