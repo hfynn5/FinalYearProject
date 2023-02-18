@@ -93,10 +93,10 @@ class GameManager:
         self.board_graphic = BoardGraphic()
 
         for i, button in enumerate(self.board_graphic.house_a_buttons):
-            button.clicked.connect(lambda checked, value = i+1: self.start_worker_sowing('a', value))
+            button.clicked.connect(lambda checked, value = i+11: self.start_worker_sowing('a', value))
 
         for i, button in enumerate(self.board_graphic.house_b_buttons):
-            button.clicked.connect(lambda checked, value = i+1: self.start_worker_sowing('b', value))
+            button.clicked.connect(lambda checked, value = i+21: self.start_worker_sowing('b', value))
 
         self.update_board_graphics(board_graphic=self.board_graphic, board_model=self.board_model)
 
@@ -111,7 +111,7 @@ class GameManager:
         self.threadpool.start(worker)
 
     def start_worker_updating(self):
-        worker = Worker(self.constant_update_board_graphics, True)
+        worker = Worker(self.constant_update_board_graphics)
 
         self.threadpool.start(worker)
 

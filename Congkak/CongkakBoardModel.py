@@ -33,7 +33,7 @@ class BoardModel:
         # self.iterate_sowing(player='a', hole=6)
 
 
-    def iterate_sowing(self, player, hole):
+    def iterate_sowing(self, player, hole, sowing_speed):
 
         CONTINUE_SOWING = 1
         STOP_SOWING = 2
@@ -43,45 +43,41 @@ class BoardModel:
 
         while status == CONTINUE_SOWING:
 
-            new_hand_pos = self.sow_once(player = player, hole = hole)
+            new_hand_pos = self.sow_once(player = player, hole = hole, sowing_speed=sowing_speed)
 
-            if new_hand_pos == 28 or new_hand_pos == 18:
-                new_hand_pos -= 1
+            time.sleep(sowing_speed)
 
-            if (new_hand_pos < 20 and (self.house_a_values[new_hand_pos-11] == 1 or self.house_a_values[new_hand_pos-11] == 0 )) or \
+            if new_hand_pos == 18 or new_hand_pos == 28:
+                status = PROMPT_SOWING
+                print("user needs to input hole")
+            elif (new_hand_pos < 20 and (self.house_a_values[new_hand_pos-11] == 1 or self.house_a_values[new_hand_pos-11] == 0 )) or \
                     (new_hand_pos > 20 and (self.house_b_values[new_hand_pos - 21] == 1 or self.house_b_values[new_hand_pos - 21] == 0)):
                 status = STOP_SOWING
                 print("sowing stopped")
-            elif new_hand_pos == 17 or new_hand_pos == 27:
-                status = PROMPT_SOWING
-                print("user needs to input hole")
             else:
                 status = CONTINUE_SOWING
-                hole = new_hand_pos % 10
+                hole = new_hand_pos
                 print("continuing starting with: " + str(hole))
 
         # self.print_holes()
 
-    def sow_once(self, player, hole):
+    def sow_once(self, player, hole, sowing_speed):
 
         hand_value = 0
         hand_pos = hole
 
-        if player == 'a':
-            hand_pos = 10 + hole
-            hand_value = self.house_a_values[hole-1]
-            self.house_a_values[hole-1] = 0
-
-        elif player == 'b':
-            hand_pos = 20 + hole
-            hand_value = self.house_b_values[hole-1]
-            self.house_b_values[hole-1] = 0
+        if hand_pos >= 10 and hand_pos < 20:
+            hand_value = self.house_a_values[hole - 11]
+            self.house_a_values[hole - 11] = 0
+        elif hand_pos >= 20:
+            hand_value = self.house_b_values[hole - 21]
+            self.house_b_values[hole - 21] = 0
 
         player_hand = Hand(player=player, hole_pos=hand_pos, counter_count=hand_value)
 
         while player_hand.counter_count > 0:
 
-            time.sleep(0.1)
+            time.sleep(sowing_speed)
 
             player_hand.hole_pos -= 1
             self.drop_counter(player_hand)
