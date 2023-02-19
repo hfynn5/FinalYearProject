@@ -38,7 +38,6 @@ class BoardModel:
 
         while status == CONTINUE_SOWING:
 
-            # new_hand_pos = self.sow_once(player = player, hole = hole, sowing_speed=sowing_speed)
             self.current_hand = self.sow_once(self.current_hand, sowing_speed=sowing_speed)
 
             time.sleep(sowing_speed)
@@ -62,17 +61,12 @@ class BoardModel:
     # sows once
     def sow_once(self, hand, sowing_speed):
 
-        # hand_value = 0
-        # hand_pos = hole
-
         if hand.hole_pos >= 10 and hand.hole_pos < 20:
             hand.counter_count = self.house_a_values[hand.hole_pos - 11]
             self.house_a_values[hand.hole_pos - 11] = 0
         elif hand.hole_pos >= 20:
             hand.counter_count = self.house_b_values[hand.hole_pos - 21]
             self.house_b_values[hand.hole_pos - 21] = 0
-
-        # player_hand = Hand(player=player, hole_pos=hand_pos, counter_count=hand_value)
 
         while hand.counter_count > 0:
             time.sleep(sowing_speed)
