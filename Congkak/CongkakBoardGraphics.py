@@ -40,8 +40,8 @@ class BoardGraphic(QMainWindow):
         self.generate_points()
 
         self.create_hole_text()
-        self.create_buttons()
-        self.create_ui()
+        self.create_inputs()
+        self.create_menus
 
         # show all the widgets
         self.show()
@@ -150,12 +150,10 @@ class BoardGraphic(QMainWindow):
         self.storeroom_b_text_label.move(self.storeroom_b_position + offset)
         self.storeroom_b_text_label.setText("0")
 
-    # create all buttons
-    def create_buttons(self):
+    # creates the UI.
+    def create_inputs(self):
 
         offset = QPoint(-22, -60)
-
-        # count = 7
 
         for pos in self.house_a_positions:
             button = QPushButton(self)
@@ -163,10 +161,6 @@ class BoardGraphic(QMainWindow):
             button.move(pos + offset)
             button.setText("Pick")
             self.house_a_buttons.append(button)
-
-            # count -= 1
-
-        # count = 7
 
         offset = QPoint(-22, 40)
 
@@ -176,10 +170,6 @@ class BoardGraphic(QMainWindow):
             button.move(pos + offset)
             button.setText("Pick")
             self.house_b_buttons.append(button)
-
-    # creats the UI.
-    # TODO split into inputs and menus
-    def create_ui(self):
 
         self.player_a_dropdown = QComboBox(self)
         self.player_a_dropdown.move(650, 100)
@@ -204,9 +194,9 @@ class BoardGraphic(QMainWindow):
         self.play_button.setGeometry(150,450,40,25)
         self.play_button.setText("Play")
 
+    def create_menus(self):
+
         menu_bar = self.menuBar()
-
-
 
         # save games?
         file_menu = menu_bar.addMenu("File")
@@ -225,8 +215,6 @@ class BoardGraphic(QMainWindow):
 
         button_action = QAction("Load Game", self)
         file_menu.addAction(button_action)
-
-
 
         # edit games?
         edit_menu = menu_bar.addMenu("Edit")
