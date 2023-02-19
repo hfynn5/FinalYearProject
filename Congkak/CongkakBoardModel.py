@@ -1,15 +1,6 @@
 import sys
 import time
-
-class Hand:
-    player = 'n'
-    hole_pos = 0
-    counter_count = 0
-
-    def __init__(self, player, hole_pos, counter_count):
-        self.player = player
-        self.hole_pos = hole_pos
-        self.counter_count = counter_count
+from Congkak.Hand import Hand
 
 class BoardModel:
 
@@ -30,10 +21,11 @@ class BoardModel:
         self.storeroom_a_value = 0
         self.storeroom_b_value = 0
 
-        # TODO: create hands for player A and B. Use this hand in all needed functions below
+        self.player_a_hand = Hand(player='a', hole_pos=-1, counter_count=0)
+        self.player_b_hand = Hand(player='b', hole_pos=-1, counter_count=0)
+        self.current_hand = Hand(player='', hole_pos=-1, counter_count=0)
 
     # do repeated sowing
-    # TODO: replace player and hole with hand
     def iterate_sowing(self, player, hole, sowing_speed):
 
         CONTINUE_SOWING = 1
@@ -42,46 +34,52 @@ class BoardModel:
 
         status = CONTINUE_SOWING
 
+        self.current_hand = Hand(player=player, hole_pos=hole, counter_count=0)
+
         while status == CONTINUE_SOWING:
 
-            new_hand_pos = self.sow_once(player = player, hole = hole, sowing_speed=sowing_speed)
+            # new_hand_pos = self.sow_once(player = player, hole = hole, sowing_speed=sowing_speed)
+            self.current_hand = self.sow_once(self.current_hand, sowing_speed=sowing_speed)
 
             time.sleep(sowing_speed)
 
-            if new_hand_pos == 18 or new_hand_pos == 28:
+            if self.current_hand.hole_pos == 18 or self.current_hand.hole_pos == 28:
                 status = PROMPT_SOWING
                 print("user needs to input hole")
-            elif (new_hand_pos < 20 and (self.house_a_values[new_hand_pos-11] == 1 or self.house_a_values[new_hand_pos-11] == 0 )) or \
-                    (new_hand_pos > 20 and (self.house_b_values[new_hand_pos - 21] == 1 or self.house_b_values[new_hand_pos - 21] == 0)):
+            elif (self.current_hand.hole_pos < 20 and
+                  (self.house_a_values[self.current_hand.hole_pos-11] == 1 or
+                   self.house_a_values[self.current_hand.hole_pos-11] == 0 )) or \
+                    (self.current_hand.hole_pos > 20 and
+                     (self.house_b_values[self.current_hand.hole_pos - 21] == 1 or
+                      self.house_b_values[self.current_hand.hole_pos - 21] == 0)):
                 status = STOP_SOWING
                 print("sowing stopped")
             else:
                 status = CONTINUE_SOWING
-                hole = new_hand_pos
-                print("continuing starting with: " + str(hole))
+                # hole = self.current_hand.hole_pos
+                print("continuing starting with: " + str(self.current_hand.hole_pos))
 
     # sows once
-    # TODO: replace player and hole with hand.
-    def sow_once(self, player, hole, sowing_speed):
+    def sow_once(self, hand, sowing_speed):
 
-        hand_value = 0
-        hand_pos = hole
+        # hand_value = 0
+        # hand_pos = hole
 
-        if hand_pos >= 10 and hand_pos < 20:
-            hand_value = self.house_a_values[hole - 11]
-            self.house_a_values[hole - 11] = 0
-        elif hand_pos >= 20:
-            hand_value = self.house_b_values[hole - 21]
-            self.house_b_values[hole - 21] = 0
+        if hand.hole_pos >= 10 and hand.hole_pos < 20:
+            hand.counter_count = self.house_a_values[hand.hole_pos - 11]
+            self.house_a_values[hand.hole_pos - 11] = 0
+        elif hand.hole_pos >= 20:
+            hand.counter_count = self.house_b_values[hand.hole_pos - 21]
+            self.house_b_values[hand.hole_pos - 21] = 0
 
-        player_hand = Hand(player=player, hole_pos=hand_pos, counter_count=hand_value)
+        # player_hand = Hand(player=player, hole_pos=hand_pos, counter_count=hand_value)
 
-        while player_hand.counter_count > 0:
+        while hand.counter_count > 0:
             time.sleep(sowing_speed)
-            player_hand.hole_pos -= 1
-            self.drop_counter(player_hand)
+            hand.hole_pos -= 1
+            self.drop_counter(hand)
 
-        return player_hand.hole_pos
+        return hand
 
     # drops a counter a the position the hand is at
     def drop_counter(self, hand):
