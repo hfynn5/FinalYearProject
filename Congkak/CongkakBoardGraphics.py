@@ -124,20 +124,22 @@ class BoardGraphic(QMainWindow):
 
         # painter.setPen(pen)
 
-        # storeroom A
+        # storeroom A and hands
         if self.player_a_hand.hole_pos == 28:
             pen.setColor(QtGui.QColor('blue'))
-            print('blue')
+            painter.setPen(pen)
+            painter.drawArc(self.storeroom_a_position.x() - round(hand_diameter / 2) - 1,
+                            self.storeroom_a_position.y() - hand_diameter - 30, hand_diameter,
+                            hand_diameter, 0 * 16, 180 * 16)
         elif self.player_b_hand.hole_pos == 28:
             pen.setColor(QtGui.QColor('red'))
-            print('red')
         else:
             pen.setColor(QtGui.QColor('brown'))
 
         painter.setPen(pen)
         painter.drawEllipse(self.storeroom_a_position, storeroom_diameter, storeroom_diameter)
 
-        # house a
+        # house A and hands
         for i, pos in enumerate(self.house_a_positions):
             if self.player_a_hand.hole_pos == i + 11:
                 pen.setColor(QtGui.QColor('blue'))
@@ -147,33 +149,37 @@ class BoardGraphic(QMainWindow):
             elif self.player_b_hand.hole_pos == i + 11:
                 pen.setColor(QtGui.QColor('red'))
                 painter.setPen(pen)
-                painter.drawArc(pos.x()-round(hand_diameter/2)-1, pos.y()-hand_diameter-10, hand_diameter,
-                                hand_diameter, 0 * 16, 180 * 16)
+                painter.drawArc(pos.x() - round(hand_diameter / 2) - 1, pos.y() + 10, hand_diameter,
+                                hand_diameter, 180 * 16, 180 * 16)
             else:
                 pen.setColor(QtGui.QColor('brown'))
 
             painter.setPen(pen)
             painter.drawEllipse(pos, house_diameter, house_diameter)
 
-        # storeroom B
+        # storeroom B and hands
         if self.player_a_hand.hole_pos == 18:
             pen.setColor(QtGui.QColor('blue'))
         elif self.player_b_hand.hole_pos == 18:
             pen.setColor(QtGui.QColor('red'))
+            painter.setPen(pen)
+            painter.drawArc(self.storeroom_b_position.x() - round(hand_diameter / 2) - 1,
+                            self.storeroom_b_position.y() + 30, hand_diameter,
+                            hand_diameter, 180 * 16, 180 * 16)
         else:
             pen.setColor(QtGui.QColor('brown'))
 
         painter.setPen(pen)
         painter.drawEllipse(self.storeroom_b_position, storeroom_diameter, storeroom_diameter)
 
-        # house b
+        # house B and hands
         for i, pos in enumerate(self.house_b_positions):
 
             if self.player_a_hand.hole_pos == i + 21:
                 pen.setColor(QtGui.QColor('blue'))
                 painter.setPen(pen)
-                painter.drawArc(pos.x() - round(hand_diameter / 2) - 1, pos.y() + 10, hand_diameter,
-                                hand_diameter, 180 * 16, 180 * 16)
+                painter.drawArc(pos.x() - round(hand_diameter / 2) - 1, pos.y() - hand_diameter - 10, hand_diameter,
+                                hand_diameter, 0 * 16, 180 * 16)
             elif self.player_b_hand.hole_pos == i + 21:
                 pen.setColor(QtGui.QColor('red'))
                 painter.setPen(pen)
@@ -214,6 +220,10 @@ class BoardGraphic(QMainWindow):
         self.storeroom_b_text_label = QLabel(self)
         self.storeroom_b_text_label.move(self.storeroom_b_position + offset)
         self.storeroom_b_text_label.setText("0")
+
+    # TODO: create labels for hand
+    def create_hand_text(self):
+        pass
 
     # creates the UI.
     def create_inputs(self):
