@@ -52,6 +52,8 @@ class BoardModel:
                      (self.house_b_values[self.current_hand.hole_pos - 21] == 1 or
                       self.house_b_values[self.current_hand.hole_pos - 21] == 0)):
                 status = STOP_SOWING
+                self.player_a_hand = Hand(player='a', hole_pos=-1, counter_count=0)
+                self.player_b_hand = Hand(player='b', hole_pos=-1, counter_count=0)
                 print("sowing stopped")
             else:
                 status = CONTINUE_SOWING
@@ -71,7 +73,18 @@ class BoardModel:
         while hand.counter_count > 0:
             time.sleep(sowing_speed)
             hand.hole_pos -= 1
-            self.drop_counter(hand)
+
+            if hand.hole_pos == 10 and hand.player == 'b':
+                hand.hole_pos = 27
+            elif hand.hole_pos == 20 and hand.player == 'a':
+                hand.hole_pos = 17
+
+            hand = self.drop_counter(hand)
+
+            if hand.player == 'a':
+                self.player_a_hand = hand
+            elif hand.player == 'b':
+                self.player_b_hand = hand
 
         return hand
 

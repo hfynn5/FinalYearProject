@@ -4,6 +4,7 @@ from PyQt6.QtWidgets import *
 from PyQt6.QtGui import QPixmap, QPainter, QPen, QAction, QIcon
 from PyQt6 import QtCore, QtGui, QtWidgets, uic
 from PyQt6.QtCore import QPoint, Qt
+from Congkak.Hand import Hand
 import sys
 
 
@@ -25,6 +26,9 @@ class BoardGraphic(QMainWindow):
 
         self.house_a_buttons = []
         self.house_b_buttons = []
+
+        self.player_a_hand = Hand(player='a', hole_pos=-1, counter_count=0)
+        self.player_b_hand = Hand(player='b', hole_pos=-1, counter_count=0)
 
         self.player_a_dropdown = QComboBox()
         self.player_b_dropdown = QComboBox()
@@ -101,7 +105,6 @@ class BoardGraphic(QMainWindow):
         self.house_b_positions.reverse()
 
     # Draws all the circles
-    # TODO: add a list of all the circles to edit and show hand position
     def paintEvent(self, QPaintEvent):
 
         storeroom_diameter = 45
@@ -112,23 +115,73 @@ class BoardGraphic(QMainWindow):
         pen = QtGui.QPen()
         pen.setWidth(5)
         pen.setColor(QtGui.QColor('brown'))
-        painter.setPen(pen)
+
+        # painter.fillRect(QtGui.QPixmap)
+
+        # painter.eraseRect(0,0,800,600)
+
+        # if self.temp_truth:
+        #     pen.setColor(QtGui.QColor('red'))
+        # else:
+        #     pen.setColor(QtGui.QColor('brown'))
+
+        # print(self.temp_truth)
+
+        # painter.setPen(pen)
 
         # storeroom B
+        if self.player_a_hand.hole_pos == 28:
+            pen.setColor(QtGui.QColor('blue'))
+        elif self.player_b_hand.hole_pos == 20:
+            pen.setColor(QtGui.QColor('red'))
+        else:
+            pen.setColor(QtGui.QColor('brown'))
+
+        painter.setPen(pen)
         painter.drawEllipse(self.storeroom_a_position, storeroom_diameter, storeroom_diameter)
 
         # house a
-        for pos in self.house_a_positions:
+        for i, pos in enumerate(self.house_a_positions):
+            if self.player_a_hand.hole_pos == i + 11:
+                pen.setColor(QtGui.QColor('blue'))
+                # print('blue')
+            elif self.player_b_hand.hole_pos == i + 11:
+                pen.setColor(QtGui.QColor('red'))
+                # print('red')
+            else:
+                pen.setColor(QtGui.QColor('brown'))
+                # print('brown')
+
+            painter.setPen(pen)
             painter.drawEllipse(pos, house_diameter, house_diameter)
 
         # storeroom A
+        if self.player_a_hand.hole_pos == 18:
+            pen.setColor(QtGui.QColor('blue'))
+        elif self.player_b_hand.hole_pos == 10:
+            pen.setColor(QtGui.QColor('red'))
+        else:
+            pen.setColor(QtGui.QColor('brown'))
+
+        painter.setPen(pen)
         painter.drawEllipse(self.storeroom_b_position, storeroom_diameter, storeroom_diameter)
 
         # house b
-        for pos in self.house_b_positions:
+        for i, pos in enumerate(self.house_b_positions):
+
+            if self.player_a_hand.hole_pos == i + 21:
+                pen.setColor(QtGui.QColor('blue'))
+            elif self.player_b_hand.hole_pos == i + 21:
+                pen.setColor(QtGui.QColor('red'))
+            else:
+                pen.setColor(QtGui.QColor('brown'))
+
+            painter.setPen(pen)
             painter.drawEllipse(pos, house_diameter, house_diameter)
 
         painter.end()
+
+    # def paint
 
     # create the label for all the holes
     def create_hole_text(self):
@@ -200,6 +253,7 @@ class BoardGraphic(QMainWindow):
         self.play_button.setGeometry(150,450,40,25)
         self.play_button.setText("Play")
 
+    # creates the menus
     def create_menus(self):
 
         menu_bar = self.menuBar()
@@ -260,7 +314,9 @@ class BoardGraphic(QMainWindow):
         about_menu = menu_bar.addMenu("About")
 
     # updates the labels
-    def update_values(self, house_a_values, house_b_values, storeroom_a_value, storeroom_b_value):
+    def update_values(self, house_a_values, house_b_values,
+                      storeroom_a_value, storeroom_b_value,
+                      player_a_hand, player_b_hand):
 
         for i, label in enumerate(self.house_a_text_labels):
             label.setText(str(house_a_values[i]))
@@ -271,11 +327,14 @@ class BoardGraphic(QMainWindow):
         self.storeroom_a_text_label.setText(str(storeroom_a_value))
         self.storeroom_b_text_label.setText(str(storeroom_b_value))
 
+        self.player_a_hand = player_a_hand
+        self.player_b_hand = player_b_hand
+
+        self.update()
+
     # enable or disable the inputs
     def set_enable_inputs(self, enable):
         for button in self.house_a_buttons:
             button.setEnabled(enable)
         for button in self.house_b_buttons:
             button.setEnabled(enable)
-
-

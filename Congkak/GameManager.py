@@ -112,7 +112,6 @@ class GameManager:
         self.threadpool.start(worker)
 
     # makes worker constantly update graphics
-    # TODO: find how to disable this worker when app exits
     def start_worker_updating(self):
         worker = Worker(self.update_board_graphics_constantly)
         self.threadpool.start(worker)
@@ -131,7 +130,10 @@ class GameManager:
     # updates board graphic
     def update_board_graphics(self, board_graphic: BoardGraphic, board_model: BoardModel):
 
-        board_graphic.update_values(house_a_values=board_model.house_a_values, house_b_values=board_model.house_b_values,
-                                             storeroom_a_value=board_model.storeroom_a_value,
-                                             storeroom_b_value=board_model.storeroom_b_value)
+        board_graphic.update_values(house_a_values=board_model.house_a_values,
+                                    house_b_values=board_model.house_b_values,
+                                    storeroom_a_value=board_model.storeroom_a_value,
+                                    storeroom_b_value=board_model.storeroom_b_value,
+                                    player_a_hand=board_model.player_a_hand,
+                                    player_b_hand=board_model.player_b_hand)
 
