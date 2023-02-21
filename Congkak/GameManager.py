@@ -125,7 +125,7 @@ class GameManager:
 
     # updates board graphics constantly
     def update_board_graphics_constantly(self):
-        while True:
+        while self.board_graphic.active:
             self.update_board_graphics(board_graphic=self.board_graphic, board_model=self.board_model)
 
     # updates board graphic

@@ -11,6 +11,8 @@ class BoardGraphic(QMainWindow):
     def __init__(self):
         super().__init__()
 
+        self.active = True
+
         self.house_a_positions = []
         self.house_b_positions = []
         self.storeroom_a_position = Point(0, 0)
@@ -59,6 +61,10 @@ class BoardGraphic(QMainWindow):
         #             )
         #
         # x = msg.exec()
+
+    def closeEvent(self, a0: QtGui.QCloseEvent) -> None:
+        self.active = False
+        a0.accept()
 
     # Generate points for the circles
     def generate_points(self):
