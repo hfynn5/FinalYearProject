@@ -44,6 +44,8 @@ class BoardModel:
 
             if self.current_hand.hole_pos == 18 or self.current_hand.hole_pos == 28:
                 status = PROMPT_SOWING
+                self.player_a_hand = Hand(player='a', hole_pos=-1, counter_count=0)
+                self.player_b_hand = Hand(player='b', hole_pos=-1, counter_count=0)
                 print("user needs to input hole")
             elif (self.current_hand.hole_pos < 20 and
                   (self.house_a_values[self.current_hand.hole_pos-11] == 1 or
