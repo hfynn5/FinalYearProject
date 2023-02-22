@@ -206,6 +206,8 @@ class BoardModel:
         print("store a: " + str(self.storeroom_a_value))
         print("store b: " + str(self.storeroom_b_value))
 
+    # TODO: add simul start
+
 
 
 

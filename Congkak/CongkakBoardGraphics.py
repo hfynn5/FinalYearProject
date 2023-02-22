@@ -14,10 +14,10 @@ class BoardGraphic(QMainWindow):
 
         self.active = True
 
-        self.house_a_positions = []
-        self.house_b_positions = []
-        self.storeroom_a_position = Point(0, 0)
-        self.storeroom_b_position = Point(0, 0)
+        self.house_a_points = []
+        self.house_b_points = []
+        self.storeroom_a_point = Point(0, 0)
+        self.storeroom_b_point = Point(0, 0)
 
         self.house_a_text_labels = []
         self.house_b_text_labels = []
@@ -29,6 +29,9 @@ class BoardGraphic(QMainWindow):
 
         self.player_a_hand = Hand(player='a', hole_pos=-1, counter_count=0)
         self.player_b_hand = Hand(player='b', hole_pos=-1, counter_count=0)
+
+        self.player_a_hand_point = Point(0, 0)
+        self.player_b_hand_point = Point(0, 0)
 
         self.player_a_dropdown = QComboBox()
         self.player_b_dropdown = QComboBox()
@@ -84,25 +87,25 @@ class BoardGraphic(QMainWindow):
         house_x_pos_offset = 70
 
         # storeroom B
-        self.storeroom_b_position = QPoint(storeroom_b_x_pos, storeroom_y_pos)
+        self.storeroom_b_point = QPoint(storeroom_b_x_pos, storeroom_y_pos)
 
         # house a
         house_x_pos = house_x_pos_init
         for x in range(7):
-            self.house_a_positions.append(QPoint(house_x_pos, house_a_y_pos))
+            self.house_a_points.append(QPoint(house_x_pos, house_a_y_pos))
             house_x_pos += house_x_pos_offset
         house_x_pos -= house_x_pos_offset
-        self.house_a_positions.reverse()
+        self.house_a_points.reverse()
 
         # storeroom A
         storeroom_a_x_pos = house_x_pos + storeroom_house_offset
-        self.storeroom_a_position = QPoint(storeroom_a_x_pos, storeroom_y_pos)
+        self.storeroom_a_point = QPoint(storeroom_a_x_pos, storeroom_y_pos)
 
         # house b
         for x in range(7):
-            self.house_b_positions.append(QPoint(house_x_pos, house_b_y_pos))
+            self.house_b_points.append(QPoint(house_x_pos, house_b_y_pos))
             house_x_pos -= house_x_pos_offset
-        self.house_b_positions.reverse()
+        self.house_b_points.reverse()
 
     # Draws all the circles
     def paintEvent(self, QPaintEvent):
@@ -128,8 +131,8 @@ class BoardGraphic(QMainWindow):
         if self.player_a_hand.hole_pos == 28:
             pen.setColor(QtGui.QColor('blue'))
             painter.setPen(pen)
-            painter.drawArc(self.storeroom_a_position.x() - round(hand_diameter / 2) - 1,
-                            self.storeroom_a_position.y() - hand_diameter - 30, hand_diameter,
+            painter.drawArc(self.storeroom_a_point.x() - round(hand_diameter / 2) - 1,
+                            self.storeroom_a_point.y() - hand_diameter - 30, hand_diameter,
                             hand_diameter, 0 * 16, 180 * 16)
         elif self.player_b_hand.hole_pos == 28:
             pen.setColor(QtGui.QColor('red'))
@@ -137,10 +140,10 @@ class BoardGraphic(QMainWindow):
             pen.setColor(QtGui.QColor('brown'))
 
         painter.setPen(pen)
-        painter.drawEllipse(self.storeroom_a_position, storeroom_diameter, storeroom_diameter)
+        painter.drawEllipse(self.storeroom_a_point, storeroom_diameter, storeroom_diameter)
 
         # house A and hands
-        for i, pos in enumerate(self.house_a_positions):
+        for i, pos in enumerate(self.house_a_points):
             if self.player_a_hand.hole_pos == i + 11:
                 pen.setColor(QtGui.QColor('blue'))
                 painter.setPen(pen)
@@ -163,17 +166,17 @@ class BoardGraphic(QMainWindow):
         elif self.player_b_hand.hole_pos == 18:
             pen.setColor(QtGui.QColor('red'))
             painter.setPen(pen)
-            painter.drawArc(self.storeroom_b_position.x() - round(hand_diameter / 2) - 1,
-                            self.storeroom_b_position.y() + 30, hand_diameter,
+            painter.drawArc(self.storeroom_b_point.x() - round(hand_diameter / 2) - 1,
+                            self.storeroom_b_point.y() + 30, hand_diameter,
                             hand_diameter, 180 * 16, 180 * 16)
         else:
             pen.setColor(QtGui.QColor('brown'))
 
         painter.setPen(pen)
-        painter.drawEllipse(self.storeroom_b_position, storeroom_diameter, storeroom_diameter)
+        painter.drawEllipse(self.storeroom_b_point, storeroom_diameter, storeroom_diameter)
 
         # house B and hands
-        for i, pos in enumerate(self.house_b_positions):
+        for i, pos in enumerate(self.house_b_points):
 
             if self.player_a_hand.hole_pos == i + 21:
                 pen.setColor(QtGui.QColor('blue'))
@@ -201,24 +204,24 @@ class BoardGraphic(QMainWindow):
         offset = QPoint(-4, -15)
 
         # creating text label for all the holes.
-        for pos in self.house_a_positions:
+        for pos in self.house_a_points:
             label = QLabel(self)
             label.move(pos + offset)
             label.setText("7")
             self.house_a_text_labels.append(label)
 
-        for pos in self.house_b_positions:
+        for pos in self.house_b_points:
             label = QLabel(self)
             label.move(pos + offset)
             label.setText("7")
             self.house_b_text_labels.append(label)
 
         self.storeroom_a_text_label = QLabel(self)
-        self.storeroom_a_text_label.move(self.storeroom_a_position + offset)
+        self.storeroom_a_text_label.move(self.storeroom_a_point + offset)
         self.storeroom_a_text_label.setText("0")
 
         self.storeroom_b_text_label = QLabel(self)
-        self.storeroom_b_text_label.move(self.storeroom_b_position + offset)
+        self.storeroom_b_text_label.move(self.storeroom_b_point + offset)
         self.storeroom_b_text_label.setText("0")
 
     # TODO: create labels for hand
@@ -230,7 +233,7 @@ class BoardGraphic(QMainWindow):
 
         offset = QPoint(-22, -60)
 
-        for pos in self.house_a_positions:
+        for pos in self.house_a_points:
             button = QPushButton(self)
             button.resize(40, 25)
             button.move(pos + offset)
@@ -239,7 +242,7 @@ class BoardGraphic(QMainWindow):
 
         offset = QPoint(-22, 40)
 
-        for pos in self.house_b_positions:
+        for pos in self.house_b_points:
             button = QPushButton(self)
             button.resize(40, 25)
             button.move(pos + offset)
