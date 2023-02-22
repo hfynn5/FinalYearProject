@@ -7,6 +7,7 @@ from PyQt6.QtWidgets import *
 from PyQt6.QtCore import QObject, QThread, pyqtSignal, QRunnable, QThreadPool
 from PyQt6.QtGui import QPixmap
 
+
 class Worker(QRunnable):
     """
     Worker thread
@@ -58,6 +59,7 @@ class Worker(QRunnable):
         finally:
             self.signals.finished.emit()  # Done
 
+
 class WorkerSignals(QObject):
     """
     Defines the signals available from a running worker thread.
@@ -79,6 +81,7 @@ class WorkerSignals(QObject):
     result = pyqtSignal(object)
     progress = pyqtSignal(int)
 
+
 class GameManager:
 
     def __init__(self):
@@ -96,10 +99,14 @@ class GameManager:
 
         # connect buttons with corresponding functions
         for i, button in enumerate(self.board_graphic.house_a_buttons):
-            button.clicked.connect(lambda checked, value = i+11: self.start_worker_sowing('a', value))
+            button.clicked.connect(lambda checked, value=i + 11: self.start_worker_sowing('a', value))
 
         for i, button in enumerate(self.board_graphic.house_b_buttons):
-            button.clicked.connect(lambda checked, value = i+21: self.start_worker_sowing('b', value))
+            button.clicked.connect(lambda checked, value=i + 21: self.start_worker_sowing('b', value))
+
+        self.board_graphic.move_speed_slider. \
+            valueChanged.connect(lambda value=self.board_graphic.move_speed_slider.value():
+                                 self.update_sowing_speed(value))
 
         # start constantly updating graphics
         self.start_worker_updating()
@@ -117,9 +124,10 @@ class GameManager:
         self.threadpool.start(worker)
 
     # iterate sowing in board model
-    def sow(self,player,hole):
+    def sow(self, player, hole):
         self.board_graphic.set_enable_inputs(False)
-        self.board_model.iterate_sowing(player=player, hole=hole, sowing_speed=0.5)
+        self.update_sowing_speed(self.board_graphic.move_speed_slider.value())
+        self.board_model.iterate_sowing(player=player, hole=hole)
         self.board_graphic.set_enable_inputs(True)
 
     # updates board graphics constantly
@@ -137,3 +145,5 @@ class GameManager:
                                     player_a_hand=board_model.player_a_hand,
                                     player_b_hand=board_model.player_b_hand)
 
+    def update_sowing_speed(self, move_per_second):
+        self.board_model.sowing_speed = 1 / move_per_second

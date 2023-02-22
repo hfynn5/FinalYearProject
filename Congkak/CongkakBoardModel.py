@@ -25,8 +25,12 @@ class BoardModel:
         self.player_b_hand = Hand(player='b', hole_pos=-1, counter_count=0)
         self.current_hand = Hand(player='', hole_pos=-1, counter_count=0)
 
+        self.sowing_speed = 0
+
+    # TODO: add simultaneous sowing
+
     # do repeated sowing
-    def iterate_sowing(self, player, hole, sowing_speed):
+    def iterate_sowing(self, player, hole):
 
         CONTINUE_SOWING = 1
         STOP_SOWING = 2
@@ -38,9 +42,9 @@ class BoardModel:
 
         while status == CONTINUE_SOWING:
 
-            self.current_hand = self.sow_once(self.current_hand, sowing_speed=sowing_speed)
+            self.current_hand = self.sow_once(self.current_hand)
 
-            time.sleep(sowing_speed)
+            time.sleep(self.sowing_speed)
 
             if self.current_hand.hole_pos == 18 or self.current_hand.hole_pos == 28:
                 status = PROMPT_SOWING
@@ -63,9 +67,8 @@ class BoardModel:
                 print("continuing starting with: " + str(self.current_hand.hole_pos))
 
     # sows once
-    def sow_once(self, hand, sowing_speed):
-
-        if hand.hole_pos >= 10 and hand.hole_pos < 20:
+    def sow_once(self, hand):
+        if 10 <= hand.hole_pos < 20:
             hand.counter_count = self.house_a_values[hand.hole_pos - 11]
             self.house_a_values[hand.hole_pos - 11] = 0
         elif hand.hole_pos >= 20:
@@ -73,7 +76,9 @@ class BoardModel:
             self.house_b_values[hand.hole_pos - 21] = 0
 
         while hand.counter_count > 0:
-            time.sleep(sowing_speed)
+
+            time.sleep(self.sowing_speed)
+
             hand.hole_pos -= 1
 
             if hand.hole_pos == 10 and hand.player == 'b':

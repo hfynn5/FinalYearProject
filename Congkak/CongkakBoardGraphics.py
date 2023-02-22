@@ -33,7 +33,7 @@ class BoardGraphic(QMainWindow):
         self.player_a_dropdown = QComboBox()
         self.player_b_dropdown = QComboBox()
 
-        self.play_speed_slider = QSlider()
+        self.move_speed_slider = QSlider()
         self.play_button = QPushButton()
 
         self.acceptDrops()
@@ -258,12 +258,12 @@ class BoardGraphic(QMainWindow):
         slider_label.move(360, 500)
         slider_label.setText("Moves Per Second")
 
-        self.play_speed_slider = QSlider(Qt.Orientation.Horizontal, self)
-        self.play_speed_slider.setGeometry(200, 450, 400, 50)
-        self.play_speed_slider.setMinimum(1)
-        self.play_speed_slider.setMaximum(20)
-        self.play_speed_slider.setTickPosition(QSlider.TickPosition.TicksBelow)
-        self.play_speed_slider.setTickInterval(1)
+        self.move_speed_slider = QSlider(Qt.Orientation.Horizontal, self)
+        self.move_speed_slider.setGeometry(200, 450, 400, 50)
+        self.move_speed_slider.setMinimum(1)
+        self.move_speed_slider.setMaximum(10)
+        self.move_speed_slider.setTickPosition(QSlider.TickPosition.TicksBelow)
+        self.move_speed_slider.setTickInterval(1)
 
         self.play_button = QPushButton(self)
         self.play_button.setGeometry(150,450,40,25)
