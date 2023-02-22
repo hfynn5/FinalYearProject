@@ -15,7 +15,7 @@ class BoardModel:
     house_b_values = [0, 0, 0, 0, 0, 0, 0]
 
     def __init__(self):
-        self.house_a_values = [1, 7, 7, 7, 7, 7, 7]
+        self.house_a_values = [1, 7, 7, 7, 7, 5, 7]
         self.house_b_values = [1, 7, 7, 7, 7, 7, 7]
 
         self.storeroom_a_value = 0
@@ -24,6 +24,9 @@ class BoardModel:
         self.player_a_hand = Hand(player='a', hole_pos=-1, counter_count=0)
         self.player_b_hand = Hand(player='b', hole_pos=-1, counter_count=0)
         self.current_hand = Hand(player='', hole_pos=-1, counter_count=0)
+
+        self.must_loop_before_tikam = True
+
 
         self.sowing_speed = 0
 
@@ -61,7 +64,7 @@ class BoardModel:
             elif (self.current_hand.hole_pos < 20 and
                   (self.house_a_values[self.current_hand.hole_pos-11] == 1)):
                 status = STOP_SOWING
-                if self.current_hand.player == 'a':
+                if self.current_hand.player == 'a' and self.current_hand.has_looped:
                     # Tikam
                     opposite_hole = 17 - self.current_hand.hole_pos
                     current_hand_pos = self.current_hand.hole_pos
@@ -95,7 +98,7 @@ class BoardModel:
             elif (self.current_hand.hole_pos > 20 and
                   (self.house_b_values[self.current_hand.hole_pos - 21] == 1)):
                 status = STOP_SOWING
-                if self.current_hand.player == 'b':
+                if self.current_hand.player == 'b' and self.current_hand.has_looped:
                     # Tikam
                     opposite_hole = 27 - self.current_hand.hole_pos
                     current_hand_pos = self.current_hand.hole_pos
@@ -169,11 +172,13 @@ class BoardModel:
             if hand.player == 'a':
                 self.storeroom_a_value += 1
                 hand.drop_one_counter()
+                hand.has_looped = True
             hand.hole_pos = 28
         elif hand.hole_pos == 20:
             if hand.player == 'b':
                 self.storeroom_b_value += 1
                 hand.drop_one_counter()
+                hand.has_looped = True
             hand.hole_pos = 18
         elif hand.hole_pos < 20:
             self.house_a_values[hand.hole_pos - 11] += 1

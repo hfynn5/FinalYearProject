@@ -7,6 +7,7 @@ class Hand:
         self.player = player
         self.hole_pos = hole_pos
         self.counter_count = counter_count
+        self.has_looped = False
 
     def drop_one_counter(self):
         self.counter_count -= 1
