@@ -116,6 +116,16 @@ class BoardModel:
 
         return hand
 
+    def reset_hands(self):
+        self.player_a_hand = Hand(player='a', hole_pos=-1, counter_count=0)
+        self.player_b_hand = Hand(player='b', hole_pos=-1, counter_count=0)
+
+    def update_player_hands(self):
+        if self.current_hand.player == 'a':
+            self.player_a_hand = self.current_hand
+        elif self.current_hand.player == 'b':
+            self.player_b_hand = self.current_hand
+
     # print holes
     def print_holes(self):
         print("house a: " + str(self.house_a_values))
