@@ -6,6 +6,8 @@ class Hand:
     def __init__(self, player, hole_pos, counter_count):
         self.player = player
         self.hole_pos = hole_pos
+        # 18 = storeroom B
+        # 28 = storeroom A
         self.counter_count = counter_count
         self.has_looped = False
 

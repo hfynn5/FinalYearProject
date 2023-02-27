@@ -125,10 +125,53 @@ class GameManager:
 
     # iterate sowing in board model
     def sow(self, player, hole):
+
+        CONTINUE_SOWING = 1
+        STOP_SOWING_A = 21
+        STOP_SOWING_B = 22
+        PROMPT_SOWING_A = 31
+        PROMPT_SOWING_B = 32
+        ERROR = -1
+
         self.board_graphic.set_enable_inputs(False)
         self.update_sowing_speed(self.board_graphic.move_speed_slider.value())
-        self.board_model.iterate_sowing(player=player, hole=hole)
-        self.board_graphic.set_enable_inputs(True)
+
+        status = self.board_model.iterate_sowing(player=player, hole=hole)
+
+        if status == PROMPT_SOWING_A:
+            print("continue: player A needs to input hole")
+            self.board_graphic.set_enable_player_inputs('a',enable=True)
+            self.board_graphic.set_enable_player_inputs('b',enable=False)
+            pass
+        elif status == PROMPT_SOWING_B:
+            print("continue: player B needs to input hole")
+            self.board_graphic.set_enable_player_inputs('b', enable=True)
+            self.board_graphic.set_enable_player_inputs('a', enable=False)
+            pass
+        elif status == STOP_SOWING_A:
+            print("player A stopped. player B needs to input hole")
+            self.board_graphic.set_enable_player_inputs('b', enable=True)
+            self.board_graphic.set_enable_player_inputs('a', enable=False)
+            pass
+        elif status == STOP_SOWING_B:
+            print("player B stopped. player A needs to input hole")
+            self.board_graphic.set_enable_player_inputs('a', enable=True)
+            self.board_graphic.set_enable_player_inputs('b', enable=False)
+            pass
+        elif status == CONTINUE_SOWING:
+            pass
+
+
+        # self.board_graphic.set_enable_inputs(True)
+
+    def prompt_player(self,player):
+
+        if player == 'a':
+            self.board_graphic.set_enable_player_inputs(player='a',enable=True)
+            self.board_graphic.set_enable_player_inputs(player='b', enable=False)
+        elif player == 'b':
+            self.board_graphic.set_enable_player_inputs(player='b', enable=True)
+            self.board_graphic.set_enable_player_inputs(player='a', enable=False)
 
     # updates board graphics constantly
     def update_board_graphics_constantly(self):

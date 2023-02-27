@@ -15,8 +15,8 @@ class BoardModel:
     house_b_values = [0, 0, 0, 0, 0, 0, 0]
 
     def __init__(self):
-        self.house_a_values = [1, 7, 7, 7, 7, 5, 7]
-        self.house_b_values = [1, 7, 7, 7, 7, 7, 7]
+        self.house_a_values = [7, 7, 7, 7, 7, 7, 7]
+        self.house_b_values = [0, 0, 0, 0, 0, 0, 0]
 
         self.storeroom_a_value = 0
         self.storeroom_b_value = 0
@@ -27,6 +27,7 @@ class BoardModel:
 
         self.must_loop_before_tikam = True
 
+        self.turn_count = 0
 
         self.sowing_speed = 0
 
@@ -36,8 +37,10 @@ class BoardModel:
     def iterate_sowing(self, player, hole):
 
         CONTINUE_SOWING = 1
-        STOP_SOWING = 2
-        PROMPT_SOWING = 3
+        STOP_SOWING_A = 21
+        STOP_SOWING_B = 22
+        PROMPT_SOWING_A = 31
+        PROMPT_SOWING_B = 32
         ERROR = -1
 
         status = CONTINUE_SOWING
@@ -50,10 +53,14 @@ class BoardModel:
 
             time.sleep(self.sowing_speed)
 
-            if self.current_hand.hole_pos == 18 or self.current_hand.hole_pos == 28:
-                status = PROMPT_SOWING
+            if self.current_hand.hole_pos == 28:
+                status = PROMPT_SOWING_A
                 self.reset_hands()
-                print("user needs to input hole")
+
+            elif self.current_hand.hole_pos == 18:
+                status = PROMPT_SOWING_B
+                self.reset_hands()
+                print("user B needs to input hole")
             elif (self.current_hand.hole_pos < 20 and
                   (self.house_a_values[self.current_hand.hole_pos-11] == 0)) or \
                     (self.current_hand.hole_pos > 20 and
@@ -63,7 +70,12 @@ class BoardModel:
 
             elif (self.current_hand.hole_pos < 20 and
                   (self.house_a_values[self.current_hand.hole_pos-11] == 1)):
-                status = STOP_SOWING
+
+                if self.current_hand.player == 'a':
+                    status = STOP_SOWING_A
+                elif self.current_hand.player == 'b':
+                    status = STOP_SOWING_B
+
                 if self.current_hand.player == 'a' and self.current_hand.has_looped:
                     # Tikam
                     opposite_hole = 17 - self.current_hand.hole_pos
@@ -97,7 +109,12 @@ class BoardModel:
                 self.reset_hands()
             elif (self.current_hand.hole_pos > 20 and
                   (self.house_b_values[self.current_hand.hole_pos - 21] == 1)):
-                status = STOP_SOWING
+
+                if self.current_hand.player == 'a':
+                    status = STOP_SOWING_A
+                elif self.current_hand.player == 'b':
+                    status = STOP_SOWING_B
+
                 if self.current_hand.player == 'b' and self.current_hand.has_looped:
                     # Tikam
                     opposite_hole = 27 - self.current_hand.hole_pos
@@ -133,6 +150,8 @@ class BoardModel:
                 status = CONTINUE_SOWING
                 # hole = self.current_hand.hole_pos
                 # print("continuing starting with: " + str(self.current_hand.hole_pos))
+
+        return status
 
     # sows once
     def sow_once(self, hand):
