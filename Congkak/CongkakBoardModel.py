@@ -54,9 +54,15 @@ class BoardModel:
 
         self.current_hand = Hand(player=player, hole_pos=hole, counter_count=0)
 
+        self.update_player_hands()
+
+        time.sleep(self.sowing_speed)
+
         while status == CONTINUE_SOWING:
 
             self.current_hand = self.sow_once(self.current_hand)
+
+            self.update_player_hands()
 
             time.sleep(self.sowing_speed)
 
