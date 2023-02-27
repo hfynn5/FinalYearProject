@@ -135,6 +135,8 @@ class GameManager:
         while self.board_graphic.active:
             self.update_board_graphics(board_graphic=self.board_graphic, board_model=self.board_model)
 
+        sys.exit("Window closed")
+
     # updates board graphic
     def update_board_graphics(self, board_graphic: BoardGraphic, board_model: BoardModel):
 
