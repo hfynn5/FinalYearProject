@@ -16,13 +16,15 @@ class BoardGraphic(QMainWindow):
 
         self.house_a_points = []
         self.house_b_points = []
-        self.storeroom_a_point = Point(0, 0)
-        self.storeroom_b_point = Point(0, 0)
+        self.storeroom_a_point = QPoint(0, 0)
+        self.storeroom_b_point = QPoint(0, 0)
 
         self.house_a_text_labels = []
         self.house_b_text_labels = []
         self.storeroom_a_text_label = QLabel()
         self.storeroom_b_text_label = QLabel()
+        self.player_a_hand_text_label = QLabel()
+        self.player_b_hand_text_label = QLabel()
 
         self.house_a_buttons = []
         self.house_b_buttons = []
@@ -30,8 +32,8 @@ class BoardGraphic(QMainWindow):
         self.player_a_hand = Hand(player='a', hole_pos=-1, counter_count=0)
         self.player_b_hand = Hand(player='b', hole_pos=-1, counter_count=0)
 
-        self.player_a_hand_point = Point(0, 0)
-        self.player_b_hand_point = Point(0, 0)
+        self.player_a_hand_point = QPoint(0, 0)
+        self.player_b_hand_point = QPoint(0, 0)
 
         # self.player_b_hand_point.x()
 
@@ -75,7 +77,7 @@ class BoardGraphic(QMainWindow):
         self.active = False
         a0.accept()
 
-    # Generate points for the circles
+    # Generate points once for the circles
     def generate_points(self):
 
         storeroom_b_x_pos = 100
@@ -142,12 +144,12 @@ class BoardGraphic(QMainWindow):
 
         pen.setColor(QtGui.QColor('blue'))
         painter.setPen(pen)
-        painter.drawArc(round(self.player_a_hand_point.x), round(self.player_a_hand_point.y), hand_diameter,
+        painter.drawArc(round(self.player_a_hand_point.x()), round(self.player_a_hand_point.y()), hand_diameter,
                         hand_diameter, 0 * 16, 180 * 16)
 
         pen.setColor(QtGui.QColor('red'))
         painter.setPen(pen)
-        painter.drawArc(round(self.player_b_hand_point.x), round(self.player_b_hand_point.y), hand_diameter,
+        painter.drawArc(round(self.player_b_hand_point.x()), round(self.player_b_hand_point.y()), hand_diameter,
                         hand_diameter, 180 * 16, 180 * 16)
 
         painter.end()
@@ -180,9 +182,22 @@ class BoardGraphic(QMainWindow):
         self.storeroom_b_text_label.move(self.storeroom_b_point + offset)
         self.storeroom_b_text_label.setText("0")
 
-    # TODO: create labels for hand
-    def create_hand_text(self):
-        pass
+        self.player_a_hand_text_label = QLabel(self)
+
+        self.player_b_hand_text_label = QLabel(self)
+
+    def update_hand_label(self):
+
+        offset = QPoint(22, 5)
+
+        self.player_a_hand_text_label.move(self.player_a_hand_point + offset)
+        self.player_a_hand_text_label.setText(str(self.player_a_hand.counter_count))
+
+        offset = QPoint(22, 15)
+
+        self.player_b_hand_text_label.move(self.player_b_hand_point + offset)
+        self.player_b_hand_text_label.setText(str(self.player_b_hand.counter_count))
+
 
     # creates the UI.
     def create_inputs(self):
@@ -306,6 +321,7 @@ class BoardGraphic(QMainWindow):
         self.player_b_hand = player_b_hand
 
         self.update()
+        self.update_hand_label()
 
     # update the hand positions
     def update_hand_positions(self):
@@ -322,12 +338,14 @@ class BoardGraphic(QMainWindow):
             y_coord = round(self.house_b_points[player_a_hand.hole_pos - 21].y() - hand_diameter - 10)
         elif player_a_hand.hole_pos == 28:
             x_coord = self.storeroom_a_point.x() - round(hand_diameter / 2) - 1
-            y_coord = self.storeroom_a_point.y() - 70
+            y_coord = self.storeroom_a_point.y() - 80
         else:
             x_coord = -100
             y_coord = -100
 
-        self.player_a_hand_point = Point(x_coord, y_coord)
+        self.player_a_hand_point = QPoint(x_coord, y_coord)
+        # self.player_a_hand_point.x = x_coord
+        # self.player_a_hand_point.y = y_coord
 
         if 10 < player_b_hand.hole_pos < 18:
             x_coord = self.house_a_points[player_b_hand.hole_pos - 11].x() - round(hand_diameter / 2) - 1
@@ -337,12 +355,14 @@ class BoardGraphic(QMainWindow):
             y_coord = self.house_b_points[player_b_hand.hole_pos - 21].y() + 10
         elif player_b_hand.hole_pos == 18:
             x_coord = self.storeroom_b_point.x() - round(hand_diameter / 2) - 1
-            y_coord = self.storeroom_b_point.y() + 30
+            y_coord = self.storeroom_b_point.y() + 40
         else:
             x_coord = -100
             y_coord = -100
 
-        self.player_b_hand_point = Point(x_coord, y_coord)
+        self.player_b_hand_point = QPoint(x_coord, y_coord)
+        # self.player_b_hand_point.x = x_coord
+        # self.player_b_hand_point.y = y_coord
 
     # enable or disable the inputs
     def set_enable_inputs(self, enable):
