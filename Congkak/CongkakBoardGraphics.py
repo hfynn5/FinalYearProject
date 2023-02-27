@@ -33,6 +33,8 @@ class BoardGraphic(QMainWindow):
         self.player_a_hand_point = Point(0, 0)
         self.player_b_hand_point = Point(0, 0)
 
+        # self.player_b_hand_point.x()
+
         self.player_a_dropdown = QComboBox()
         self.player_b_dropdown = QComboBox()
 
@@ -120,79 +122,33 @@ class BoardGraphic(QMainWindow):
         pen = QtGui.QPen()
         pen.setWidth(5)
         pen.setColor(QtGui.QColor('brown'))
-
-        # painter.fillRect(QtGui.QPixmap)
-
-        # painter.eraseRect(0,0,800,600)
-
-        # painter.setPen(pen)
-
-        # storeroom A and hands
-        if self.player_a_hand.hole_pos == 28:
-            pen.setColor(QtGui.QColor('blue'))
-            painter.setPen(pen)
-            painter.drawArc(self.storeroom_a_point.x() - round(hand_diameter / 2) - 1,
-                            self.storeroom_a_point.y() - hand_diameter - 30, hand_diameter,
-                            hand_diameter, 0 * 16, 180 * 16)
-        elif self.player_b_hand.hole_pos == 28:
-            pen.setColor(QtGui.QColor('red'))
-        else:
-            pen.setColor(QtGui.QColor('brown'))
-
         painter.setPen(pen)
+
+        # storeroom A
         painter.drawEllipse(self.storeroom_a_point, storeroom_diameter, storeroom_diameter)
 
-        # house A and hands
+        # house A
         for i, pos in enumerate(self.house_a_points):
-            if self.player_a_hand.hole_pos == i + 11:
-                pen.setColor(QtGui.QColor('blue'))
-                painter.setPen(pen)
-                painter.drawArc(pos.x()-round(hand_diameter/2)-1, pos.y()-hand_diameter-10, hand_diameter,
-                                hand_diameter, 0 * 16, 180 * 16)
-            elif self.player_b_hand.hole_pos == i + 11:
-                pen.setColor(QtGui.QColor('red'))
-                painter.setPen(pen)
-                painter.drawArc(pos.x() - round(hand_diameter / 2) - 1, pos.y() + 10, hand_diameter,
-                                hand_diameter, 180 * 16, 180 * 16)
-            else:
-                pen.setColor(QtGui.QColor('brown'))
-
-            painter.setPen(pen)
             painter.drawEllipse(pos, house_diameter, house_diameter)
 
-        # storeroom B and hands
-        if self.player_a_hand.hole_pos == 18:
-            pen.setColor(QtGui.QColor('blue'))
-        elif self.player_b_hand.hole_pos == 18:
-            pen.setColor(QtGui.QColor('red'))
-            painter.setPen(pen)
-            painter.drawArc(self.storeroom_b_point.x() - round(hand_diameter / 2) - 1,
-                            self.storeroom_b_point.y() + 30, hand_diameter,
-                            hand_diameter, 180 * 16, 180 * 16)
-        else:
-            pen.setColor(QtGui.QColor('brown'))
-
-        painter.setPen(pen)
+        # storeroom B
         painter.drawEllipse(self.storeroom_b_point, storeroom_diameter, storeroom_diameter)
 
-        # house B and hands
+        # house B
         for i, pos in enumerate(self.house_b_points):
-
-            if self.player_a_hand.hole_pos == i + 21:
-                pen.setColor(QtGui.QColor('blue'))
-                painter.setPen(pen)
-                painter.drawArc(pos.x() - round(hand_diameter / 2) - 1, pos.y() - hand_diameter - 10, hand_diameter,
-                                hand_diameter, 0 * 16, 180 * 16)
-            elif self.player_b_hand.hole_pos == i + 21:
-                pen.setColor(QtGui.QColor('red'))
-                painter.setPen(pen)
-                painter.drawArc(pos.x() - round(hand_diameter / 2) - 1, pos.y() + 10, hand_diameter,
-                                hand_diameter, 180 * 16, 180 * 16)
-            else:
-                pen.setColor(QtGui.QColor('brown'))
-
-            painter.setPen(pen)
             painter.drawEllipse(pos, house_diameter, house_diameter)
+
+        self.update_hand_positions()
+
+        pen.setColor(QtGui.QColor('blue'))
+        painter.setPen(pen)
+        painter.drawArc(round(self.player_a_hand_point.x), round(self.player_a_hand_point.y), hand_diameter,
+                        hand_diameter, 0 * 16, 180 * 16)
+
+        pen.setColor(QtGui.QColor('red'))
+        painter.setPen(pen)
+        painter.drawArc(round(self.player_b_hand_point.x), round(self.player_b_hand_point.y), hand_diameter,
+                        hand_diameter, 180 * 16, 180 * 16)
 
         painter.end()
 
@@ -350,6 +306,43 @@ class BoardGraphic(QMainWindow):
         self.player_b_hand = player_b_hand
 
         self.update()
+
+    # update the hand positions
+    def update_hand_positions(self):
+        hand_diameter = 50
+
+        player_a_hand = self.player_a_hand
+        player_b_hand = self.player_b_hand
+
+        if 10 < player_a_hand.hole_pos < 18:
+            x_coord = round(self.house_a_points[player_a_hand.hole_pos - 11].x() - round(hand_diameter / 2) - 1)
+            y_coord = round(self.house_a_points[player_a_hand.hole_pos - 11].y() - hand_diameter - 10)
+        elif 20 < player_a_hand.hole_pos < 28:
+            x_coord = round(self.house_b_points[player_a_hand.hole_pos - 21].x() - round(hand_diameter / 2) - 1)
+            y_coord = round(self.house_b_points[player_a_hand.hole_pos - 21].y() - hand_diameter - 10)
+        elif player_a_hand.hole_pos == 28:
+            x_coord = self.storeroom_a_point.x() - round(hand_diameter / 2) - 1
+            y_coord = self.storeroom_a_point.y() - 70
+        else:
+            x_coord = -100
+            y_coord = -100
+
+        self.player_a_hand_point = Point(x_coord, y_coord)
+
+        if 10 < player_b_hand.hole_pos < 18:
+            x_coord = self.house_a_points[player_b_hand.hole_pos - 11].x() - round(hand_diameter / 2) - 1
+            y_coord = self.house_a_points[player_b_hand.hole_pos - 11].y() + 10
+        elif 20 < player_b_hand.hole_pos < 28:
+            x_coord = self.house_b_points[player_b_hand.hole_pos - 21].x() - round(hand_diameter / 2) - 1
+            y_coord = self.house_b_points[player_b_hand.hole_pos - 21].y() + 10
+        elif player_b_hand.hole_pos == 18:
+            x_coord = self.storeroom_b_point.x() - round(hand_diameter / 2) - 1
+            y_coord = self.storeroom_b_point.y() + 30
+        else:
+            x_coord = -100
+            y_coord = -100
+
+        self.player_b_hand_point = Point(x_coord, y_coord)
 
     # enable or disable the inputs
     def set_enable_inputs(self, enable):
