@@ -346,15 +346,21 @@ class BoardGraphic(QMainWindow):
 
     # enable or disable the inputs
     def set_enable_inputs(self, enable):
-        for button in self.house_a_buttons:
-            button.setEnabled(enable)
-            if enable:
-                button.show()
-            else:
-                button.hide()
-        for button in self.house_b_buttons:
-            button.setEnabled(enable)
-            if enable:
-                button.show()
-            else:
-                button.hide()
+        self.set_enable_player_inputs('a',enable)
+        self.set_enable_player_inputs('b',enable)
+
+    def set_enable_player_inputs(self, player, enable):
+        if player == 'a':
+            for button in self.house_a_buttons:
+                button.setEnabled(enable)
+                if enable:
+                    button.show()
+                else:
+                    button.hide()
+        elif player == 'b':
+            for button in self.house_b_buttons:
+                button.setEnabled(enable)
+                if enable:
+                    button.show()
+                else:
+                    button.hide()
