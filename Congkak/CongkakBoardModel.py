@@ -16,7 +16,7 @@ class BoardModel:
 
     def __init__(self):
         self.house_a_values = [7, 7, 7, 7, 7, 7, 7]
-        self.house_b_values = [0, 0, 0, 0, 0, 0, 0]
+        self.house_b_values = [7, 7, 7, 7, 7, 7, 7]
 
         self.storeroom_a_value = 0
         self.storeroom_b_value = 0
@@ -28,6 +28,7 @@ class BoardModel:
         self.must_loop_before_tikam = True
 
         self.turn_count = 0
+        self.current_player_turn = ''
 
         self.sowing_speed = 0
 
@@ -42,6 +43,12 @@ class BoardModel:
         PROMPT_SOWING_A = 31
         PROMPT_SOWING_B = 32
         ERROR = -1
+
+        if not player == self.current_player_turn:
+            self.turn_count += 1
+            print("turn")
+
+        self.current_player_turn = player
 
         status = CONTINUE_SOWING
 
@@ -98,6 +105,9 @@ class BoardModel:
                     time.sleep(self.sowing_speed)
 
                     self.current_hand.hole_pos = 28
+
+                    time.sleep(self.sowing_speed)
+
                     self.storeroom_a_value += self.current_hand.drop_all_counters()
                     self.update_player_hands()
 
@@ -137,6 +147,9 @@ class BoardModel:
                     time.sleep(self.sowing_speed)
 
                     self.current_hand.hole_pos = 18
+
+                    time.sleep(self.sowing_speed)
+
                     self.storeroom_b_value += self.current_hand.drop_all_counters()
                     self.update_player_hands()
 
@@ -148,8 +161,6 @@ class BoardModel:
                 self.reset_hands()
             else:
                 status = CONTINUE_SOWING
-                # hole = self.current_hand.hole_pos
-                # print("continuing starting with: " + str(self.current_hand.hole_pos))
 
         return status
 
