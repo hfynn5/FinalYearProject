@@ -81,6 +81,91 @@ class BoardModel:
         self.reset_hands()
         return status
 
+    # sows once
+    def sow_once(self, hand):
+
+        hand = self.pick_up_all_counters(hand)
+
+        if hand.counter_count == 0:
+            return hand
+
+        while hand.counter_count > 0:
+
+            time.sleep(self.sowing_speed)
+
+            hand.hole_pos -= 1
+
+            if hand.hole_pos == 10 and hand.player == 'b':
+                hand.hole_pos = 27
+            elif hand.hole_pos == 20 and hand.player == 'a':
+                hand.hole_pos = 17
+
+            hand = self.drop_counter(hand)
+
+            if hand.player == 'a':
+                self.player_a_hand = hand
+            elif hand.player == 'b':
+                self.player_b_hand = hand
+
+        return hand
+
+    # TODO: add simul start
+    def simultaneous_iterate_sowing(self, new_hand_a, new_hand_b):
+
+        self.player_a_hand = new_hand_a
+        self.player_b_hand = new_hand_b
+
+        status = self.CONTINUE_SOWING
+
+        while status == self.CONTINUE_SOWING:
+
+           pass
+
+        return self.player_a_hand, self.player_b_hand
+        pass
+
+    def simultaneous_sow_once(self):
+
+        self.player_a_hand = self.pick_up_all_counters(self.player_a_hand)
+        self.player_b_hand = self.pick_up_all_counters(self.player_b_hand)
+
+
+        pass
+
+    def pick_up_all_counters(self, hand):
+        if 10 <= hand.hole_pos < 18:
+            hand.counter_count = self.house_a_values[hand.hole_pos - 11]
+            self.house_a_values[hand.hole_pos - 11] = 0
+        elif 20 <= hand.hole_pos < 28:
+            hand.counter_count = self.house_b_values[hand.hole_pos - 21]
+            self.house_b_values[hand.hole_pos - 21] = 0
+        else:
+            print("player at storeroom. cant pick up")
+        return hand
+
+    # drops a counter a the position the hand is at
+    def drop_counter(self, hand):
+        if hand.hole_pos == 10:
+            if hand.player == 'a':
+                self.storeroom_a_value += 1
+                hand.drop_one_counter()
+                hand.has_looped = True
+            hand.hole_pos = 28
+        elif hand.hole_pos == 20:
+            if hand.player == 'b':
+                self.storeroom_b_value += 1
+                hand.drop_one_counter()
+                hand.has_looped = True
+            hand.hole_pos = 18
+        elif hand.hole_pos < 20:
+            self.house_a_values[hand.hole_pos - 11] += 1
+            hand.drop_one_counter()
+        elif hand.hole_pos > 20:
+            self.house_b_values[hand.hole_pos - 21] += 1
+            hand.drop_one_counter()
+
+        return hand
+
     # check status of hand
     def check_hand_status(self, hand):
 
@@ -190,84 +275,6 @@ class BoardModel:
             time.sleep(delay)
         else:
             print("cannot tikam")
-
-    # sows once
-    def sow_once(self, hand):
-
-        if 10 <= hand.hole_pos < 20:
-            hand.counter_count = self.house_a_values[hand.hole_pos - 11]
-            self.house_a_values[hand.hole_pos - 11] = 0
-        elif hand.hole_pos >= 20:
-            hand.counter_count = self.house_b_values[hand.hole_pos - 21]
-            self.house_b_values[hand.hole_pos - 21] = 0
-
-        if hand.counter_count == 0:
-            return hand
-
-        while hand.counter_count > 0:
-
-            time.sleep(self.sowing_speed)
-
-            hand.hole_pos -= 1
-
-            if hand.hole_pos == 10 and hand.player == 'b':
-                hand.hole_pos = 27
-            elif hand.hole_pos == 20 and hand.player == 'a':
-                hand.hole_pos = 17
-
-            hand = self.drop_counter(hand)
-
-            if hand.player == 'a':
-                self.player_a_hand = hand
-            elif hand.player == 'b':
-                self.player_b_hand = hand
-
-        return hand
-
-    # TODO: add simul start
-    def simultaneous_sowing(self, new_hand_a, new_hand_b):
-
-        CONTINUE_SOWING = 1
-        STOP_SOWING_A = 21
-        STOP_SOWING_B = 22
-        PROMPT_SOWING_A = 31
-        PROMPT_SOWING_B = 32
-        ERROR = -1
-
-        self.player_a_hand = new_hand_a
-        self.player_b_hand = new_hand_b
-
-        status = CONTINUE_SOWING
-
-        while status == CONTINUE_SOWING:
-
-           pass
-
-        return self.player_a_hand, self.player_b_hand
-        pass
-
-    # drops a counter a the position the hand is at
-    def drop_counter(self, hand):
-        if hand.hole_pos == 10:
-            if hand.player == 'a':
-                self.storeroom_a_value += 1
-                hand.drop_one_counter()
-                hand.has_looped = True
-            hand.hole_pos = 28
-        elif hand.hole_pos == 20:
-            if hand.player == 'b':
-                self.storeroom_b_value += 1
-                hand.drop_one_counter()
-                hand.has_looped = True
-            hand.hole_pos = 18
-        elif hand.hole_pos < 20:
-            self.house_a_values[hand.hole_pos - 11] += 1
-            hand.drop_one_counter()
-        elif hand.hole_pos > 20:
-            self.house_b_values[hand.hole_pos - 21] += 1
-            hand.drop_one_counter()
-
-        return hand
 
     def reset_hands(self):
         self.player_a_hand = Hand(player='a', hole_pos=-1, counter_count=0)
