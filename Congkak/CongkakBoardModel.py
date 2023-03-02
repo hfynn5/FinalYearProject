@@ -93,12 +93,7 @@ class BoardModel:
 
             time.sleep(self.sowing_speed)
 
-            hand.hole_pos -= 1
-
-            if hand.hole_pos == 10 and hand.player == 'b':
-                hand.hole_pos = 27
-            elif hand.hole_pos == 20 and hand.player == 'a':
-                hand.hole_pos = 17
+            hand.move_one_pos()
 
             hand = self.drop_counter(hand)
 

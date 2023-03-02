@@ -19,3 +19,15 @@ class Hand:
         old = self.counter_count
         self.counter_count = 0
         return old
+
+    def move_one_pos(self):
+        self.hole_pos -= 1
+
+        if self.hole_pos == 10 and self.player == 'b':
+            self.hole_pos = 27
+        elif self.hole_pos == 20 and self.player == 'a':
+            self.hole_pos = 17
+
+    def move_n_pos(self, n):
+        for x in n:
+            self.move_one_pos()
