@@ -5,6 +5,7 @@ from Congkak.CongkakBoardGraphics import BoardGraphic
 from Congkak.CongkakBoardModel import BoardModel, Hand
 from PyQt6.QtWidgets import *
 from PyQt6.QtCore import QObject, QThread, pyqtSignal, QRunnable, QThreadPool
+from Congkak.Hand import Hand
 from PyQt6.QtGui import QPixmap
 
 
@@ -136,7 +137,9 @@ class GameManager:
         self.board_graphic.set_enable_inputs(False)
         self.update_sowing_speed(self.board_graphic.move_speed_slider.value())
 
-        status = self.board_model.iterate_sowing(player=player, hole=hole)
+        new_hand = Hand(player=player, hole_pos=hole, counter_count=0)
+
+        status = self.board_model.iterate_sowing(new_hand)
 
         if status == PROMPT_SOWING_A:
             print("continue: player A needs to input hole")

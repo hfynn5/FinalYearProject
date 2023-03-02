@@ -32,10 +32,8 @@ class BoardModel:
 
         self.sowing_speed = 0
 
-    # TODO: add simultaneous sowing
-
     # do repeated sowing
-    def iterate_sowing(self, player, hole):
+    def iterate_sowing(self, new_hand):
 
         CONTINUE_SOWING = 1
         STOP_SOWING_A = 21
@@ -44,15 +42,15 @@ class BoardModel:
         PROMPT_SOWING_B = 32
         ERROR = -1
 
-        if not player == self.current_player_turn:
+        self.current_hand = new_hand
+
+        if not self.current_hand.player == self.current_player_turn:
             self.turn_count += 1
             print("turn")
 
-        self.current_player_turn = player
+        self.current_player_turn = self.current_hand.player
 
         status = CONTINUE_SOWING
-
-        self.current_hand = Hand(player=player, hole_pos=hole, counter_count=0)
 
         self.update_player_hands()
 
@@ -202,6 +200,10 @@ class BoardModel:
 
         return hand
 
+    # TODO: add simul start
+    def simultaneous_sowing(self, hand_a, hand_b):
+        pass
+
     # drops a counter a the position the hand is at
     def drop_counter(self, hand):
         if hand.hole_pos == 10:
@@ -242,7 +244,8 @@ class BoardModel:
         print("store a: " + str(self.storeroom_a_value))
         print("store b: " + str(self.storeroom_b_value))
 
-    # TODO: add simul start
+
+
 
 
 
