@@ -12,10 +12,6 @@ class BoardModel:
     TIKAM_A = 41
     TIKAM_B = 42
     ERROR = -1
-    #
-    # status = self.CONTINUE_SOWING
-    # status = CONTINUE_SOWING
-
 
     # player A is top with storeroom on right.
     # player B is bottom with storeroom on left.
@@ -124,9 +120,22 @@ class BoardModel:
         self.player_a_hand = self.pick_up_all_counters(self.player_a_hand)
         self.player_b_hand = self.pick_up_all_counters(self.player_b_hand)
 
+        if self.player_a_hand.counter_count == 0 or self.player_b_hand.counter_count == 0:
+            return self.player_a_hand, self.player_b_hand
 
-        pass
+        while self.player_a_hand.counter_count > 0 and self.player_b_hand.counter_count > 0:
 
+            time.sleep(self.sowing_speed)
+
+            self.player_a_hand.move_one()
+            self.player_b_hand.move_one()
+
+            self.player_a_hand = self.drop_counter(self.player_a_hand)
+            self.player_b_hand = self.drop_counter(self.player_b_hand)
+
+        return self.player_a_hand, self.player_b_hand
+
+    # pick up all counters at the hand position and put into hand
     def pick_up_all_counters(self, hand):
         if 10 <= hand.hole_pos < 18:
             hand.counter_count = self.house_a_values[hand.hole_pos - 11]
@@ -271,10 +280,12 @@ class BoardModel:
         else:
             print("cannot tikam")
 
+    # reset hands to empty and no position
     def reset_hands(self):
         self.player_a_hand = Hand(player='a', hole_pos=-1, counter_count=0)
         self.player_b_hand = Hand(player='b', hole_pos=-1, counter_count=0)
 
+    # update the current hand to appropriate player hand
     def update_player_hands(self):
         if self.current_hand.player == 'a':
             self.player_a_hand = self.current_hand
