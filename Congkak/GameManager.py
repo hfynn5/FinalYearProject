@@ -132,6 +132,8 @@ class GameManager:
         STOP_SOWING_B = 22
         PROMPT_SOWING_A = 31
         PROMPT_SOWING_B = 32
+        TIKAM_A = 41
+        TIKAM_B = 42
         ERROR = -1
 
         self.board_graphic.set_enable_inputs(False)
@@ -151,12 +153,12 @@ class GameManager:
             self.board_graphic.set_enable_player_inputs('b', enable=True)
             self.board_graphic.set_enable_player_inputs('a', enable=False)
             pass
-        elif status == STOP_SOWING_A:
+        elif status == STOP_SOWING_A or status == TIKAM_A:
             print("player A stopped. player B needs to input hole")
             self.board_graphic.set_enable_player_inputs('b', enable=True)
             self.board_graphic.set_enable_player_inputs('a', enable=False)
             pass
-        elif status == STOP_SOWING_B:
+        elif status == STOP_SOWING_B or status == TIKAM_B:
             print("player B stopped. player A needs to input hole")
             self.board_graphic.set_enable_player_inputs('a', enable=True)
             self.board_graphic.set_enable_player_inputs('b', enable=False)
