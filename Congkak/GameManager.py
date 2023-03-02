@@ -100,7 +100,8 @@ class GameManager:
 
         # connect buttons with corresponding functions
         for i, button in enumerate(self.board_graphic.house_a_buttons):
-            button.clicked.connect(lambda checked, value=i + 11: self.start_worker_sowing('a', value))
+            # button.clicked.connect(lambda checked, value=i + 11: self.start_worker_sowing('a', value))
+            button.clicked.connect(lambda checked, value=i + 11: self.start_worker_simultaneous_sowing(15, 27))
 
         for i, button in enumerate(self.board_graphic.house_b_buttons):
             button.clicked.connect(lambda checked, value=i + 21: self.start_worker_sowing('b', value))
@@ -118,6 +119,13 @@ class GameManager:
     def start_worker_sowing(self, player, hole):
         worker = Worker(self.sow, player=player, hole=hole)
         self.threadpool.start(worker)
+
+    def start_worker_simultaneous_sowing(self, hole_a, hole_b):
+        worker_a = Worker(self.sow, player='a', hole=hole_a)
+        self.threadpool.start(worker_a)
+
+        worker_b = Worker(self.sow, player='b', hole=hole_b)
+        self.threadpool.start(worker_b)
 
     # makes worker constantly update graphics
     def start_worker_updating(self):

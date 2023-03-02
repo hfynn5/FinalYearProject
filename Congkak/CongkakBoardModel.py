@@ -33,7 +33,7 @@ class BoardModel:
 
         self.player_a_hand = Hand(player='a', hole_pos=-1, counter_count=0)
         self.player_b_hand = Hand(player='b', hole_pos=-1, counter_count=0)
-        self.current_hand = Hand(player='', hole_pos=-1, counter_count=0)
+        # self.current_hand = Hand(player='', hole_pos=-1, counter_count=0)
 
         self.must_loop_before_tikam = True
 
@@ -43,31 +43,32 @@ class BoardModel:
         self.sowing_speed = 0
 
     # do repeated sowing
-    def iterate_sowing(self, new_hand):
+    def iterate_sowing(self, current_hand):
 
-        self.current_hand = new_hand
+        # self.current_hand = new_hand
+        print(current_hand.hole_pos)
 
-        if not self.current_hand.player == self.current_player_turn:
+        if not current_hand.player == self.current_player_turn:
             self.turn_count += 1
             print("turn")
 
-        self.current_player_turn = self.current_hand.player
+        self.current_player_turn = current_hand.player
 
         status = self.CONTINUE_SOWING
 
-        self.update_player_hands()
+        self.update_player_hands(current_hand)
 
         time.sleep(self.sowing_speed)
 
         while status == self.CONTINUE_SOWING:
 
-            self.current_hand = self.sow_once(self.current_hand)
+            current_hand = self.sow_once(current_hand)
 
-            self.update_player_hands()
+            self.update_player_hands(current_hand)
 
             time.sleep(self.sowing_speed)
 
-            status = self.check_hand_status(self.current_hand)
+            status = self.check_hand_status(current_hand)
 
             if status == self.TIKAM_A:
                 self.tikam(self.player_a_hand, True)
@@ -99,41 +100,60 @@ class BoardModel:
                 self.player_b_hand = hand
 
         return hand
-
-    # TODO: add simul start
-    def simultaneous_iterate_sowing(self, new_hand_a, new_hand_b):
-
-        self.player_a_hand = new_hand_a
-        self.player_b_hand = new_hand_b
-
-        status = self.CONTINUE_SOWING
-
-        while status == self.CONTINUE_SOWING:
-
-           pass
-
-        return self.player_a_hand, self.player_b_hand
-        pass
-
-    def simultaneous_sow_once(self):
-
-        self.player_a_hand = self.pick_up_all_counters(self.player_a_hand)
-        self.player_b_hand = self.pick_up_all_counters(self.player_b_hand)
-
-        if self.player_a_hand.counter_count == 0 or self.player_b_hand.counter_count == 0:
-            return self.player_a_hand, self.player_b_hand
-
-        while self.player_a_hand.counter_count > 0 and self.player_b_hand.counter_count > 0:
-
-            time.sleep(self.sowing_speed)
-
-            self.player_a_hand.move_one()
-            self.player_b_hand.move_one()
-
-            self.player_a_hand = self.drop_counter(self.player_a_hand)
-            self.player_b_hand = self.drop_counter(self.player_b_hand)
-
-        return self.player_a_hand, self.player_b_hand
+    #
+    #
+    # def simultaneous_iterate_sowing(self, new_hand_a, new_hand_b):
+    #
+    #     self.player_a_hand = new_hand_a
+    #     self.player_b_hand = new_hand_b
+    #
+    #     # status = self.CONTINUE_SOWING
+    #     status_a = self.CONTINUE_SOWING
+    #     status_b = self.CONTINUE_SOWING
+    #
+    #     while status_a == self.CONTINUE_SOWING and status_b == self.CONTINUE_SOWING:
+    #
+    #         self.player_a_hand, self.player_b_hand = self.simultaneous_sow_once()
+    #
+    #         self.update_player_hands()
+    #
+    #         time.sleep(self.sowing_speed)
+    #
+    #         status_a = self.check_hand_status(self.player_a_hand)
+    #         status_b = self.check_hand_status(self.player_b_hand)
+    #
+    #         if status_a == self.TIKAM_A:
+    #             self.tikam(self.player_a_hand, False)
+    #
+    #         if status_a == self.TIKAM_B:
+    #             self.tikam(self.player_b_hand, False)
+    #
+    #
+    #
+    #         pass
+    #
+    #     return self.player_a_hand, self.player_b_hand
+    #     pass
+    #
+    # def simultaneous_sow_once(self):
+    #
+    #     self.player_a_hand = self.pick_up_all_counters(self.player_a_hand)
+    #     self.player_b_hand = self.pick_up_all_counters(self.player_b_hand)
+    #
+    #     if self.player_a_hand.counter_count == 0 or self.player_b_hand.counter_count == 0:
+    #         return self.player_a_hand, self.player_b_hand
+    #
+    #     while self.player_a_hand.counter_count > 0 and self.player_b_hand.counter_count > 0:
+    #
+    #         time.sleep(self.sowing_speed)
+    #
+    #         self.player_a_hand.move_one()
+    #         self.player_b_hand.move_one()
+    #
+    #         self.player_a_hand = self.drop_counter(self.player_a_hand)
+    #         self.player_b_hand = self.drop_counter(self.player_b_hand)
+    #
+    #     return self.player_a_hand, self.player_b_hand
 
     # pick up all counters at the hand position and put into hand
     def pick_up_all_counters(self, hand):
@@ -144,6 +164,7 @@ class BoardModel:
             hand.counter_count = self.house_b_values[hand.hole_pos - 21]
             self.house_b_values[hand.hole_pos - 21] = 0
         else:
+            print(hand)
             print("player at storeroom. cant pick up")
         return hand
 
@@ -193,12 +214,12 @@ class BoardModel:
                     status = self.STOP_SOWING_A
             elif hand.player == 'b':
                 status = self.STOP_SOWING_B
-        elif (self.current_hand.hole_pos > 20 and
-              (self.house_b_values[self.current_hand.hole_pos - 21] == 1)):
+        elif (hand.hole_pos > 20 and
+              (self.house_b_values[hand.hole_pos - 21] == 1)):
 
-            if self.current_hand.player == 'a':
+            if hand.player == 'a':
                 status = self.STOP_SOWING_A
-            elif self.current_hand.player == 'b':
+            elif hand.player == 'b':
                 if hand.has_looped:
                     status = self.TIKAM_B
                 else:
@@ -228,13 +249,11 @@ class BoardModel:
             time.sleep(delay)
 
             self.player_a_hand.hole_pos = 21 + opposite_hole
-            self.update_player_hands()
 
             time.sleep(delay)
 
             self.player_a_hand.counter_count += self.house_b_values[opposite_hole]
             self.house_b_values[opposite_hole] = 0
-            self.update_player_hands()
 
             time.sleep(delay)
 
@@ -243,7 +262,6 @@ class BoardModel:
             time.sleep(delay)
 
             self.storeroom_a_value += self.player_a_hand.drop_all_counters()
-            self.update_player_hands()
 
             time.sleep(delay)
             pass
@@ -259,13 +277,11 @@ class BoardModel:
             time.sleep(delay)
 
             self.player_b_hand.hole_pos = 11 + opposite_hole
-            self.update_player_hands()
 
             time.sleep(delay)
 
             self.player_b_hand.counter_count += self.house_a_values[opposite_hole]
             self.house_a_values[opposite_hole] = 0
-            self.update_player_hands()
 
             time.sleep(delay)
 
@@ -274,7 +290,6 @@ class BoardModel:
             time.sleep(delay)
 
             self.storeroom_b_value += self.player_b_hand.drop_all_counters()
-            self.update_player_hands()
 
             time.sleep(delay)
         else:
@@ -285,12 +300,18 @@ class BoardModel:
         self.player_a_hand = Hand(player='a', hole_pos=-1, counter_count=0)
         self.player_b_hand = Hand(player='b', hole_pos=-1, counter_count=0)
 
-    # update the current hand to appropriate player hand
-    def update_player_hands(self):
-        if self.current_hand.player == 'a':
-            self.player_a_hand = self.current_hand
-        elif self.current_hand.player == 'b':
-            self.player_b_hand = self.current_hand
+    # # update the current hand to appropriate player hand
+    # def update_player_hands(self):
+    #     if self.current_hand.player == 'a':
+    #         self.player_a_hand = self.current_hand
+    #     elif self.current_hand.player == 'b':
+    #         self.player_b_hand = self.current_hand
+
+    def update_player_hands(self, current_hand):
+        if current_hand.player == 'a':
+            self.player_a_hand = current_hand
+        elif current_hand.player == 'b':
+            self.player_b_hand = current_hand
 
     # print holes
     def print_holes(self):

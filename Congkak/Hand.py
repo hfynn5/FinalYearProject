@@ -10,6 +10,7 @@ class Hand:
         # 28 = storeroom A
         self.counter_count = counter_count
         self.has_looped = False
+        self.is_running = False
 
     def drop_one_counter(self):
         self.counter_count -= 1
