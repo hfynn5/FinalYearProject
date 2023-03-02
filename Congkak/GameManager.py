@@ -127,15 +127,6 @@ class GameManager:
     # iterate sowing in board model
     def sow(self, player, hole):
 
-        CONTINUE_SOWING = 1
-        STOP_SOWING_A = 21
-        STOP_SOWING_B = 22
-        PROMPT_SOWING_A = 31
-        PROMPT_SOWING_B = 32
-        TIKAM_A = 41
-        TIKAM_B = 42
-        ERROR = -1
-
         self.board_graphic.set_enable_inputs(False)
         self.update_sowing_speed(self.board_graphic.move_speed_slider.value())
 
@@ -143,29 +134,28 @@ class GameManager:
 
         status = self.board_model.iterate_sowing(new_hand)
 
-        if status == PROMPT_SOWING_A:
+        if status == BoardModel.PROMPT_SOWING_A:
             print("continue: player A needs to input hole")
-            self.board_graphic.set_enable_player_inputs('a',enable=True)
-            self.board_graphic.set_enable_player_inputs('b',enable=False)
+            self.board_graphic.set_enable_player_inputs('a', enable=True)
+            self.board_graphic.set_enable_player_inputs('b', enable=False)
             pass
-        elif status == PROMPT_SOWING_B:
+        elif status == BoardModel.PROMPT_SOWING_B:
             print("continue: player B needs to input hole")
             self.board_graphic.set_enable_player_inputs('b', enable=True)
             self.board_graphic.set_enable_player_inputs('a', enable=False)
             pass
-        elif status == STOP_SOWING_A or status == TIKAM_A:
+        elif status == BoardModel.STOP_SOWING_A or status == BoardModel.TIKAM_A:
             print("player A stopped. player B needs to input hole")
             self.board_graphic.set_enable_player_inputs('b', enable=True)
             self.board_graphic.set_enable_player_inputs('a', enable=False)
             pass
-        elif status == STOP_SOWING_B or status == TIKAM_B:
+        elif status == BoardModel.STOP_SOWING_B or status == BoardModel.TIKAM_B:
             print("player B stopped. player A needs to input hole")
             self.board_graphic.set_enable_player_inputs('a', enable=True)
             self.board_graphic.set_enable_player_inputs('b', enable=False)
             pass
-        elif status == CONTINUE_SOWING:
+        elif status == BoardModel.CONTINUE_SOWING:
             pass
-
 
         # self.board_graphic.set_enable_inputs(True)
 
