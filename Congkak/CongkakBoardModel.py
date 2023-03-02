@@ -4,6 +4,19 @@ from Congkak.Hand import Hand
 
 class BoardModel:
 
+    CONTINUE_SOWING = 1
+    STOP_SOWING_A = 21
+    STOP_SOWING_B = 22
+    PROMPT_SOWING_A = 31
+    PROMPT_SOWING_B = 32
+    TIKAM_A = 41
+    TIKAM_B = 42
+    ERROR = -1
+    #
+    # status = self.CONTINUE_SOWING
+    # status = CONTINUE_SOWING
+
+
     # player A is top with storeroom on right.
     # player B is bottom with storeroom on left.
     storeroom_a_value = 0
@@ -13,6 +26,7 @@ class BoardModel:
     # player B house 1 starts at left.
     house_a_values = [0, 0, 0, 0, 0, 0, 0]
     house_b_values = [0, 0, 0, 0, 0, 0, 0]
+
 
     def __init__(self):
         self.house_a_values = [7, 7, 7, 7, 7, 7, 7]
@@ -35,13 +49,6 @@ class BoardModel:
     # do repeated sowing
     def iterate_sowing(self, new_hand):
 
-        CONTINUE_SOWING = 1
-        STOP_SOWING_A = 21
-        STOP_SOWING_B = 22
-        PROMPT_SOWING_A = 31
-        PROMPT_SOWING_B = 32
-        ERROR = -1
-
         self.current_hand = new_hand
 
         if not self.current_hand.player == self.current_player_turn:
@@ -50,13 +57,13 @@ class BoardModel:
 
         self.current_player_turn = self.current_hand.player
 
-        status = CONTINUE_SOWING
+        status = self.CONTINUE_SOWING
 
         self.update_player_hands()
 
         time.sleep(self.sowing_speed)
 
-        while status == CONTINUE_SOWING:
+        while status == self.CONTINUE_SOWING:
 
             self.current_hand = self.sow_once(self.current_hand)
 
@@ -64,112 +71,129 @@ class BoardModel:
 
             time.sleep(self.sowing_speed)
 
-            if self.current_hand.hole_pos == 28:
-                status = PROMPT_SOWING_A
-                self.reset_hands()
+            status = self.check_hand_status(self.current_hand)
 
-            elif self.current_hand.hole_pos == 18:
-                status = PROMPT_SOWING_B
-                self.reset_hands()
-                print("user B needs to input hole")
-            elif (self.current_hand.hole_pos < 20 and
-                  (self.house_a_values[self.current_hand.hole_pos-11] == 0)) or \
-                    (self.current_hand.hole_pos > 20 and
-                     (self.house_b_values[self.current_hand.hole_pos - 21] == 0)):
-                status = ERROR
-                self.reset_hands()
+            if status == self.TIKAM_A:
+                self.tikam(self.player_a_hand, True)
+            elif status == self.TIKAM_B:
+                self.tikam(self.player_b_hand, True)
 
-            elif (self.current_hand.hole_pos < 20 and
-                  (self.house_a_values[self.current_hand.hole_pos-11] == 1)):
+        self.reset_hands()
+        return status
 
-                if self.current_hand.player == 'a':
-                    status = STOP_SOWING_A
-                elif self.current_hand.player == 'b':
-                    status = STOP_SOWING_B
+    # check status of hand
+    def check_hand_status(self, hand):
 
-                if self.current_hand.player == 'a' and self.current_hand.has_looped:
-                    # Tikam
-                    opposite_hole = 17 - self.current_hand.hole_pos
-                    current_hand_pos = self.current_hand.hole_pos
+        status = self.CONTINUE_SOWING
 
-                    self.house_a_values[current_hand_pos - 11] = 0
-                    self.current_hand.counter_count += 1
-
-                    time.sleep(self.sowing_speed)
-
-                    self.current_hand.hole_pos = 21 + opposite_hole
-                    self.update_player_hands()
-
-                    time.sleep(self.sowing_speed)
-
-                    self.current_hand.counter_count += self.house_b_values[opposite_hole]
-                    self.house_b_values[opposite_hole] = 0
-                    self.update_player_hands()
-
-                    time.sleep(self.sowing_speed)
-
-                    self.current_hand.hole_pos = 28
-
-                    time.sleep(self.sowing_speed)
-
-                    self.storeroom_a_value += self.current_hand.drop_all_counters()
-                    self.update_player_hands()
-
-                    time.sleep(self.sowing_speed)
-                    pass
+        if hand.hole_pos == 28:
+            status = self.PROMPT_SOWING_A
+        elif hand.hole_pos == 18:
+            status = self.PROMPT_SOWING_B
+        elif (hand.hole_pos < 20 and
+              (self.house_a_values[hand.hole_pos - 11] == 0)) or \
+                (hand.hole_pos > 20 and
+                 (self.house_b_values[hand.hole_pos - 21] == 0)):
+            status = self.ERROR
+        elif (hand.hole_pos < 20 and
+              (self.house_a_values[hand.hole_pos - 11] == 1)):
+            if hand.player == 'a':
+                if hand.has_looped:
+                    status = self.TIKAM_A
                 else:
-                    # mati
-                    pass
-                self.reset_hands()
-            elif (self.current_hand.hole_pos > 20 and
-                  (self.house_b_values[self.current_hand.hole_pos - 21] == 1)):
+                    status = self.STOP_SOWING_A
+            elif hand.player == 'b':
+                status = self.STOP_SOWING_B
+        elif (self.current_hand.hole_pos > 20 and
+              (self.house_b_values[self.current_hand.hole_pos - 21] == 1)):
 
-                if self.current_hand.player == 'a':
-                    status = STOP_SOWING_A
-                elif self.current_hand.player == 'b':
-                    status = STOP_SOWING_B
-
-                if self.current_hand.player == 'b' and self.current_hand.has_looped:
-                    # Tikam
-                    opposite_hole = 27 - self.current_hand.hole_pos
-                    current_hand_pos = self.current_hand.hole_pos
-
-                    self.house_b_values[current_hand_pos - 21] = 0
-                    self.current_hand.counter_count += 1
-
-                    time.sleep(self.sowing_speed)
-
-                    self.current_hand.hole_pos = 11 + opposite_hole
-                    self.update_player_hands()
-
-                    time.sleep(self.sowing_speed)
-
-                    self.current_hand.counter_count += self.house_a_values[opposite_hole]
-                    self.house_a_values[opposite_hole] = 0
-                    self.update_player_hands()
-
-                    time.sleep(self.sowing_speed)
-
-                    self.current_hand.hole_pos = 18
-
-                    time.sleep(self.sowing_speed)
-
-                    self.storeroom_b_value += self.current_hand.drop_all_counters()
-                    self.update_player_hands()
-
-                    time.sleep(self.sowing_speed)
-                    pass
+            if self.current_hand.player == 'a':
+                status = self.STOP_SOWING_A
+            elif self.current_hand.player == 'b':
+                if hand.has_looped:
+                    status = self.TIKAM_B
                 else:
-                    # mati
-                    pass
-                self.reset_hands()
-            else:
-                status = CONTINUE_SOWING
+                    status = self.STOP_SOWING_B
+        else:
+            status = self.CONTINUE_SOWING
 
         return status
 
+    # tikam the hand (will check if its possible to tikam or not
+    def tikam(self, hand, timed):
+
+        if timed:
+            delay = self.sowing_speed
+        else:
+            delay = 0
+
+        if hand.player == 'a' and hand.has_looped and hand.hole_pos < 20:
+            self.player_a_hand = hand
+
+            opposite_hole = 17 - self.player_a_hand.hole_pos
+            current_hand_pos = self.player_a_hand.hole_pos
+
+            self.house_a_values[current_hand_pos - 11] = 0
+            self.player_a_hand.counter_count += 1
+
+            time.sleep(delay)
+
+            self.player_a_hand.hole_pos = 21 + opposite_hole
+            self.update_player_hands()
+
+            time.sleep(delay)
+
+            self.player_a_hand.counter_count += self.house_b_values[opposite_hole]
+            self.house_b_values[opposite_hole] = 0
+            self.update_player_hands()
+
+            time.sleep(delay)
+
+            self.player_a_hand.hole_pos = 28
+
+            time.sleep(delay)
+
+            self.storeroom_a_value += self.player_a_hand.drop_all_counters()
+            self.update_player_hands()
+
+            time.sleep(delay)
+            pass
+        elif hand.player == 'b' and hand.has_looped and hand.hole_pos > 20:
+            self.player_b_hand = hand
+
+            opposite_hole = 27 - self.player_b_hand.hole_pos
+            current_hand_pos = self.player_b_hand.hole_pos
+
+            self.house_b_values[current_hand_pos - 21] = 0
+            self.player_b_hand.counter_count += 1
+
+            time.sleep(delay)
+
+            self.player_b_hand.hole_pos = 11 + opposite_hole
+            self.update_player_hands()
+
+            time.sleep(delay)
+
+            self.player_b_hand.counter_count += self.house_a_values[opposite_hole]
+            self.house_a_values[opposite_hole] = 0
+            self.update_player_hands()
+
+            time.sleep(delay)
+
+            self.player_b_hand.hole_pos = 18
+
+            time.sleep(delay)
+
+            self.storeroom_b_value += self.player_b_hand.drop_all_counters()
+            self.update_player_hands()
+
+            time.sleep(delay)
+        else:
+            print("cannot tikam")
+
     # sows once
     def sow_once(self, hand):
+
         if 10 <= hand.hole_pos < 20:
             hand.counter_count = self.house_a_values[hand.hole_pos - 11]
             self.house_a_values[hand.hole_pos - 11] = 0
@@ -201,7 +225,25 @@ class BoardModel:
         return hand
 
     # TODO: add simul start
-    def simultaneous_sowing(self, hand_a, hand_b):
+    def simultaneous_sowing(self, new_hand_a, new_hand_b):
+
+        CONTINUE_SOWING = 1
+        STOP_SOWING_A = 21
+        STOP_SOWING_B = 22
+        PROMPT_SOWING_A = 31
+        PROMPT_SOWING_B = 32
+        ERROR = -1
+
+        self.player_a_hand = new_hand_a
+        self.player_b_hand = new_hand_b
+
+        status = CONTINUE_SOWING
+
+        while status == CONTINUE_SOWING:
+
+           pass
+
+        return self.player_a_hand, self.player_b_hand
         pass
 
     # drops a counter a the position the hand is at
