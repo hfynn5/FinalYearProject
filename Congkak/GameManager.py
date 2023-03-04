@@ -83,9 +83,24 @@ class WorkerSignals(QObject):
     progress = pyqtSignal(int)
 
 
+# updates board graphic
+def update_board_graphics(board_graphic: BoardGraphic, board_model: BoardModel):
+    board_graphic.update_values(house_a_values=board_model.house_a_values,
+                                house_b_values=board_model.house_b_values,
+                                storeroom_a_value=board_model.storeroom_a_value,
+                                storeroom_b_value=board_model.storeroom_b_value,
+                                player_a_hand=board_model.player_a_hand,
+                                player_b_hand=board_model.player_b_hand)
+
+
 class GameManager:
 
     def __init__(self):
+
+        self.player_a_hand_pos = 0
+        self.player_b_hand_pos = 0
+
+        self.autoplay_hands = False
 
         # declare threadpool
         self.threadpool = QThreadPool()
@@ -101,10 +116,16 @@ class GameManager:
         # connect buttons with corresponding functions
         for i, button in enumerate(self.board_graphic.house_a_buttons):
             # button.clicked.connect(lambda checked, value=i + 11: self.start_worker_sowing('a', value))
-            button.clicked.connect(lambda checked, value=i + 11: self.start_worker_simultaneous_sowing(15, 27))
+            # button.clicked.connect(lambda checked, value=i + 11: self.start_worker_simultaneous_sowing(15, 27))
+            button.clicked.connect(lambda checked, value=i + 11: self.hole_button_action('a', value))
 
         for i, button in enumerate(self.board_graphic.house_b_buttons):
-            button.clicked.connect(lambda checked, value=i + 21: self.start_worker_sowing('b', value))
+            # button.clicked.connect(lambda checked, value=i + 21: self.start_worker_sowing('b', value))
+            button.clicked.connect(lambda checked, value=i + 21: self.hole_button_action('b', value))
+
+        self.board_graphic.play_button.clicked.connect(lambda checked:
+                                               self.start_worker_simultaneous_sowing(self.player_a_hand_pos,
+                                                                                     self.player_b_hand_pos))
 
         self.board_graphic.move_speed_slider. \
             valueChanged.connect(lambda value=self.board_graphic.move_speed_slider.value():
@@ -121,6 +142,7 @@ class GameManager:
         self.threadpool.start(worker)
 
     def start_worker_simultaneous_sowing(self, hole_a, hole_b):
+        self.autoplay_hands = True
         worker_a = Worker(self.sow, player='a', hole=hole_a)
         self.threadpool.start(worker_a)
 
@@ -167,31 +189,35 @@ class GameManager:
 
         # self.board_graphic.set_enable_inputs(True)
 
-    def prompt_player(self,player):
+    def hole_button_action(self, player, hole):
+        if self.autoplay_hands:
+            self.start_worker_sowing(player, hole)
+        else:
+            self.set_beginning_hand_pos(player, hole)
+
+    def set_beginning_hand_pos(self, player, hole):
+        self.board_model.update_player_hand_pos(player, hole)
 
         if player == 'a':
-            self.board_graphic.set_enable_player_inputs(player='a',enable=True)
-            self.board_graphic.set_enable_player_inputs(player='b', enable=False)
+            self.player_a_hand_pos = hole
+        elif player == 'b':
+            self.player_b_hand_pos = hole
+
+    def prompt_player(self, player):
+        if player == 'a':
+            self.board_graphic.set_enable_player_inputs(player='a', enable=True)
+            # self.board_graphic.set_enable_player_inputs(player='b', enable=False)
         elif player == 'b':
             self.board_graphic.set_enable_player_inputs(player='b', enable=True)
-            self.board_graphic.set_enable_player_inputs(player='a', enable=False)
+            # self.board_graphic.set_enable_player_inputs(player='a', enable=False)
 
     # updates board graphics constantly
     def update_board_graphics_constantly(self):
         while self.board_graphic.active:
-            self.update_board_graphics(board_graphic=self.board_graphic, board_model=self.board_model)
-
+            update_board_graphics(board_graphic=self.board_graphic, board_model=self.board_model)
         sys.exit("Window closed")
 
-    # updates board graphic
-    def update_board_graphics(self, board_graphic: BoardGraphic, board_model: BoardModel):
 
-        board_graphic.update_values(house_a_values=board_model.house_a_values,
-                                    house_b_values=board_model.house_b_values,
-                                    storeroom_a_value=board_model.storeroom_a_value,
-                                    storeroom_b_value=board_model.storeroom_b_value,
-                                    player_a_hand=board_model.player_a_hand,
-                                    player_b_hand=board_model.player_b_hand)
 
     def update_sowing_speed(self, move_per_second):
         self.board_model.sowing_speed = 1 / move_per_second

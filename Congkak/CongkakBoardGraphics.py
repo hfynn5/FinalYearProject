@@ -49,6 +49,7 @@ class BoardGraphic(QMainWindow):
 
         # setting the geometry of window
         self.setGeometry(100, 100, 800, 600)
+        self.setAutoFillBackground(True)
 
         self.generate_points()
 
@@ -126,6 +127,8 @@ class BoardGraphic(QMainWindow):
         pen.setColor(QtGui.QColor('brown'))
         painter.setPen(pen)
 
+
+
         # storeroom A
         painter.drawEllipse(self.storeroom_a_point, storeroom_diameter, storeroom_diameter)
 
@@ -142,11 +145,12 @@ class BoardGraphic(QMainWindow):
 
         self.update_hand_positions()
 
+        # player hand a
         pen.setColor(QtGui.QColor('blue'))
         painter.setPen(pen)
         painter.drawArc(round(self.player_a_hand_point.x()), round(self.player_a_hand_point.y()), hand_diameter,
                         hand_diameter, 0 * 16, 180 * 16)
-
+        # player hand b
         pen.setColor(QtGui.QColor('red'))
         painter.setPen(pen)
         painter.drawArc(round(self.player_b_hand_point.x()), round(self.player_b_hand_point.y()), hand_diameter,
