@@ -55,6 +55,12 @@ class BoardModel:
         self.current_player_turn = ''
 
         self.sowing_speed = 0
+        # self.player_a_slowed_sowing_multiplier = 2
+        # self.player_b_slowed_sowing_multiplier = 2
+        self.slowed_sowing_multiplier = 2
+
+        self.player_a_sowing_slowed = False
+        self.player_b_sowing_slowed = False
 
     # do repeated sowing
     def iterate_sowing(self, current_hand):
@@ -76,7 +82,7 @@ class BoardModel:
 
         self.update_player_hands_from_current_hand(current_hand)
 
-        time.sleep(self.sowing_speed)
+        self.wait_between_micromoves(current_hand.player)
 
         while status == self.CONTINUE_SOWING:
 
@@ -84,15 +90,15 @@ class BoardModel:
 
             self.update_player_hands_from_current_hand(current_hand)
 
-            time.sleep(self.sowing_speed)
+            self.wait_between_micromoves(current_hand.player)
 
             status = self.check_hand_status(current_hand)
 
         if status == self.TIKAM_A:
-            self.tikam(self.player_a_hand, True)
+            self.tikam(self.player_a_hand)
             status = self.STOP_SOWING_A
         elif status == self.TIKAM_B:
-            self.tikam(self.player_b_hand, True)
+            self.tikam(self.player_b_hand)
             status = self.STOP_SOWING_B
 
         if status == self.STOP_SOWING_A or status == self.STOP_SOWING_B:
@@ -113,7 +119,7 @@ class BoardModel:
 
         while hand.counter_count > 0:
 
-            time.sleep(self.sowing_speed)
+            self.wait_between_micromoves(hand.player)
 
             hand.move_one_pos()
 
@@ -163,12 +169,7 @@ class BoardModel:
         return hand
 
     # tikam the hand (will check if its possible to tikam or not
-    def tikam(self, hand, timed):
-
-        if timed:
-            delay = self.sowing_speed
-        else:
-            delay = 0
+    def tikam(self, hand):
 
         if hand.player == 'a' and hand.has_looped and hand.hole_pos < 20:
             self.player_a_hand = hand
@@ -179,24 +180,24 @@ class BoardModel:
             self.house_a_values[current_hand_pos - 11] = 0
             self.player_a_hand.counter_count += 1
 
-            time.sleep(delay)
+            self.wait_between_micromoves(hand.player)
 
             self.player_a_hand.hole_pos = 21 + opposite_hole
 
-            time.sleep(delay)
+            self.wait_between_micromoves(hand.player)
 
             self.player_a_hand.counter_count += self.house_b_values[opposite_hole]
             self.house_b_values[opposite_hole] = 0
 
-            time.sleep(delay)
+            self.wait_between_micromoves(hand.player)
 
             self.player_a_hand.hole_pos = 28
 
-            time.sleep(delay)
+            self.wait_between_micromoves(hand.player)
 
             self.storeroom_a_value += self.player_a_hand.drop_all_counters()
 
-            time.sleep(delay)
+            self.wait_between_micromoves(hand.player)
             pass
         elif hand.player == 'b' and hand.has_looped and hand.hole_pos > 20:
             self.player_b_hand = hand
@@ -207,24 +208,24 @@ class BoardModel:
             self.house_b_values[current_hand_pos - 21] = 0
             self.player_b_hand.counter_count += 1
 
-            time.sleep(delay)
+            self.wait_between_micromoves(hand.player)
 
             self.player_b_hand.hole_pos = 11 + opposite_hole
 
-            time.sleep(delay)
+            self.wait_between_micromoves(hand.player)
 
             self.player_b_hand.counter_count += self.house_a_values[opposite_hole]
             self.house_a_values[opposite_hole] = 0
 
-            time.sleep(delay)
+            self.wait_between_micromoves(hand.player)
 
             self.player_b_hand.hole_pos = 18
 
-            time.sleep(delay)
+            self.wait_between_micromoves(hand.player)
 
             self.storeroom_b_value += self.player_b_hand.drop_all_counters()
 
-            time.sleep(delay)
+            self.wait_between_micromoves(hand.player)
         else:
             print("cannot tikam")
 
@@ -328,12 +329,22 @@ class BoardModel:
         print("store a: " + str(self.storeroom_a_value))
         print("store b: " + str(self.storeroom_b_value))
 
+    def wait_between_micromoves(self, player):
 
+        start_time = time.time()
 
+        wait_length = self.sowing_speed
 
+        if player == 'a' and self.player_a_sowing_slowed or player == 'b' and self.player_b_sowing_slowed:
+            wait_length = self.sowing_speed * self.slowed_sowing_multiplier
 
+        while time.time() - start_time < wait_length:
+            if player == 'a' and self.player_a_sowing_slowed or player == 'b' and self.player_b_sowing_slowed:
+                wait_length = self.sowing_speed * self.slowed_sowing_multiplier
+            else:
+                wait_length = self.sowing_speed
+            pass
 
-
-
+            time.sleep(0.01)
 
 
