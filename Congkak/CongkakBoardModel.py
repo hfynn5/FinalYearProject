@@ -48,8 +48,6 @@ class BoardModel:
         self.current_player_turn = ''
 
         self.sowing_speed = 0
-        # self.player_a_slowed_sowing_multiplier = 2
-        # self.player_b_slowed_sowing_multiplier = 2
         self.slowed_sowing_multiplier = 100000
 
         self.player_a_sowing_slowed = False
@@ -326,7 +324,6 @@ class BoardModel:
             self.player_a_hand.hole_pos = pos
         elif player == 'b':
             self.player_b_hand.hole_pos = pos
-
 
     # wait time
     def wait_between_micromoves(self, player):

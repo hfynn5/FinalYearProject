@@ -55,7 +55,7 @@ class BoardGraphic(QMainWindow):
 
         self.create_hole_text()
         self.create_inputs()
-        self.create_menus
+        self.create_menus()
 
         # show all the widgets
         self.show()
@@ -74,6 +74,7 @@ class BoardGraphic(QMainWindow):
         #
         # x = msg.exec()
 
+    # what to do if close window
     def closeEvent(self, a0: QtGui.QCloseEvent) -> None:
         self.active = False
         a0.accept()
@@ -112,7 +113,7 @@ class BoardGraphic(QMainWindow):
             house_x_pos -= house_x_pos_offset
         self.house_b_points.reverse()
 
-    # Draws all the circles
+    # Draws all the circles and hands and shapes
     def paintEvent(self, QPaintEvent):
 
         storeroom_diameter = 45
@@ -156,8 +157,6 @@ class BoardGraphic(QMainWindow):
 
         painter.end()
 
-    # def paint
-
     # create the label for all the holes
     def create_hole_text(self):
 
@@ -199,7 +198,6 @@ class BoardGraphic(QMainWindow):
 
         self.player_b_hand_text_label.move(self.player_b_hand_point + offset)
         self.player_b_hand_text_label.setText(str(self.player_b_hand.counter_count))
-
 
     # creates the UI.
     def create_inputs(self):

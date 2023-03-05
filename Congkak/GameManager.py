@@ -129,15 +129,21 @@ class GameManager:
                                  self.update_sowing_speed(value))
 
         # start constantly updating graphics
-        self.start_worker_updating()
+        self.start_worker_graphic_updater()
 
         sys.exit(App.exec())
+
+    # makes worker constantly update graphics
+    def start_worker_graphic_updater(self):
+        worker = Worker(self.update_board_graphics_constantly)
+        self.threadpool.start(worker)
 
     # makes worker to start sowing
     def start_worker_sowing(self, player, hole):
         worker = Worker(self.sow, player=player, hole=hole)
         self.threadpool.start(worker)
 
+    # starts a worker for each hand
     def start_worker_simultaneous_sowing(self, hole_a, hole_b):
         self.autoplay_hands = True
         worker_a = Worker(self.sow, player='a', hole=hole_a)
@@ -145,11 +151,6 @@ class GameManager:
 
         worker_b = Worker(self.sow, player='b', hole=hole_b)
         self.threadpool.start(worker_b)
-
-    # makes worker constantly update graphics
-    def start_worker_updating(self):
-        worker = Worker(self.update_board_graphics_constantly)
-        self.threadpool.start(worker)
 
     # iterate sowing in board model
     def sow(self, player, hole):
@@ -176,7 +177,9 @@ class GameManager:
             self.prompt_player('b')
         elif action == BoardModel.GAME_END:
             print("Game over")
+            self.end_game()
 
+    # ends the game
     def end_game(self):
         if self.board_model.storeroom_a_value == self.board_model.storeroom_b_value:
             print("Draw")
@@ -200,6 +203,7 @@ class GameManager:
         elif player == 'b':
             self.player_b_hand_pos = hole
 
+    # prompts the corresponding player
     def prompt_player(self, player):
         if player == 'a':
             self.board_graphic.set_enable_player_inputs(player='a', enable=True)
@@ -212,5 +216,6 @@ class GameManager:
             update_board_graphics(board_graphic=self.board_graphic, board_model=self.board_model)
         sys.exit("Window closed")
 
+    # updates the sowing speed
     def update_sowing_speed(self, move_per_second):
         self.board_model.sowing_speed = 1 / move_per_second
