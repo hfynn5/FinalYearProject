@@ -7,21 +7,28 @@ class BoardModel:
     CONTINUE_SOWING = 1
     STOP_SOWING_A = 21
     STOP_SOWING_B = 22
+    STOP_SOWING_BOTH = 23
     PROMPT_SOWING_A = 31
     PROMPT_SOWING_B = 32
+    PROMPT_SOWING_BOTH = 33
     TIKAM_A = 41
     TIKAM_B = 42
+    TIKAM_BOTH = 43
+    WAIT = 5
     ERROR = -1
 
-    # player A is top with storeroom on right.
-    # player B is bottom with storeroom on left.
-    storeroom_a_value = 0
-    storeroom_b_value = 0
+    SIMULTANEOUS_PHASE = 1
+    SEQUENTIAL_PHASE = 2
 
-    # player A house 1 starts at left. For the sake of sanity, houses start at 1, not 0
-    # player B house 1 starts at left.
-    house_a_values = [0, 0, 0, 0, 0, 0, 0]
-    house_b_values = [0, 0, 0, 0, 0, 0, 0]
+    # # player A is top with storeroom on right.
+    # # player B is bottom with storeroom on left.
+    # storeroom_a_value = 0
+    # storeroom_b_value = 0
+    #
+    # # player A house 1 starts at left. For the sake of sanity, houses start at 1, not 0
+    # # player B house 1 starts at left.
+    # house_a_values = [0, 0, 0, 0, 0, 0, 0]
+    # house_b_values = [0, 0, 0, 0, 0, 0, 0]
 
 
     def __init__(self):
@@ -37,6 +44,13 @@ class BoardModel:
 
         self.must_loop_before_tikam = True
 
+        self.player_a_status = self.STOP_SOWING_A
+        self.player_b_status = self.STOP_SOWING_B
+        self.active_players = []
+        self.last_active_player = ''
+
+        self.game_phase = self.SIMULTANEOUS_PHASE
+
         self.turn_count = 0
         self.current_player_turn = ''
 
@@ -45,16 +59,20 @@ class BoardModel:
     # do repeated sowing
     def iterate_sowing(self, current_hand):
 
-        # self.current_hand = new_hand
-        print(current_hand.hole_pos)
+        if current_hand.player not in self.active_players:
+            self.active_players.append(current_hand.player)
 
-        if not current_hand.player == self.current_player_turn:
-            self.turn_count += 1
-            print("turn")
-
-        self.current_player_turn = current_hand.player
+        if current_hand.player == 'a':
+            self.player_a_status = self.CONTINUE_SOWING
+        elif current_hand.player == 'b':
+            self.player_b_status = self.CONTINUE_SOWING
 
         status = self.CONTINUE_SOWING
+
+        if not current_hand.player == self.current_player_turn and self.game_phase == self.SEQUENTIAL_PHASE:
+            self.turn_count += 1
+            print("turn")
+            self.current_player_turn = current_hand.player
 
         self.update_player_hands_from_current_hand(current_hand)
 
@@ -70,10 +88,17 @@ class BoardModel:
 
             status = self.check_hand_status(current_hand)
 
-            if status == self.TIKAM_A:
-                self.tikam(self.player_a_hand, True)
-            elif status == self.TIKAM_B:
-                self.tikam(self.player_b_hand, True)
+        if status == self.TIKAM_A:
+            self.tikam(self.player_a_hand, True)
+            status = self.STOP_SOWING_A
+        elif status == self.TIKAM_B:
+            self.tikam(self.player_b_hand, True)
+            status = self.STOP_SOWING_B
+
+        if status == self.STOP_SOWING_A or status == self.STOP_SOWING_B:
+            self.active_players.remove(current_hand.player)
+            if len(self.active_players) == 0:
+                self.last_active_player = current_hand.player
 
         self.reset_hands()
         return status
@@ -111,7 +136,7 @@ class BoardModel:
             self.house_b_values[hand.hole_pos - 21] = 0
         else:
             print(hand)
-            print("player at storeroom. cant pick up")
+            print("player " + hand.player + " at storeroom. cant pick up")
         return hand
 
     # drops a counter a the position the hand is at
@@ -136,44 +161,6 @@ class BoardModel:
             hand.drop_one_counter()
 
         return hand
-
-    # check status of hand
-    def check_hand_status(self, hand):
-
-        status = self.CONTINUE_SOWING
-
-        if hand.hole_pos == 28:
-            status = self.PROMPT_SOWING_A
-        elif hand.hole_pos == 18:
-            status = self.PROMPT_SOWING_B
-        elif (hand.hole_pos < 20 and
-              (self.house_a_values[hand.hole_pos - 11] == 0)) or \
-                (hand.hole_pos > 20 and
-                 (self.house_b_values[hand.hole_pos - 21] == 0)):
-            status = self.ERROR
-        elif (hand.hole_pos < 20 and
-              (self.house_a_values[hand.hole_pos - 11] == 1)):
-            if hand.player == 'a':
-                if hand.has_looped:
-                    status = self.TIKAM_A
-                else:
-                    status = self.STOP_SOWING_A
-            elif hand.player == 'b':
-                status = self.STOP_SOWING_B
-        elif (hand.hole_pos > 20 and
-              (self.house_b_values[hand.hole_pos - 21] == 1)):
-
-            if hand.player == 'a':
-                status = self.STOP_SOWING_A
-            elif hand.player == 'b':
-                if hand.has_looped:
-                    status = self.TIKAM_B
-                else:
-                    status = self.STOP_SOWING_B
-        else:
-            status = self.CONTINUE_SOWING
-
-        return status
 
     # tikam the hand (will check if its possible to tikam or not
     def tikam(self, hand, timed):
@@ -241,17 +228,86 @@ class BoardModel:
         else:
             print("cannot tikam")
 
+    # check status of hand
+    def check_hand_status(self, hand):
+
+        status = self.CONTINUE_SOWING
+
+        if hand.hole_pos == 28:
+            status = self.PROMPT_SOWING_A
+        elif hand.hole_pos == 18:
+            status = self.PROMPT_SOWING_B
+        elif (hand.hole_pos < 20 and
+              (self.house_a_values[hand.hole_pos - 11] == 0)) or \
+                (hand.hole_pos > 20 and
+                 (self.house_b_values[hand.hole_pos - 21] == 0)):
+            status = self.ERROR
+        elif (hand.hole_pos < 20 and
+              (self.house_a_values[hand.hole_pos - 11] == 1)):
+            if hand.player == 'a':
+                if hand.has_looped:
+                    status = self.TIKAM_A
+                else:
+                    status = self.STOP_SOWING_A
+            elif hand.player == 'b':
+                status = self.STOP_SOWING_B
+        elif (hand.hole_pos > 20 and
+              (self.house_b_values[hand.hole_pos - 21] == 1)):
+
+            if hand.player == 'a':
+                status = self.STOP_SOWING_A
+            elif hand.player == 'b':
+                if hand.has_looped:
+                    status = self.TIKAM_B
+                else:
+                    status = self.STOP_SOWING_B
+        else:
+            status = self.CONTINUE_SOWING
+
+        if hand.player == 'a':
+            self.player_a_status = status
+        if hand.player == 'b':
+            self.player_b_status = status
+
+        return status
+
+    def action_to_take(self):
+        action = self.ERROR
+        if self.game_phase == self.SEQUENTIAL_PHASE:
+
+            if self.player_a_status == self.PROMPT_SOWING_A:
+                action = self.PROMPT_SOWING_A
+            elif self.player_b_status == self.PROMPT_SOWING_B:
+                action = self.PROMPT_SOWING_B
+            elif self.player_a_status == self.STOP_SOWING_A and self.player_b_status == self.STOP_SOWING_B:
+                if self.last_active_player == 'a':
+                    action = self.PROMPT_SOWING_B
+                elif self.last_active_player == 'b':
+                    action = self.PROMPT_SOWING_A
+
+        elif self.game_phase == self.SIMULTANEOUS_PHASE:
+
+            if self.player_a_status == self.STOP_SOWING_A and self.player_b_status == self.STOP_SOWING_B:
+                self.game_phase = self.SEQUENTIAL_PHASE
+                if self.last_active_player == 'a':
+                    action = self.PROMPT_SOWING_B
+                elif self.last_active_player == 'b':
+                    action = self.PROMPT_SOWING_A
+            elif self.player_a_status == self.STOP_SOWING_A and not self.player_b_status == self.STOP_SOWING_B or \
+                    self.player_b_status == self.STOP_SOWING_B and not self.player_a_status == self.STOP_SOWING_A or \
+                    self.player_a_status == self.CONTINUE_SOWING and self.player_b_status == self.CONTINUE_SOWING:
+                action = self.WAIT
+            elif self.player_a_status == self.PROMPT_SOWING_A:
+                action = self.PROMPT_SOWING_A
+            elif self.player_b_status == self.PROMPT_SOWING_B:
+                action = self.PROMPT_SOWING_B
+
+        return action
+
     # reset hands to empty and no position
     def reset_hands(self):
         self.player_a_hand = Hand(player='a', hole_pos=-1, counter_count=0)
         self.player_b_hand = Hand(player='b', hole_pos=-1, counter_count=0)
-
-    # # update the current hand to appropriate player hand
-    # def update_player_hands(self):
-    #     if self.current_hand.player == 'a':
-    #         self.player_a_hand = self.current_hand
-    #     elif self.current_hand.player == 'b':
-    #         self.player_b_hand = self.current_hand
 
     def update_player_hands_from_current_hand(self, current_hand):
         if current_hand.player == 'a':
