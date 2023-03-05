@@ -70,8 +70,10 @@ class BoardModel:
 
         if current_hand.player == 'a':
             self.player_a_status = self.CONTINUE_SOWING
+            self.player_b_sowing_slowed = False
         elif current_hand.player == 'b':
             self.player_b_status = self.CONTINUE_SOWING
+            self.player_a_sowing_slowed = False
 
         status = self.CONTINUE_SOWING
 
@@ -96,9 +98,11 @@ class BoardModel:
 
         if status == self.TIKAM_A:
             self.tikam(self.player_a_hand)
+            self.player_a_status = self.STOP_SOWING_A
             status = self.STOP_SOWING_A
         elif status == self.TIKAM_B:
             self.tikam(self.player_b_hand)
+            self.player_b_status = self.STOP_SOWING_B
             status = self.STOP_SOWING_B
 
         if status == self.STOP_SOWING_A or status == self.STOP_SOWING_B:
@@ -272,6 +276,7 @@ class BoardModel:
 
         return status
 
+    # returns the action the game manager should do
     def action_to_take(self):
         action = self.ERROR
         if self.game_phase == self.SEQUENTIAL_PHASE:
@@ -295,13 +300,18 @@ class BoardModel:
                 elif self.last_active_player == 'b':
                     action = self.PROMPT_SOWING_A
             elif self.player_a_status == self.STOP_SOWING_A and not self.player_b_status == self.STOP_SOWING_B or \
-                    self.player_b_status == self.STOP_SOWING_B and not self.player_a_status == self.STOP_SOWING_A or \
-                    self.player_a_status == self.CONTINUE_SOWING and self.player_b_status == self.CONTINUE_SOWING:
+                    self.player_b_status == self.STOP_SOWING_B and not self.player_a_status == self.STOP_SOWING_A:
+                self.game_phase = self.SEQUENTIAL_PHASE
                 action = self.WAIT
+            elif self.player_a_status == self.PROMPT_SOWING_A and self.player_b_status == self.PROMPT_SOWING_B:
+                action = self.PROMPT_SOWING_BOTH
             elif self.player_a_status == self.PROMPT_SOWING_A:
                 action = self.PROMPT_SOWING_A
             elif self.player_b_status == self.PROMPT_SOWING_B:
                 action = self.PROMPT_SOWING_B
+
+        print("player a: " + str(self.player_a_status) + "player b: " + str(self.player_b_status))
+        print("phase: " + str(self.game_phase))
 
         return action
 
@@ -310,12 +320,14 @@ class BoardModel:
         self.player_a_hand = Hand(player='a', hole_pos=-1, counter_count=0)
         self.player_b_hand = Hand(player='b', hole_pos=-1, counter_count=0)
 
+    # update player hands given the current hand
     def update_player_hands_from_current_hand(self, current_hand):
         if current_hand.player == 'a':
             self.player_a_hand = current_hand
         elif current_hand.player == 'b':
             self.player_b_hand = current_hand
 
+    # update player hand pos (10-28)
     def update_player_hand_pos(self, player, pos):
         if player == 'a':
             self.player_a_hand.hole_pos = pos
@@ -329,6 +341,7 @@ class BoardModel:
         print("store a: " + str(self.storeroom_a_value))
         print("store b: " + str(self.storeroom_b_value))
 
+    # wait time
     def wait_between_micromoves(self, player):
 
         start_time = time.time()

@@ -94,6 +94,8 @@ def update_board_graphics(board_graphic: BoardGraphic, board_model: BoardModel):
 
 
 class GameManager:
+    SIMULTANEOUS_PHASE = 1
+    SEQUENTIAL_PHASE = 2
 
     def __init__(self):
 
@@ -101,6 +103,13 @@ class GameManager:
         self.player_b_hand_pos = 0
 
         self.autoplay_hands = False
+
+        self.phase = self.SIMULTANEOUS_PHASE
+
+        # self.player_a_status = BoardModel.STOP_SOWING_A
+        # self.player_b_status = BoardModel.STOP_SOWING_B
+
+        self.active_players = []
 
         # declare threadpool
         self.threadpool = QThreadPool()
@@ -113,19 +122,16 @@ class GameManager:
         App = QApplication(sys.argv)
         self.board_graphic = BoardGraphic()
 
-        # connect buttons with corresponding functions
+        # connect input with corresponding functions
         for i, button in enumerate(self.board_graphic.house_a_buttons):
-            # button.clicked.connect(lambda checked, value=i + 11: self.start_worker_sowing('a', value))
-            # button.clicked.connect(lambda checked, value=i + 11: self.start_worker_simultaneous_sowing(15, 27))
             button.clicked.connect(lambda checked, value=i + 11: self.hole_button_action('a', value))
 
         for i, button in enumerate(self.board_graphic.house_b_buttons):
-            # button.clicked.connect(lambda checked, value=i + 21: self.start_worker_sowing('b', value))
             button.clicked.connect(lambda checked, value=i + 21: self.hole_button_action('b', value))
 
         self.board_graphic.play_button.clicked.connect(lambda checked:
-                                               self.start_worker_simultaneous_sowing(self.player_a_hand_pos,
-                                                                                     self.player_b_hand_pos))
+                                                       self.start_worker_simultaneous_sowing(self.player_a_hand_pos,
+                                                                                             self.player_b_hand_pos))
 
         self.board_graphic.move_speed_slider. \
             valueChanged.connect(lambda value=self.board_graphic.move_speed_slider.value():
@@ -156,46 +162,36 @@ class GameManager:
 
     # iterate sowing in board model
     def sow(self, player, hole):
-
-        self.board_graphic.set_enable_inputs(False)
+        self.board_graphic.set_enable_player_inputs(player, False)
         self.update_sowing_speed(self.board_graphic.move_speed_slider.value())
 
         new_hand = Hand(player=player, hole_pos=hole, counter_count=0)
 
-        status = self.board_model.iterate_sowing(new_hand)
+        self.board_model.iterate_sowing(new_hand)
 
-        if status == BoardModel.PROMPT_SOWING_A:
-            print("continue: player A needs to input hole")
-            self.board_graphic.set_enable_player_inputs('a', enable=True)
-            self.board_graphic.set_enable_player_inputs('b', enable=False)
-            pass
-        elif status == BoardModel.PROMPT_SOWING_B:
-            print("continue: player B needs to input hole")
-            self.board_graphic.set_enable_player_inputs('b', enable=True)
-            self.board_graphic.set_enable_player_inputs('a', enable=False)
-            pass
-        elif status == BoardModel.STOP_SOWING_A or status == BoardModel.TIKAM_A:
-            print("player A stopped. player B needs to input hole")
-            self.board_graphic.set_enable_player_inputs('b', enable=True)
-            self.board_graphic.set_enable_player_inputs('a', enable=False)
-            pass
-        elif status == BoardModel.STOP_SOWING_B or status == BoardModel.TIKAM_B:
-            print("player B stopped. player A needs to input hole")
-            self.board_graphic.set_enable_player_inputs('a', enable=True)
-            self.board_graphic.set_enable_player_inputs('b', enable=False)
-            pass
-        elif status == BoardModel.CONTINUE_SOWING:
-            pass
+        action = self.board_model.action_to_take()
 
-        # self.board_graphic.set_enable_inputs(True)
+        print("player: " + player + " action: " + str(action))
 
+        if action == BoardModel.PROMPT_SOWING_A:
+            self.prompt_player('a')
+            self.board_model.player_b_sowing_slowed = True
+        elif action == BoardModel.PROMPT_SOWING_B:
+            self.prompt_player('b')
+            self.board_model.player_a_sowing_slowed = True
+        elif action == BoardModel.PROMPT_SOWING_BOTH:
+            self.prompt_player('a')
+            self.prompt_player('b')
+
+    # decides what action the hole button should take
     def hole_button_action(self, player, hole):
         if self.autoplay_hands:
             self.start_worker_sowing(player, hole)
         else:
-            self.set_beginning_hand_pos(player, hole)
+            self.set_hand_pos(player, hole)
 
-    def set_beginning_hand_pos(self, player, hole):
+    # sets the hand position
+    def set_hand_pos(self, player, hole):
         self.board_model.update_player_hand_pos(player, hole)
 
         if player == 'a':
@@ -206,18 +202,14 @@ class GameManager:
     def prompt_player(self, player):
         if player == 'a':
             self.board_graphic.set_enable_player_inputs(player='a', enable=True)
-            # self.board_graphic.set_enable_player_inputs(player='b', enable=False)
         elif player == 'b':
             self.board_graphic.set_enable_player_inputs(player='b', enable=True)
-            # self.board_graphic.set_enable_player_inputs(player='a', enable=False)
 
     # updates board graphics constantly
     def update_board_graphics_constantly(self):
         while self.board_graphic.active:
             update_board_graphics(board_graphic=self.board_graphic, board_model=self.board_model)
         sys.exit("Window closed")
-
-
 
     def update_sowing_speed(self, move_per_second):
         self.board_model.sowing_speed = 1 / move_per_second
