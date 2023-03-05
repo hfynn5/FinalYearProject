@@ -15,32 +15,25 @@ class BoardModel:
     TIKAM_B = 42
     TIKAM_BOTH = 43
     WAIT = 5
+    GAME_END = 6
     ERROR = -1
 
     SIMULTANEOUS_PHASE = 1
     SEQUENTIAL_PHASE = 2
 
-    # # player A is top with storeroom on right.
-    # # player B is bottom with storeroom on left.
-    # storeroom_a_value = 0
-    # storeroom_b_value = 0
-    #
-    # # player A house 1 starts at left. For the sake of sanity, houses start at 1, not 0
-    # # player B house 1 starts at left.
-    # house_a_values = [0, 0, 0, 0, 0, 0, 0]
-    # house_b_values = [0, 0, 0, 0, 0, 0, 0]
-
-
     def __init__(self):
+        # player A house 1 starts at left. For the sake of sanity, houses start at 1, not 0
+        # player B house 1 starts at left.
         self.house_a_values = [7, 7, 7, 7, 7, 7, 7]
         self.house_b_values = [7, 7, 7, 7, 7, 7, 7]
 
+        # player A is top with storeroom on right.
+        # player B is bottom with storeroom on left.
         self.storeroom_a_value = 0
         self.storeroom_b_value = 0
 
         self.player_a_hand = Hand(player='a', hole_pos=-1, counter_count=0)
         self.player_b_hand = Hand(player='b', hole_pos=-1, counter_count=0)
-        # self.current_hand = Hand(player='', hole_pos=-1, counter_count=0)
 
         self.must_loop_before_tikam = True
 
@@ -57,7 +50,7 @@ class BoardModel:
         self.sowing_speed = 0
         # self.player_a_slowed_sowing_multiplier = 2
         # self.player_b_slowed_sowing_multiplier = 2
-        self.slowed_sowing_multiplier = 2
+        self.slowed_sowing_multiplier = 100000
 
         self.player_a_sowing_slowed = False
         self.player_b_sowing_slowed = False
@@ -79,7 +72,6 @@ class BoardModel:
 
         if not current_hand.player == self.current_player_turn and self.game_phase == self.SEQUENTIAL_PHASE:
             self.turn_count += 1
-            print("turn")
             self.current_player_turn = current_hand.player
 
         self.update_player_hands_from_current_hand(current_hand)
@@ -126,7 +118,6 @@ class BoardModel:
             self.wait_between_micromoves(hand.player)
 
             hand.move_one_pos()
-
             hand = self.drop_counter(hand)
 
             if hand.player == 'a':
@@ -281,7 +272,13 @@ class BoardModel:
         action = self.ERROR
         if self.game_phase == self.SEQUENTIAL_PHASE:
 
-            if self.player_a_status == self.PROMPT_SOWING_A:
+            if sum(self.house_a_values) == 0 and sum(self.house_b_values) == 0:
+                action = self.GAME_END
+            elif sum(self.house_a_values) == 0:
+                action = self.PROMPT_SOWING_B
+            elif sum(self.house_b_values) == 0:
+                action = self.PROMPT_SOWING_A
+            elif self.player_a_status == self.PROMPT_SOWING_A:
                 action = self.PROMPT_SOWING_A
             elif self.player_b_status == self.PROMPT_SOWING_B:
                 action = self.PROMPT_SOWING_B
@@ -292,7 +289,6 @@ class BoardModel:
                     action = self.PROMPT_SOWING_A
 
         elif self.game_phase == self.SIMULTANEOUS_PHASE:
-
             if self.player_a_status == self.STOP_SOWING_A and self.player_b_status == self.STOP_SOWING_B:
                 self.game_phase = self.SEQUENTIAL_PHASE
                 if self.last_active_player == 'a':
@@ -309,9 +305,6 @@ class BoardModel:
                 action = self.PROMPT_SOWING_A
             elif self.player_b_status == self.PROMPT_SOWING_B:
                 action = self.PROMPT_SOWING_B
-
-        print("player a: " + str(self.player_a_status) + "player b: " + str(self.player_b_status))
-        print("phase: " + str(self.game_phase))
 
         return action
 
@@ -334,12 +327,6 @@ class BoardModel:
         elif player == 'b':
             self.player_b_hand.hole_pos = pos
 
-    # print holes
-    def print_holes(self):
-        print("house a: " + str(self.house_a_values))
-        print("house b: " + str(self.house_b_values))
-        print("store a: " + str(self.storeroom_a_value))
-        print("store b: " + str(self.storeroom_b_value))
 
     # wait time
     def wait_between_micromoves(self, player):
@@ -360,4 +347,10 @@ class BoardModel:
 
             time.sleep(0.01)
 
+    # print holes
+    def print_holes(self):
+        print("house a: " + str(self.house_a_values))
+        print("house b: " + str(self.house_b_values))
+        print("store a: " + str(self.storeroom_a_value))
+        print("store b: " + str(self.storeroom_b_value))
 

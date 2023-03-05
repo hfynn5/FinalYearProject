@@ -127,8 +127,6 @@ class BoardGraphic(QMainWindow):
         pen.setColor(QtGui.QColor('brown'))
         painter.setPen(pen)
 
-
-
         # storeroom A
         painter.drawEllipse(self.storeroom_a_point, storeroom_diameter, storeroom_diameter)
 

@@ -94,8 +94,6 @@ def update_board_graphics(board_graphic: BoardGraphic, board_model: BoardModel):
 
 
 class GameManager:
-    SIMULTANEOUS_PHASE = 1
-    SEQUENTIAL_PHASE = 2
 
     def __init__(self):
 
@@ -103,13 +101,6 @@ class GameManager:
         self.player_b_hand_pos = 0
 
         self.autoplay_hands = False
-
-        self.phase = self.SIMULTANEOUS_PHASE
-
-        # self.player_a_status = BoardModel.STOP_SOWING_A
-        # self.player_b_status = BoardModel.STOP_SOWING_B
-
-        self.active_players = []
 
         # declare threadpool
         self.threadpool = QThreadPool()
@@ -180,8 +171,19 @@ class GameManager:
             self.prompt_player('b')
             self.board_model.player_a_sowing_slowed = True
         elif action == BoardModel.PROMPT_SOWING_BOTH:
+            self.autoplay_hands = False
             self.prompt_player('a')
             self.prompt_player('b')
+        elif action == BoardModel.GAME_END:
+            print("Game over")
+
+    def end_game(self):
+        if self.board_model.storeroom_a_value == self.board_model.storeroom_b_value:
+            print("Draw")
+        elif self.board_model.storeroom_a_value > self.board_model.storeroom_b_value:
+            print("Player A wins")
+        elif self.board_model.storeroom_b_value > self.board_model.storeroom_a_value:
+            print("Player B wins")
 
     # decides what action the hole button should take
     def hole_button_action(self, player, hole):
@@ -193,7 +195,6 @@ class GameManager:
     # sets the hand position
     def set_hand_pos(self, player, hole):
         self.board_model.update_player_hand_pos(player, hole)
-
         if player == 'a':
             self.player_a_hand_pos = hole
         elif player == 'b':
