@@ -53,6 +53,8 @@ class BoardModel:
         self.player_a_sowing_slowed = False
         self.player_b_sowing_slowed = False
 
+        self.moves_made = []
+
     # do repeated sowing
     def iterate_sowing(self, current_hand):
 
@@ -343,6 +345,28 @@ class BoardModel:
             pass
 
             time.sleep(0.01)
+
+    # TODO: add move saving
+    # def append_move(self,):
+
+    def does_hole_have_counter(self, player):
+
+        truth_list = []
+
+        if player == 'a':
+            for hole in self.house_a_values:
+                if hole > 0:
+                    truth_list.append(True)
+                else:
+                    truth_list.append(False)
+        elif player == 'b':
+            for hole in self.house_b_values:
+                if hole > 0:
+                    truth_list.append(True)
+                else:
+                    truth_list.append(False)
+
+        return truth_list
 
     # print holes
     def print_holes(self):

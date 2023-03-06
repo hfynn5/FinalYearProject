@@ -53,7 +53,7 @@ class BoardGraphic(QMainWindow):
 
         self.generate_points()
 
-        self.create_hole_text()
+        self.create_hole_labels()
         self.create_inputs()
         self.create_menus()
 
@@ -158,7 +158,7 @@ class BoardGraphic(QMainWindow):
         painter.end()
 
     # create the label for all the holes
-    def create_hole_text(self):
+    def create_hole_labels(self):
 
         offset = QPoint(-4, -15)
 
@@ -304,7 +304,7 @@ class BoardGraphic(QMainWindow):
         about_menu = menu_bar.addMenu("About")
 
     # updates the labels
-    def update_values(self, house_a_values, house_b_values,
+    def update_labels(self, house_a_values, house_b_values,
                       storeroom_a_value, storeroom_b_value,
                       player_a_hand, player_b_hand):
 
@@ -369,18 +369,18 @@ class BoardGraphic(QMainWindow):
         self.set_enable_player_inputs('a',enable)
         self.set_enable_player_inputs('b',enable)
 
-    def set_enable_player_inputs(self, player, enable):
+    def set_enable_player_inputs(self, player, enable_list):
         if player == 'a':
-            for button in self.house_a_buttons:
-                button.setEnabled(enable)
-                if enable:
+            for i, button in enumerate(self.house_a_buttons):
+                button.setEnabled(enable_list[i])
+                if enable_list[i]:
                     button.show()
                 else:
                     button.hide()
         elif player == 'b':
-            for button in self.house_b_buttons:
-                button.setEnabled(enable)
-                if enable:
+            for i, button in enumerate(self.house_b_buttons):
+                button.setEnabled(enable_list[i])
+                if enable_list[i]:
                     button.show()
                 else:
                     button.hide()

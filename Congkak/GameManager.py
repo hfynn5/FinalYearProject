@@ -85,7 +85,7 @@ class WorkerSignals(QObject):
 
 # updates board graphic
 def update_board_graphics(board_graphic: BoardGraphic, board_model: BoardModel):
-    board_graphic.update_values(house_a_values=board_model.house_a_values,
+    board_graphic.update_labels(house_a_values=board_model.house_a_values,
                                 house_b_values=board_model.house_b_values,
                                 storeroom_a_value=board_model.storeroom_a_value,
                                 storeroom_b_value=board_model.storeroom_b_value,
@@ -154,7 +154,8 @@ class GameManager:
 
     # iterate sowing in board model
     def sow(self, player, hole):
-        self.board_graphic.set_enable_player_inputs(player, False)
+        false_list = [False,False,False,False,False,False,False]
+        self.board_graphic.set_enable_player_inputs(player, enable_list=false_list)
         self.update_sowing_speed(self.board_graphic.move_speed_slider.value())
 
         new_hand = Hand(player=player, hole_pos=hole, counter_count=0)
@@ -205,10 +206,14 @@ class GameManager:
 
     # prompts the corresponding player
     def prompt_player(self, player):
-        if player == 'a':
-            self.board_graphic.set_enable_player_inputs(player='a', enable=True)
-        elif player == 'b':
-            self.board_graphic.set_enable_player_inputs(player='b', enable=True)
+
+        self.board_graphic.set_enable_player_inputs(player=player,
+                                                    enable_list=self.board_model.does_hole_have_counter(player))
+
+        # if player == 'a':
+        #     self.board_graphic.set_enable_player_inputs(player='a', enable_list=self.board_model.does_hole_have_counter('a'))
+        # elif player == 'b':
+        #     self.board_graphic.set_enable_player_inputs(player='b', enable_list=self.board_model.does_hole_have_counter('b'))
 
     # updates board graphics constantly
     def update_board_graphics_constantly(self):
