@@ -102,7 +102,7 @@ class BoardModel:
             if len(self.active_players) == 0:
                 self.last_active_player = current_hand.player
 
-        self.reset_hands()
+        self.reset_hands(current_hand.player)
         return status
 
     # sows once
@@ -309,9 +309,12 @@ class BoardModel:
         return action
 
     # reset hands to empty and no position
-    def reset_hands(self):
-        self.player_a_hand = Hand(player='a', hole_pos=-1, counter_count=0)
-        self.player_b_hand = Hand(player='b', hole_pos=-1, counter_count=0)
+    def reset_hands(self,player):
+
+        if player == 'a':
+            self.player_a_hand = Hand(player='a', hole_pos=-1, counter_count=0)
+        elif player == 'b':
+            self.player_b_hand = Hand(player='b', hole_pos=-1, counter_count=0)
 
     # update player hands given the current hand
     def update_player_hands_from_current_hand(self, current_hand):
@@ -334,17 +337,27 @@ class BoardModel:
 
         wait_length = self.sowing_speed
 
-        if player == 'a' and self.player_a_sowing_slowed or player == 'b' and self.player_b_sowing_slowed:
-            wait_length = self.sowing_speed * self.slowed_sowing_multiplier
+        if wait_length < 0.001:
+            print("instant")
+            while player == 'a' and self.player_a_sowing_slowed or player == 'b' and self.player_b_sowing_slowed:
+                pass
 
-        while time.time() - start_time < wait_length:
+        else:
             if player == 'a' and self.player_a_sowing_slowed or player == 'b' and self.player_b_sowing_slowed:
                 wait_length = self.sowing_speed * self.slowed_sowing_multiplier
-            else:
-                wait_length = self.sowing_speed
-            pass
 
-            time.sleep(0.01)
+            while time.time() - start_time < wait_length:
+
+                if player == 'a':
+                    print(self.player_a_hand.hole_pos)
+
+                if player == 'a' and self.player_a_sowing_slowed or player == 'b' and self.player_b_sowing_slowed:
+                    wait_length = self.sowing_speed * self.slowed_sowing_multiplier
+                else:
+                    wait_length = self.sowing_speed
+                pass
+
+                time.sleep(0.01)
 
     # TODO: add move saving
     # def append_move(self,):

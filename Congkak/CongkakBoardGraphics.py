@@ -235,7 +235,7 @@ class BoardGraphic(QMainWindow):
         self.move_speed_slider = QSlider(Qt.Orientation.Horizontal, self)
         self.move_speed_slider.setGeometry(200, 450, 400, 50)
         self.move_speed_slider.setMinimum(1)
-        self.move_speed_slider.setMaximum(10)
+        self.move_speed_slider.setMaximum(11)
         self.move_speed_slider.setTickPosition(QSlider.TickPosition.TicksBelow)
         self.move_speed_slider.setTickInterval(1)
 

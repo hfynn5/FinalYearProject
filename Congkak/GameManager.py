@@ -223,4 +223,8 @@ class GameManager:
 
     # updates the sowing speed
     def update_sowing_speed(self, move_per_second):
-        self.board_model.sowing_speed = 1 / move_per_second
+
+        if move_per_second > 10:
+            self.board_model.sowing_speed = 0
+        else:
+            self.board_model.sowing_speed = 1 / move_per_second
