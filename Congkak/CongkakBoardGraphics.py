@@ -1,7 +1,7 @@
 from graphics import *
 from PyQt6.QtWidgets import QApplication, QWidget
 from PyQt6.QtWidgets import *
-from PyQt6.QtGui import QPixmap, QPainter, QPen, QAction, QIcon
+from PyQt6.QtGui import QPixmap, QPainter, QPen, QAction, QIcon, QPalette
 from PyQt6 import QtCore, QtGui, QtWidgets, uic
 from PyQt6.QtCore import QPoint, Qt
 from Congkak.Hand import Hand
@@ -125,10 +125,20 @@ class BoardGraphic(QMainWindow):
         painter = QPainter(self)
         pen = QtGui.QPen()
         pen.setWidth(5)
+        pen.setColor(QtGui.QColor('white'))
+        painter.setPen(pen)
+
+        # brush = QtGui.QBrush(QtGui.QColor(0, 0, 0), QtCore.Qt)
+        # # painter.setBackground(painter, brush)
+        # painter.setBackground(brush)
+
+        # painter.fillRect(0, 0, 800, 600)
+
         pen.setColor(QtGui.QColor('brown'))
         painter.setPen(pen)
 
-        painter.eraseRect(0, 0, 800, 600)
+
+
 
         # storeroom A
         painter.drawEllipse(self.storeroom_a_point, storeroom_diameter, storeroom_diameter)

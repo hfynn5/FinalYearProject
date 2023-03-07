@@ -276,6 +276,8 @@ class BoardModel:
     # returns the action the game manager should do
     def action_to_take(self):
 
+        print("checking action")
+
         print("status a: " + str(self.player_a_status))
         print("status b: " + str(self.player_b_status))
 
@@ -335,11 +337,12 @@ class BoardModel:
                 print("player a has stopped. player b has not: " + str(self.player_b_status) +
                       ". wait for player b to stop")
                 action = self.WAIT
-            elif self.player_a_status == self.STOP_SOWING_B and not self.player_b_status == self.STOP_SOWING_A:
+                self.game_phase = self.SEQUENTIAL_PHASE
+            elif self.player_b_status == self.STOP_SOWING_B and not self.player_a_status == self.STOP_SOWING_A:
                 print("player b has stopped. player a has not: " + str(self.player_a_status) +
                       ". wait for player a to stop")
                 action = self.WAIT
-
+                self.game_phase = self.SEQUENTIAL_PHASE
 
 
             # if ((self.player_a_status == self.PROMPT_SOWING_A and self.player_b_status == self.PROMPT_SOWING_B) or
@@ -413,10 +416,12 @@ class BoardModel:
 
             if player == 'a':
                 while (self.no_of_micromoves_made_player_b < self.no_of_micromoves_made):
+                    if self.game_phase == self.SEQUENTIAL_PHASE: break
                     # print("waiting for b")
                     pass
             elif player == 'b':
                 while (self.no_of_micromoves_made_player_a < self.no_of_micromoves_made):
+                    if self.game_phase == self.SEQUENTIAL_PHASE: break
                     # print("waiting for a")
                     pass
 
@@ -430,31 +435,40 @@ class BoardModel:
             #         pass
 
             if player == 'a' and self.player_a_sowing_slowed or player == 'b' and self.player_b_sowing_slowed:
-                wait_length = self.sowing_speed * slow_speed
+
+                if self.sowing_speed < 0.1:
+                    wait_length = 99999
+                else:
+                    wait_length = self.sowing_speed * slow_speed
             else:
                 wait_length = self.sowing_speed
             pass
 
             while time.time() - start_time < wait_length:
+                print("waot")
                 if player == 'a' and self.player_a_sowing_slowed or player == 'b' and self.player_b_sowing_slowed:
-                    wait_length = self.sowing_speed * slow_speed
+                    if self.sowing_speed < 0.1:
+                        wait_length = 99999
+                    else:
+                        wait_length = self.sowing_speed * slow_speed
                 else:
                     wait_length = self.sowing_speed
-                time.sleep(0.001)
+                # time.sleep(0.001)
 
         elif self.game_phase == self.SEQUENTIAL_PHASE:
 
-            if player == 'a' and self.player_a_sowing_slowed or player == 'b' and self.player_b_sowing_slowed:
-                wait_length = self.sowing_speed * slow_speed
+            # if player == 'a' and self.player_a_sowing_slowed or player == 'b' and self.player_b_sowing_slowed:
+            #     wait_length = self.sowing_speed * slow_speed
 
             while time.time() - start_time < wait_length:
+                pass
+                # print("waot")
+                # if player == 'a' and self.player_a_sowing_slowed or player == 'b' and self.player_b_sowing_slowed:
+                #     wait_length = self.sowing_speed * slow_speed
+                # else:
+                #     wait_length = self.sowing_speed
 
-                if player == 'a' and self.player_a_sowing_slowed or player == 'b' and self.player_b_sowing_slowed:
-                    wait_length = self.sowing_speed * slow_speed
-                else:
-                    wait_length = self.sowing_speed
-
-                time.sleep(0.001)
+                # time.sleep(0.001)
 
             pass
 
