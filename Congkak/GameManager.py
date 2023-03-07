@@ -210,11 +210,6 @@ class GameManager:
         self.board_graphic.set_enable_player_inputs(player=player,
                                                     enable_list=self.board_model.does_hole_have_counter(player))
 
-        # if player == 'a':
-        #     self.board_graphic.set_enable_player_inputs(player='a', enable_list=self.board_model.does_hole_have_counter('a'))
-        # elif player == 'b':
-        #     self.board_graphic.set_enable_player_inputs(player='b', enable_list=self.board_model.does_hole_have_counter('b'))
-
     # updates board graphics constantly
     def update_board_graphics_constantly(self):
         while self.board_graphic.active:
@@ -225,6 +220,6 @@ class GameManager:
     def update_sowing_speed(self, move_per_second):
 
         if move_per_second > 10:
-            self.board_model.sowing_speed = 0
+            self.board_model.sowing_speed = 0.001
         else:
             self.board_model.sowing_speed = 1 / move_per_second

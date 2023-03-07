@@ -48,10 +48,14 @@ class BoardModel:
         self.current_player_turn = ''
 
         self.sowing_speed = 0
-        self.slowed_sowing_multiplier = 100000
+        self.slowed_sowing_multiplier = 10  # if more than 10, slowing is infinite
 
         self.player_a_sowing_slowed = False
         self.player_b_sowing_slowed = False
+
+        self.no_of_micromoves_made = 0
+        self.no_of_micromoves_made_player_a = 0
+        self.no_of_micromoves_made_player_b = 0
 
         self.moves_made = []
 
@@ -265,10 +269,19 @@ class BoardModel:
         if hand.player == 'b':
             self.player_b_status = status
 
+
+
         return status
 
     # returns the action the game manager should do
     def action_to_take(self):
+
+        print("status a: " + str(self.player_a_status))
+        print("status b: " + str(self.player_b_status))
+
+        print("micromove a: " + str(self.no_of_micromoves_made_player_a))
+        print("micromove b: " + str(self.no_of_micromoves_made_player_b))
+
         action = self.ERROR
         if self.game_phase == self.SEQUENTIAL_PHASE:
 
@@ -289,22 +302,77 @@ class BoardModel:
                     action = self.PROMPT_SOWING_A
 
         elif self.game_phase == self.SIMULTANEOUS_PHASE:
-            if self.player_a_status == self.STOP_SOWING_A and self.player_b_status == self.STOP_SOWING_B:
+
+            if self.player_a_status == self.PROMPT_SOWING_A and self.player_b_status == self.PROMPT_SOWING_B:
+                print("both are prompted")
+                action = self.PROMPT_SOWING_BOTH
+            elif self.player_a_status == self.STOP_SOWING_A and self.player_b_status == self.STOP_SOWING_B and \
+                    self.no_of_micromoves_made_player_a == self.no_of_micromoves_made_player_b:
+                print("both stopped at the same time. prompting both")
+                action = self.PROMPT_SOWING_BOTH
+            elif self.player_a_status == self.TIKAM_A and self.player_b_status == self.TIKAM_B:
+                print("both tikam. prompting both. honestly, this should never be printed so you fucked up")
+                action = self.PROMPT_SOWING_BOTH
+            elif self.player_a_status == self.STOP_SOWING_A and self.player_b_status == self.STOP_SOWING_B and not \
+                    self.no_of_micromoves_made_player_a == self.no_of_micromoves_made_player_b:
+                print("sequential phase")
                 self.game_phase = self.SEQUENTIAL_PHASE
                 if self.last_active_player == 'a':
+                    print("prompt player b")
                     action = self.PROMPT_SOWING_B
                 elif self.last_active_player == 'b':
+                    print("prompt player a")
                     action = self.PROMPT_SOWING_A
-            elif self.player_a_status == self.STOP_SOWING_A and not self.player_b_status == self.STOP_SOWING_B or \
-                    self.player_b_status == self.STOP_SOWING_B and not self.player_a_status == self.STOP_SOWING_A:
-                self.game_phase = self.SEQUENTIAL_PHASE
-                action = self.WAIT
-            elif self.player_a_status == self.PROMPT_SOWING_A and self.player_b_status == self.PROMPT_SOWING_B:
-                action = self.PROMPT_SOWING_BOTH
+
             elif self.player_a_status == self.PROMPT_SOWING_A:
+                print("prompt player a")
                 action = self.PROMPT_SOWING_A
             elif self.player_b_status == self.PROMPT_SOWING_B:
+                print("prompt player b")
                 action = self.PROMPT_SOWING_B
+
+            elif self.player_a_status == self.STOP_SOWING_A and not self.player_b_status == self.STOP_SOWING_B:
+                print("player a has stopped. player b has not: " + str(self.player_b_status) +
+                      ". wait for player b to stop")
+                action = self.WAIT
+            elif self.player_a_status == self.STOP_SOWING_B and not self.player_b_status == self.STOP_SOWING_A:
+                print("player b has stopped. player a has not: " + str(self.player_a_status) +
+                      ". wait for player a to stop")
+                action = self.WAIT
+
+
+
+            # if ((self.player_a_status == self.PROMPT_SOWING_A and self.player_b_status == self.PROMPT_SOWING_B) or
+            #         (self.player_a_status == self.STOP_SOWING_A and self.player_b_status == self.STOP_SOWING_B) or
+            #         (self.player_a_status == self.TIKAM_A and self.player_b_status == self.TIKAM_B) and
+            #         self.no_of_micromoves_made_player_a == self.no_of_micromoves_made_player_b):
+            #     action = self.PROMPT_SOWING_BOTH
+            # elif (self.player_a_status == self.STOP_SOWING_A and self.player_b_status == self.STOP_SOWING_B) or \
+            #         (self.player_a_status == self.TIKAM_A and self.player_b_status == self.STOP_SOWING_B) or \
+            #         (self.player_a_status == self.STOP_SOWING_A and self.player_b_status == self.TIKAM_B):
+            #
+            #     if self.no_of_micromoves_made_player_a == self.no_of_micromoves_made_player_b:
+            #         action = self.PROMPT_SOWING_BOTH
+            #     else:
+            #         self.game_phase = self.SEQUENTIAL_PHASE
+            #         if self.last_active_player == 'a':
+            #             action = self.PROMPT_SOWING_B
+            #         elif self.last_active_player == 'b':
+            #             action = self.PROMPT_SOWING_A
+            #
+            # elif self.player_a_status == self.STOP_SOWING_A and not self.player_b_status == self.STOP_SOWING_B or \
+            #         self.player_b_status == self.STOP_SOWING_B and not self.player_a_status == self.STOP_SOWING_A:
+            #
+            #     if self.no_of_micromoves_made_player_a == self.no_of_micromoves_made_player_b:
+            #         action = self.PROMPT_SOWING_BOTH
+            #     else:
+            #         self.game_phase = self.SEQUENTIAL_PHASE
+            #         action = self.WAIT
+            #
+            # elif self.player_a_status == self.PROMPT_SOWING_A:
+            #     action = self.PROMPT_SOWING_A
+            # elif self.player_b_status == self.PROMPT_SOWING_B:
+            #     action = self.PROMPT_SOWING_B
 
         return action
 
@@ -336,28 +404,66 @@ class BoardModel:
         start_time = time.time()
 
         wait_length = self.sowing_speed
+        slow_speed = self.slowed_sowing_multiplier
 
-        if wait_length < 0.001:
-            print("instant")
-            while player == 'a' and self.player_a_sowing_slowed or player == 'b' and self.player_b_sowing_slowed:
-                pass
+        if slow_speed >= 10:
+            slow_speed = 99999
 
-        else:
+        if self.game_phase == self.SIMULTANEOUS_PHASE:
+
+            if player == 'a':
+                while (self.no_of_micromoves_made_player_b < self.no_of_micromoves_made):
+                    # print("waiting for b")
+                    pass
+            elif player == 'b':
+                while (self.no_of_micromoves_made_player_a < self.no_of_micromoves_made):
+                    # print("waiting for a")
+                    pass
+
+            # if player == 'a':
+            #     while self.no_of_micromoves_made_player_a - self.no_of_micromoves_made_player_b > 0:
+            #         # print("waiting for b")
+            #         pass
+            # elif player == 'b':
+            #     while self.no_of_micromoves_made_player_b - self.no_of_micromoves_made_player_a > 0:
+            #         # print("waiting for a")
+            #         pass
+
             if player == 'a' and self.player_a_sowing_slowed or player == 'b' and self.player_b_sowing_slowed:
-                wait_length = self.sowing_speed * self.slowed_sowing_multiplier
+                wait_length = self.sowing_speed * slow_speed
+            else:
+                wait_length = self.sowing_speed
+            pass
+
+            while time.time() - start_time < wait_length:
+                if player == 'a' and self.player_a_sowing_slowed or player == 'b' and self.player_b_sowing_slowed:
+                    wait_length = self.sowing_speed * slow_speed
+                else:
+                    wait_length = self.sowing_speed
+                time.sleep(0.001)
+
+        elif self.game_phase == self.SEQUENTIAL_PHASE:
+
+            if player == 'a' and self.player_a_sowing_slowed or player == 'b' and self.player_b_sowing_slowed:
+                wait_length = self.sowing_speed * slow_speed
 
             while time.time() - start_time < wait_length:
 
-                if player == 'a':
-                    print(self.player_a_hand.hole_pos)
-
                 if player == 'a' and self.player_a_sowing_slowed or player == 'b' and self.player_b_sowing_slowed:
-                    wait_length = self.sowing_speed * self.slowed_sowing_multiplier
+                    wait_length = self.sowing_speed * slow_speed
                 else:
                     wait_length = self.sowing_speed
-                pass
 
-                time.sleep(0.01)
+                time.sleep(0.001)
+
+            pass
+
+        if player == 'a':
+            self.no_of_micromoves_made_player_a += 1
+        elif player == 'b':
+            self.no_of_micromoves_made_player_b += 1
+
+        self.no_of_micromoves_made = max(self.no_of_micromoves_made_player_a, self.no_of_micromoves_made_player_b)
 
     # TODO: add move saving
     # def append_move(self,):
