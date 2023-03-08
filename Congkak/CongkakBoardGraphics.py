@@ -9,6 +9,7 @@ import sys
 
 
 class BoardGraphic(QMainWindow):
+
     def __init__(self):
         super().__init__()
 
@@ -42,6 +43,10 @@ class BoardGraphic(QMainWindow):
 
         self.move_speed_slider = QSlider()
         self.play_button = QPushButton()
+
+        self.new_game_button_action = QAction()
+        self.save_game_button_action = QAction()
+        self.load_game_button_action = QAction()
 
         self.acceptDrops()
         # set the title
@@ -136,9 +141,6 @@ class BoardGraphic(QMainWindow):
 
         pen.setColor(QtGui.QColor('brown'))
         painter.setPen(pen)
-
-
-
 
         # storeroom A
         painter.drawEllipse(self.storeroom_a_point, storeroom_diameter, storeroom_diameter)
@@ -258,28 +260,23 @@ class BoardGraphic(QMainWindow):
     # creates the menus
     def create_menus(self):
 
-        menu_bar = self.menuBar()
-
         # save games?
-        file_menu = menu_bar.addMenu("File")
+        file_menu = self.menuBar().addMenu("File")
 
-        button_action = QAction("New Game", self)
-        # button_action.setStatusTip("This is your button")
-        # button_action.triggered.connect(self.onMyToolBarButtonClick)
-        # button_action.setCheckable(True)
-        file_menu.addAction(button_action)
+        self.new_game_button_action = QAction("New Game", self)
+        self.new_game_button_action.setStatusTip("Create a new game from the start")
+        file_menu.addAction(self.new_game_button_action)
 
-        button_action = QAction("", self)
-        file_menu.addAction(button_action)
+        self.save_game_button_action = QAction("Save Game", self)
+        self.save_game_button_action.setStatusTip("Save the game to a text file")
+        file_menu.addAction(self.save_game_button_action)
 
-        button_action = QAction("Save Game", self)
-        file_menu.addAction(button_action)
-
-        button_action = QAction("Load Game", self)
-        file_menu.addAction(button_action)
+        self.load_game_button_action = QAction("Load Game", self)
+        self.load_game_button_action.setStatusTip("Load a game from a text file")
+        file_menu.addAction(self.load_game_button_action)
 
         # edit games?
-        edit_menu = menu_bar.addMenu("Edit")
+        edit_menu = self.menuBar().addMenu("Edit")
 
         submenu = edit_menu.addMenu("Edit Player")
 
@@ -295,15 +292,15 @@ class BoardGraphic(QMainWindow):
         button_action = QAction("Change Speed", self)
         edit_menu.addAction(button_action)
 
-        train_menu = menu_bar.addMenu("Training")
+        train_menu = self.menuBar().addMenu("Training")
 
         # views
-        view_menu = menu_bar.addMenu("View")
+        view_menu = self.menuBar().addMenu("View")
 
         button_action = QAction("idk", self)
         view_menu.addAction(button_action)
         #
-        game_menu = menu_bar.addMenu("Game")
+        game_menu = self.menuBar().addMenu("Game")
 
         button_action = QAction("Run Multiple Games...", self)
         game_menu.addAction(button_action)
@@ -311,9 +308,9 @@ class BoardGraphic(QMainWindow):
         button_action = QAction("Run Round Robin Tournament...", self)
         game_menu.addAction(button_action)
 
-        help_menu = menu_bar.addMenu("Help")
+        help_menu = self.menuBar().addMenu("Help")
 
-        about_menu = menu_bar.addMenu("About")
+        about_menu = self.menuBar().addMenu("About")
 
     # updates the labels
     def update_labels(self, house_a_values, house_b_values,

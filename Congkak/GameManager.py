@@ -128,6 +128,10 @@ class GameManager:
             valueChanged.connect(lambda value=self.board_graphic.move_speed_slider.value():
                                  self.update_sowing_speed(value))
 
+        self.board_graphic.save_game_button_action.triggered.connect(lambda checked: self.save_moves())
+
+        self.board_graphic.menuBar()
+
         # start constantly updating graphics
         self.start_worker_graphic_updater()
 
@@ -148,6 +152,8 @@ class GameManager:
 
         worker = Worker(self.sow, player=player, hole=hole)
         self.threadpool.start(worker)
+
+    # TODO: disable play button if sequential mode or choices are not made.
 
     # starts a worker for each hand
     def start_worker_simultaneous_sowing(self, hole_a, hole_b):
@@ -173,12 +179,14 @@ class GameManager:
 
         action = self.board_model.action_to_take()
 
-        print("player: " + player + " action: " + str(action))
+        # print("player: " + player + " action: " + str(action))
+        # print("player a: " + str(self.board_model.player_a_status))
+        # print("player b: " + str(self.board_model.player_b_status))
 
-        if action == BoardModel.PROMPT_SOWING_A:
+        if action == BoardModel.PROMPT_SOWING_A and not self.board_model.player_a_status == BoardModel.CONTINUE_SOWING:
             self.prompt_player('a')
             self.board_model.player_b_sowing_slowed = True
-        elif action == BoardModel.PROMPT_SOWING_B:
+        elif action == BoardModel.PROMPT_SOWING_B and not self.board_model.player_b_status == BoardModel.CONTINUE_SOWING:
             self.prompt_player('b')
             self.board_model.player_a_sowing_slowed = True
         elif action == BoardModel.PROMPT_SOWING_BOTH:
@@ -188,8 +196,6 @@ class GameManager:
         elif action == BoardModel.GAME_END:
             print("Game over")
             self.end_game()
-
-        self.save_moves()
 
     # ends the game
     def end_game(self):

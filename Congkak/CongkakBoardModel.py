@@ -273,13 +273,13 @@ class BoardModel:
     # returns the action the game manager should do
     def action_to_take(self):
 
-        print("\n\nchecking action")
-
-        print("status a: " + str(self.player_a_status))
-        print("status b: " + str(self.player_b_status))
-
-        print("micromove a: " + str(self.no_of_micromoves_made_player_a))
-        print("micromove b: " + str(self.no_of_micromoves_made_player_b))
+        # print("\n\nchecking action")
+        #
+        # print("status a: " + str(self.player_a_status))
+        # print("status b: " + str(self.player_b_status))
+        #
+        # print("micromove a: " + str(self.no_of_micromoves_made_player_a))
+        # print("micromove b: " + str(self.no_of_micromoves_made_player_b))
 
         action = self.ERROR
         if self.game_phase == self.SEQUENTIAL_PHASE:
@@ -377,8 +377,6 @@ class BoardModel:
 
         if self.game_phase == self.SIMULTANEOUS_PHASE:
 
-            print("simul")
-
             if player == 'a':
                 while self.no_of_micromoves_made_player_b < self.no_of_micromoves_made:
                     if self.game_phase == self.SEQUENTIAL_PHASE: break
@@ -412,8 +410,6 @@ class BoardModel:
 
         elif self.game_phase == self.SEQUENTIAL_PHASE:
 
-            print("seq")
-
             while time.time() - start_time < wait_length:
                 # print(wait)
                 pass
@@ -426,7 +422,6 @@ class BoardModel:
 
         self.no_of_micromoves_made = max(self.no_of_micromoves_made_player_a, self.no_of_micromoves_made_player_b)
 
-    # TODO: add move saving
     def append_move(self, player_a_move, player_b_move):
         if not (type(player_a_move) == int) or 1 <= player_a_move <= 7:
             player_a_move = ''
