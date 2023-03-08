@@ -2,8 +2,8 @@ import sys
 import time
 from Congkak.Hand import Hand
 
-class BoardModel:
 
+class BoardModel:
     CONTINUE_SOWING = 1
     STOP_SOWING_A = 21
     STOP_SOWING_B = 22
@@ -83,7 +83,6 @@ class BoardModel:
         self.wait_between_micromoves(current_hand.player)
 
         while status == self.CONTINUE_SOWING:
-
             current_hand = self.sow_once(current_hand)
 
             self.update_player_hands_from_current_hand(current_hand)
@@ -344,7 +343,7 @@ class BoardModel:
         return action
 
     # reset hands to empty and no position
-    def reset_hands(self,player):
+    def reset_hands(self, player):
 
         if player == 'a':
             self.player_a_hand = Hand(player='a', hole_pos=-1, counter_count=0)
@@ -381,12 +380,12 @@ class BoardModel:
             print("simul")
 
             if player == 'a':
-                while (self.no_of_micromoves_made_player_b < self.no_of_micromoves_made):
+                while self.no_of_micromoves_made_player_b < self.no_of_micromoves_made:
                     if self.game_phase == self.SEQUENTIAL_PHASE: break
                     # print("waiting for b")
                     pass
             elif player == 'b':
-                while (self.no_of_micromoves_made_player_a < self.no_of_micromoves_made):
+                while self.no_of_micromoves_made_player_a < self.no_of_micromoves_made:
                     if self.game_phase == self.SEQUENTIAL_PHASE: break
                     # print("waiting for a")
                     pass
@@ -429,9 +428,9 @@ class BoardModel:
 
     # TODO: add move saving
     def append_move(self, player_a_move, player_b_move):
-        if not(type(player_a_move) == int) or 1 <= player_a_move <= 7:
+        if not (type(player_a_move) == int) or 1 <= player_a_move <= 7:
             player_a_move = ''
-        if not(type(player_b_move) == int) or 1 <= player_b_move <= 7:
+        if not (type(player_b_move) == int) or 1 <= player_b_move <= 7:
             player_b_move = ''
 
         move_tuple = (player_a_move, player_b_move)
@@ -463,4 +462,3 @@ class BoardModel:
         print("house b: " + str(self.house_b_values))
         print("store a: " + str(self.storeroom_a_value))
         print("store b: " + str(self.storeroom_b_value))
-

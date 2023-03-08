@@ -189,6 +189,8 @@ class GameManager:
             print("Game over")
             self.end_game()
 
+        self.save_moves()
+
     # ends the game
     def end_game(self):
         if self.board_model.storeroom_a_value == self.board_model.storeroom_b_value:
