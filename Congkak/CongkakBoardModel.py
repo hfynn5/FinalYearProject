@@ -269,14 +269,12 @@ class BoardModel:
         if hand.player == 'b':
             self.player_b_status = status
 
-
-
         return status
 
     # returns the action the game manager should do
     def action_to_take(self):
 
-        print("checking action")
+        print("\n\nchecking action")
 
         print("status a: " + str(self.player_a_status))
         print("status b: " + str(self.player_b_status))
@@ -326,13 +324,6 @@ class BoardModel:
                     print("prompt player a")
                     action = self.PROMPT_SOWING_A
 
-            elif self.player_a_status == self.PROMPT_SOWING_A:
-                print("prompt player a")
-                action = self.PROMPT_SOWING_A
-            elif self.player_b_status == self.PROMPT_SOWING_B:
-                print("prompt player b")
-                action = self.PROMPT_SOWING_B
-
             elif self.player_a_status == self.STOP_SOWING_A and not self.player_b_status == self.STOP_SOWING_B:
                 print("player a has stopped. player b has not: " + str(self.player_b_status) +
                       ". wait for player b to stop")
@@ -344,39 +335,12 @@ class BoardModel:
                 action = self.WAIT
                 self.game_phase = self.SEQUENTIAL_PHASE
 
-
-            # if ((self.player_a_status == self.PROMPT_SOWING_A and self.player_b_status == self.PROMPT_SOWING_B) or
-            #         (self.player_a_status == self.STOP_SOWING_A and self.player_b_status == self.STOP_SOWING_B) or
-            #         (self.player_a_status == self.TIKAM_A and self.player_b_status == self.TIKAM_B) and
-            #         self.no_of_micromoves_made_player_a == self.no_of_micromoves_made_player_b):
-            #     action = self.PROMPT_SOWING_BOTH
-            # elif (self.player_a_status == self.STOP_SOWING_A and self.player_b_status == self.STOP_SOWING_B) or \
-            #         (self.player_a_status == self.TIKAM_A and self.player_b_status == self.STOP_SOWING_B) or \
-            #         (self.player_a_status == self.STOP_SOWING_A and self.player_b_status == self.TIKAM_B):
-            #
-            #     if self.no_of_micromoves_made_player_a == self.no_of_micromoves_made_player_b:
-            #         action = self.PROMPT_SOWING_BOTH
-            #     else:
-            #         self.game_phase = self.SEQUENTIAL_PHASE
-            #         if self.last_active_player == 'a':
-            #             action = self.PROMPT_SOWING_B
-            #         elif self.last_active_player == 'b':
-            #             action = self.PROMPT_SOWING_A
-            #
-            # elif self.player_a_status == self.STOP_SOWING_A and not self.player_b_status == self.STOP_SOWING_B or \
-            #         self.player_b_status == self.STOP_SOWING_B and not self.player_a_status == self.STOP_SOWING_A:
-            #
-            #     if self.no_of_micromoves_made_player_a == self.no_of_micromoves_made_player_b:
-            #         action = self.PROMPT_SOWING_BOTH
-            #     else:
-            #         self.game_phase = self.SEQUENTIAL_PHASE
-            #         action = self.WAIT
-            #
-            # elif self.player_a_status == self.PROMPT_SOWING_A:
-            #     action = self.PROMPT_SOWING_A
-            # elif self.player_b_status == self.PROMPT_SOWING_B:
-            #     action = self.PROMPT_SOWING_B
-
+            elif self.player_a_status == self.PROMPT_SOWING_A:
+                print("prompt player a 2")
+                action = self.PROMPT_SOWING_A
+            elif self.player_b_status == self.PROMPT_SOWING_B:
+                print("prompt player b 2")
+                action = self.PROMPT_SOWING_B
         return action
 
     # reset hands to empty and no position
@@ -414,6 +378,8 @@ class BoardModel:
 
         if self.game_phase == self.SIMULTANEOUS_PHASE:
 
+            print("simul")
+
             if player == 'a':
                 while (self.no_of_micromoves_made_player_b < self.no_of_micromoves_made):
                     if self.game_phase == self.SEQUENTIAL_PHASE: break
@@ -424,15 +390,6 @@ class BoardModel:
                     if self.game_phase == self.SEQUENTIAL_PHASE: break
                     # print("waiting for a")
                     pass
-
-            # if player == 'a':
-            #     while self.no_of_micromoves_made_player_a - self.no_of_micromoves_made_player_b > 0:
-            #         # print("waiting for b")
-            #         pass
-            # elif player == 'b':
-            #     while self.no_of_micromoves_made_player_b - self.no_of_micromoves_made_player_a > 0:
-            #         # print("waiting for a")
-            #         pass
 
             if player == 'a' and self.player_a_sowing_slowed or player == 'b' and self.player_b_sowing_slowed:
 
@@ -456,7 +413,10 @@ class BoardModel:
 
         elif self.game_phase == self.SEQUENTIAL_PHASE:
 
+            print("seq")
+
             while time.time() - start_time < wait_length:
+                # print(wait)
                 pass
             pass
 
