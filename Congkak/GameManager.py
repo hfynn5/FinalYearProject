@@ -237,3 +237,9 @@ class GameManager:
             self.board_model.sowing_speed = 0
         else:
             self.board_model.sowing_speed = 1 / move_per_second
+
+    def save_moves(self):
+        file = open("moves.txt",'w')
+        move_string = str(self.board_model.moves_made)
+        file.write(move_string)
+        file.close()
