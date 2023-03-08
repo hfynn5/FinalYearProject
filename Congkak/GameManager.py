@@ -140,12 +140,21 @@ class GameManager:
 
     # makes worker to start sowing
     def start_worker_sowing(self, player, hole):
+
+        if player == 'a':
+            self.board_model.append_move(hole, 0)
+        elif player == 'b':
+            self.board_model.append_move(0, hole)
+
         worker = Worker(self.sow, player=player, hole=hole)
         self.threadpool.start(worker)
 
     # starts a worker for each hand
     def start_worker_simultaneous_sowing(self, hole_a, hole_b):
         self.autoplay_hands = True
+
+        self.board_model.append_move(hole_a, hole_b)
+
         worker_a = Worker(self.sow, player='a', hole=hole_a)
         self.threadpool.start(worker_a)
 
@@ -188,6 +197,11 @@ class GameManager:
             print("Player A wins")
         elif self.board_model.storeroom_b_value > self.board_model.storeroom_a_value:
             print("Player B wins")
+
+        print("moves made: ")
+
+        for move in self.board_model.moves_made:
+            print(move)
 
     # decides what action the hole button should take
     def hole_button_action(self, player, hole):

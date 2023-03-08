@@ -445,7 +445,6 @@ class BoardModel:
             pass
 
             while time.time() - start_time < wait_length:
-                print("waot")
                 if player == 'a' and self.player_a_sowing_slowed or player == 'b' and self.player_b_sowing_slowed:
                     if self.sowing_speed < 0.1:
                         wait_length = 99999
@@ -457,19 +456,8 @@ class BoardModel:
 
         elif self.game_phase == self.SEQUENTIAL_PHASE:
 
-            # if player == 'a' and self.player_a_sowing_slowed or player == 'b' and self.player_b_sowing_slowed:
-            #     wait_length = self.sowing_speed * slow_speed
-
             while time.time() - start_time < wait_length:
                 pass
-                # print("waot")
-                # if player == 'a' and self.player_a_sowing_slowed or player == 'b' and self.player_b_sowing_slowed:
-                #     wait_length = self.sowing_speed * slow_speed
-                # else:
-                #     wait_length = self.sowing_speed
-
-                # time.sleep(0.001)
-
             pass
 
         if player == 'a':
@@ -480,7 +468,15 @@ class BoardModel:
         self.no_of_micromoves_made = max(self.no_of_micromoves_made_player_a, self.no_of_micromoves_made_player_b)
 
     # TODO: add move saving
-    # def append_move(self,):
+    def append_move(self, player_a_move, player_b_move):
+        if not(type(player_a_move) == int) or 1 <= player_a_move <= 7:
+            player_a_move = ''
+        if not(type(player_b_move) == int) or 1 <= player_b_move <= 7:
+            player_b_move = ''
+
+        move_tuple = (player_a_move, player_b_move)
+
+        self.moves_made.append(move_tuple)
 
     def does_hole_have_counter(self, player):
 
