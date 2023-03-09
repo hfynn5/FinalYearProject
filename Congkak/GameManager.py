@@ -102,6 +102,9 @@ class GameManager:
 
         self.autoplay_hands = False
 
+        self.loading_game = False
+        self.loaded_moves = []
+
         # declare threadpool
         self.threadpool = QThreadPool()
         print("Multithreading with maximum %d threads" % self.threadpool.maxThreadCount())
@@ -113,6 +116,14 @@ class GameManager:
         App = QApplication(sys.argv)
         self.board_graphic = BoardGraphic()
 
+        self.connect_inputs_to_functions()
+
+        # start constantly updating graphics
+        self.start_worker_graphic_updater()
+
+        sys.exit(App.exec())
+
+    def connect_inputs_to_functions(self):
         # connect input with corresponding functions
         for i, button in enumerate(self.board_graphic.house_a_buttons):
             button.clicked.connect(lambda checked, value=i + 11: self.hole_button_action('a', value))
@@ -129,11 +140,7 @@ class GameManager:
                                  self.update_sowing_speed(value))
 
         self.board_graphic.save_game_button_action.triggered.connect(lambda checked: self.save_moves())
-
-        # start constantly updating graphics
-        self.start_worker_graphic_updater()
-
-        sys.exit(App.exec())
+        self.board_graphic.load_game_button_action.triggered.connect(lambda checked: self.load_moves())
 
     # makes worker constantly update graphics
     def start_worker_graphic_updater(self):
@@ -168,6 +175,8 @@ class GameManager:
         worker_b.signals.finished.connect(self.next_action)
         self.threadpool.start(worker_b)
 
+    # def
+
     # iterate sowing in board model
     def sow(self, player, hole):
         false_list = [False,False,False,False,False,False,False]
@@ -178,11 +187,9 @@ class GameManager:
 
         self.board_model.iterate_sowing(new_hand)
 
-
-
     def next_action(self):
 
-        print("next action")
+        # print("next action")
 
         action = self.board_model.action_to_take()
 
@@ -261,3 +268,20 @@ class GameManager:
 
         file.write("END")
         file.close()
+
+    # TODO: add game loading
+
+    def load_moves(self):
+
+        file = open("moves.txt",'r')
+
+        for line in file:
+            # print(line)
+
+            if not (line == 'END'):
+                self.loaded_moves.append(eval(line))
+
+        print(self.loaded_moves)
+        file.close()
+
+
