@@ -130,8 +130,6 @@ class GameManager:
 
         self.board_graphic.save_game_button_action.triggered.connect(lambda checked: self.save_moves())
 
-        self.board_graphic.menuBar()
-
         # start constantly updating graphics
         self.start_worker_graphic_updater()
 
@@ -151,6 +149,7 @@ class GameManager:
             self.board_model.append_move(0, hole)
 
         worker = Worker(self.sow, player=player, hole=hole)
+        worker.signals.finished.connect(self.next_action)
         self.threadpool.start(worker)
 
     # TODO: disable play button if sequential mode or choices are not made.
@@ -162,9 +161,11 @@ class GameManager:
         self.board_model.append_move(hole_a, hole_b)
 
         worker_a = Worker(self.sow, player='a', hole=hole_a)
+        worker_a.signals.finished.connect(self.next_action)
         self.threadpool.start(worker_a)
 
         worker_b = Worker(self.sow, player='b', hole=hole_b)
+        worker_b.signals.finished.connect(self.next_action)
         self.threadpool.start(worker_b)
 
     # iterate sowing in board model
@@ -176,6 +177,12 @@ class GameManager:
         new_hand = Hand(player=player, hole_pos=hole, counter_count=0)
 
         self.board_model.iterate_sowing(new_hand)
+
+
+
+    def next_action(self):
+
+        print("next action")
 
         action = self.board_model.action_to_take()
 
@@ -248,6 +255,9 @@ class GameManager:
 
     def save_moves(self):
         file = open("moves.txt",'w')
-        move_string = str(self.board_model.moves_made)
-        file.write(move_string)
+
+        for move in self.board_model.moves_made:
+            file.write(str(move) + '\n')
+
+        file.write("END")
         file.close()
