@@ -364,6 +364,27 @@ class BoardModel:
         elif player == 'b':
             self.player_b_hand.hole_pos = pos
 
+    def reset_game(self):
+        self.reset_hands('a')
+        self.reset_hands('b')
+
+        self.house_a_values = [7, 7, 7, 7, 7, 7, 7]
+        self.house_b_values = [7, 7, 7, 7, 7, 7, 7]
+
+        self.storeroom_a_value = 0
+        self.storeroom_b_value = 0
+
+        self.player_a_status = self.STOP_SOWING_A
+        self.player_b_status = self.STOP_SOWING_B
+        self.active_players = []
+        self.last_active_player = ''
+
+        self.game_phase = self.SIMULTANEOUS_PHASE
+
+        self.no_of_micromoves_made = 0
+        self.no_of_micromoves_made_player_a = 0
+        self.no_of_micromoves_made_player_b = 0
+
     # wait time
     def wait_between_micromoves(self, player):
 

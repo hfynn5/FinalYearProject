@@ -104,6 +104,7 @@ class GameManager:
 
         self.loading_game = False
         self.loaded_moves = []
+        self.move_counter = 0
 
         # declare threadpool
         self.threadpool = QThreadPool()
@@ -198,15 +199,26 @@ class GameManager:
         # print("player b: " + str(self.board_model.player_b_status))
 
         if action == BoardModel.PROMPT_SOWING_A and not self.board_model.player_a_status == BoardModel.CONTINUE_SOWING:
-            self.prompt_player('a')
-            self.board_model.player_b_sowing_slowed = True
+
+            if self.loading_game:
+                self.do_next_move_from_loaded_moves(action)
+            else:
+                self.prompt_player('a')
+                self.board_model.player_b_sowing_slowed = True
+
         elif action == BoardModel.PROMPT_SOWING_B and not self.board_model.player_b_status == BoardModel.CONTINUE_SOWING:
-            self.prompt_player('b')
-            self.board_model.player_a_sowing_slowed = True
+            if self.loading_game:
+                self.do_next_move_from_loaded_moves(action)
+            else:
+                self.prompt_player('b')
+                self.board_model.player_a_sowing_slowed = True
         elif action == BoardModel.PROMPT_SOWING_BOTH:
-            self.autoplay_hands = False
-            self.prompt_player('a')
-            self.prompt_player('b')
+            if self.loading_game:
+                self.do_next_move_from_loaded_moves(action)
+            else:
+                self.autoplay_hands = False
+                self.prompt_player('a')
+                self.prompt_player('b')
         elif action == BoardModel.GAME_END:
             print("Game over")
             self.end_game()
@@ -273,15 +285,45 @@ class GameManager:
 
     def load_moves(self):
 
-        file = open("moves.txt",'r')
+        self.board_model.reset_game()
+
+        self.loading_game = True
+
+        file = open("moves.txt", 'r')
 
         for line in file:
-            # print(line)
 
             if not (line == 'END'):
                 self.loaded_moves.append(eval(line))
-
+            else:
+                break
         print(self.loaded_moves)
         file.close()
+
+        self.move_counter = 0
+        self.do_next_move_from_loaded_moves(BoardModel.PROMPT_SOWING_BOTH)
+
+    def do_next_move_from_loaded_moves(self, action):
+
+        if self.move_counter < len(self.loaded_moves):
+            current_move = self.loaded_moves[self.move_counter]
+
+            if BoardModel.PROMPT_SOWING_A and not current_move[0] == 0 and current_move[1] == 0:
+                self.start_worker_sowing('a', current_move[0])
+            elif BoardModel.PROMPT_SOWING_B and not current_move[1] == 0 and current_move[0] == 0:
+                self.start_worker_sowing('b', current_move[1])
+            elif BoardModel.PROMPT_SOWING_BOTH and not current_move[0] == 0 and not current_move[1] == 0:
+                self.start_worker_simultaneous_sowing(current_move[0], current_move[1])
+            else:
+                print("error with loading move. action: " + str(action) + " Move: " + str(current_move))
+        else:
+            print("Game Loaded")
+            self.loading_game = False
+
+        self.move_counter += 1
+
+        if self.move_counter >= len(self.loaded_moves):
+            print("Game Loaded")
+            self.loading_game = False
 
 
