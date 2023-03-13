@@ -153,6 +153,7 @@ class GameManager:
 
         self.board_graphic.save_game_button_action.triggered.connect(lambda checked: self.save_moves())
         self.board_graphic.load_game_button_action.triggered.connect(lambda checked: self.load_moves())
+        self.board_graphic.new_game_button_action.triggered.connect(lambda checked: self.new_game())
 
         self.board_graphic.player_a_dropdown. \
             activated.connect(lambda
@@ -180,8 +181,6 @@ class GameManager:
         worker = Worker(self.sow, player=player, hole=hole)
         worker.signals.finished.connect(self.next_action)
         self.threadpool.start(worker)
-
-    # TODO: disable play button if sequential mode or choices are not made.
 
     # starts a worker for each hand
     def start_worker_simultaneous_sowing(self, hole_a, hole_b):
@@ -250,7 +249,7 @@ class GameManager:
                 self.autoplay_hands = False
                 self.prompt_player('a')
                 self.prompt_player('b')
-                self.board_graphic.set_enable_play_button(False)
+                self.board_graphic.set_enable_play_button(True)
         elif action == BoardModel.GAME_END:
             print("Game over")
             self.end_game()
@@ -292,7 +291,6 @@ class GameManager:
     def prompt_player(self, player):
 
         available_moves = self.board_model.available_moves(player)
-        print("available moves: " + str(available_moves))
 
         if player == 'a':
             if self.player_a_agent == 'user':
@@ -301,23 +299,12 @@ class GameManager:
             else:
                 self.choosing_hole_action(player=player, hole=self.prompt_agent_for_input(player))
 
-            # elif self.player_a_agent == 'random':
-            #     hole = RandomAgent.choose_move(available_moves) + 10
-            #     print("random has chosen: " + str(hole))
-            #     self.choosing_hole_action(player=player, hole=hole)
-            #     # self.start_worker_sowing('a', move + 11)
-
         elif player == 'b':
             if self.player_b_agent == 'user':
                 self.board_graphic.set_enable_player_specific_inputs(player=player,
                                                                      enable_list=available_moves)
             else:
                 self.choosing_hole_action(player=player, hole=self.prompt_agent_for_input(player))
-            # elif self.player_b_agent == 'random':
-            #     hole = RandomAgent.choose_move(available_moves) + 20
-            #     print("random has chosen: " + str(hole))
-            #     self.choosing_hole_action(player=player, hole=hole)
-            #     # self.start_worker_sowing('a', move + 21)
 
     def prompt_agent_for_input(self, player):
         move = 0
@@ -357,6 +344,17 @@ class GameManager:
             self.board_model.sowing_speed = 0
         else:
             self.board_model.sowing_speed = 1 / move_per_second
+
+    def new_game(self):
+        self.board_model.reset_game()
+        self.move_counter = 0
+        self.autoplay_hands = False
+        self.player_a_hand_pos = 0
+        self.player_b_hand_pos = 0
+        self.threadpool.clear()
+        self.board_graphic.set_enable_play_button(True)
+        self.prompt_player('a')
+        self.prompt_player('b')
 
     def save_moves(self):
         file = open("moves.txt", 'w')
