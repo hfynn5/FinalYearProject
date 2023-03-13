@@ -1,5 +1,7 @@
 import sys
 import time
+import traceback
+
 from Congkak.Hand import Hand
 
 
@@ -59,6 +61,8 @@ class BoardModel:
 
         self.moves_made = []
 
+        self.running = True
+
     # do repeated sowing
     def iterate_sowing(self, current_hand):
 
@@ -82,8 +86,13 @@ class BoardModel:
 
         self.wait_between_micromoves(current_hand.player)
 
-        while status == self.CONTINUE_SOWING:
-            current_hand = self.sow_once(current_hand)
+        while status == self.CONTINUE_SOWING and self.running:
+
+            try:
+                current_hand = self.sow_once(current_hand)
+            except Exception as e:
+                print(e)
+                traceback.print_exc()
 
             self.update_player_hands_from_current_hand(current_hand)
 
@@ -116,7 +125,7 @@ class BoardModel:
         if hand.counter_count == 0:
             return hand
 
-        while hand.counter_count > 0:
+        while hand.counter_count > 0 and self.running:
 
             self.wait_between_micromoves(hand.player)
 
@@ -288,17 +297,23 @@ class BoardModel:
                 action = self.GAME_END
             elif sum(self.house_a_values) == 0:
                 action = self.PROMPT_SOWING_B
+                print("prompt player b 1")
             elif sum(self.house_b_values) == 0:
                 action = self.PROMPT_SOWING_A
+                print("prompt player a 1")
             elif self.player_a_status == self.PROMPT_SOWING_A:
                 action = self.PROMPT_SOWING_A
+                print("prompt player a 2 ")
             elif self.player_b_status == self.PROMPT_SOWING_B:
                 action = self.PROMPT_SOWING_B
+                print("prompt player b 2")
             elif self.player_a_status == self.STOP_SOWING_A and self.player_b_status == self.STOP_SOWING_B:
                 if self.last_active_player == 'a':
                     action = self.PROMPT_SOWING_B
+                    print("prompt player b 3")
                 elif self.last_active_player == 'b':
                     action = self.PROMPT_SOWING_A
+                    print("prompt player a 3")
 
         elif self.game_phase == self.SIMULTANEOUS_PHASE:
 
@@ -392,6 +407,9 @@ class BoardModel:
 
         wait_length = self.sowing_speed
         slow_speed = self.slowed_sowing_multiplier
+
+        if not self.running:
+            return
 
         if slow_speed >= 10:
             slow_speed = 99999
