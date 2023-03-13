@@ -180,7 +180,6 @@ class GameManager:
     def start_worker_graphic_updater(self):
         worker = Worker(self.update_board_graphics_constantly)
         self.threadpool.start(worker)
-        pass
 
     # makes worker to start sowing
     def start_worker_sowing(self, player, hole):
@@ -219,6 +218,8 @@ class GameManager:
         worker_b = Worker(self.sow, player='b', hole=hole_b)
         worker_b.signals.finished.connect(self.next_action)
         self.threadpool.start(worker_b)
+
+    # def
 
     # iterate sowing in board model
     def sow(self, player, hole):
@@ -391,18 +392,14 @@ class GameManager:
     def load_moves(self):
 
         self.board_model.reset_game()
-
         self.loading_game = True
 
         file = open("moves.txt", 'r')
-
         for line in file:
-
             if not (line == 'END'):
                 self.loaded_moves.append(eval(line))
             else:
                 break
-        print(self.loaded_moves)
         file.close()
 
         self.move_counter = 0
@@ -412,7 +409,6 @@ class GameManager:
 
         if self.move_counter < len(self.loaded_moves):
             current_move = self.loaded_moves[self.move_counter]
-
             if BoardModel.PROMPT_SOWING_A and not current_move[0] == 0 and current_move[1] == 0:
                 self.start_worker_sowing('a', current_move[0])
             elif BoardModel.PROMPT_SOWING_B and not current_move[1] == 0 and current_move[0] == 0:
@@ -421,12 +417,8 @@ class GameManager:
                 self.start_worker_simultaneous_sowing(current_move[0], current_move[1])
             else:
                 print("error with loading move. action: " + str(action) + " Move: " + str(current_move))
-        else:
-            print("Game Loaded")
-            self.loading_game = False
 
         self.move_counter += 1
-
         if self.move_counter >= len(self.loaded_moves):
             print("Game Loaded")
             self.loading_game = False

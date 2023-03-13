@@ -348,7 +348,6 @@ class BoardModel:
             elif self.player_b_status == self.PROMPT_SOWING_B:
                 if self.ping: print("prompt player b 2")
                 action = self.PROMPT_SOWING_B
-
         if self.ping:
             print(action)
         return action
