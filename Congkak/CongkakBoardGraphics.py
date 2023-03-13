@@ -201,6 +201,7 @@ class BoardGraphic(QMainWindow):
 
         self.player_b_hand_text_label = QLabel(self)
 
+    # updates the hand value label
     def update_hand_label(self):
 
         offset = QPoint(22, 5)
@@ -236,11 +237,11 @@ class BoardGraphic(QMainWindow):
 
         self.player_a_dropdown = QComboBox(self)
         self.player_a_dropdown.move(650, 100)
-        self.player_a_dropdown.addItems(['Random', 'Minimax', 'MCTS', 'Human'])
+        self.player_a_dropdown.addItems(['Human', 'Random', 'Minimax', 'MCTS'])
 
         self.player_b_dropdown = QComboBox(self)
         self.player_b_dropdown.move(650, 380)
-        self.player_b_dropdown.addItems(['Random', 'Minimax', 'MCTS', 'Human'])
+        self.player_b_dropdown.addItems(['Human', 'Random', 'Minimax', 'MCTS'])
 
         slider_label = QLabel(self)
         slider_label.move(360, 500)
@@ -373,6 +374,10 @@ class BoardGraphic(QMainWindow):
         # self.player_b_hand_point.x = x_coord
         # self.player_b_hand_point.y = y_coord
 
+    def end_game_prompt(self):
+        print("game ended.")
+        pass
+
     # enable or disable the inputs
     def set_enable_inputs(self, enable):
         self.set_enable_player_inputs('a',enable)
@@ -381,15 +386,18 @@ class BoardGraphic(QMainWindow):
     def set_enable_player_inputs(self, player, enable_list):
         if player == 'a':
             for i, button in enumerate(self.house_a_buttons):
-                button.setEnabled(enable_list[i])
-                if enable_list[i]:
+                if i+1 in enable_list:
+                    button.setEnabled(True)
                     button.show()
                 else:
+                    button.setEnabled(False)
                     button.hide()
+
         elif player == 'b':
             for i, button in enumerate(self.house_b_buttons):
-                button.setEnabled(enable_list[i])
-                if enable_list[i]:
+                if i+1 in enable_list:
+                    button.setEnabled(True)
                     button.show()
                 else:
+                    button.setEnabled(False)
                     button.hide()

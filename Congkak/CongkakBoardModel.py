@@ -288,17 +288,23 @@ class BoardModel:
                 action = self.GAME_END
             elif sum(self.house_a_values) == 0:
                 action = self.PROMPT_SOWING_B
+                print("prompt player b")
             elif sum(self.house_b_values) == 0:
                 action = self.PROMPT_SOWING_A
+                print("prompt player a")
             elif self.player_a_status == self.PROMPT_SOWING_A:
                 action = self.PROMPT_SOWING_A
+                print("prompt player a")
             elif self.player_b_status == self.PROMPT_SOWING_B:
                 action = self.PROMPT_SOWING_B
+                print("prompt player b")
             elif self.player_a_status == self.STOP_SOWING_A and self.player_b_status == self.STOP_SOWING_B:
                 if self.last_active_player == 'a':
                     action = self.PROMPT_SOWING_B
+                    print("prompt player b")
                 elif self.last_active_player == 'b':
                     action = self.PROMPT_SOWING_A
+                    print("prompt player a")
 
         elif self.game_phase == self.SIMULTANEOUS_PHASE:
 
@@ -453,7 +459,21 @@ class BoardModel:
 
         self.moves_made.append(move_tuple)
 
-    def does_hole_have_counter(self, player):
+    def available_moves(self, player):
+        available_move = []
+
+        if player == 'a':
+            for i, hole in enumerate(self.house_a_values):
+                if hole > 0:
+                    available_move.append(i + 1)
+        elif player == 'b':
+            for i, hole in enumerate(self.house_b_values):
+                if hole > 0:
+                    available_move.append(i + 1)
+
+        return available_move
+
+    def do_holes_have_counter(self, player):
 
         truth_list = []
 
