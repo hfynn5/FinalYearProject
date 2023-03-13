@@ -8,6 +8,9 @@ from PyQt6.QtCore import QObject, QThread, pyqtSignal, QRunnable, QThreadPool
 from Congkak.Hand import Hand
 from PyQt6.QtGui import QPixmap
 
+# from IntelligentAgents import RandomAgent, MinimaxAgent
+
+from Congkak.IntelligentAgents import RandomAgent, MinimaxAgent
 
 class Worker(QRunnable):
     """
@@ -100,6 +103,11 @@ class GameManager:
         self.player_a_hand_pos = 0
         self.player_b_hand_pos = 0
 
+        # user, random, mcts, minimax
+        self.agent_list = ['user', 'random', 'minimax', 'mcts']
+        self.player_a_agent = "user"
+        self.player_b_agent = "user"
+
         self.autoplay_hands = False
 
         self.loading_game = False
@@ -127,10 +135,10 @@ class GameManager:
     def connect_inputs_to_functions(self):
         # connect input with corresponding functions
         for i, button in enumerate(self.board_graphic.house_a_buttons):
-            button.clicked.connect(lambda checked, value=i + 11: self.hole_button_action('a', value))
+            button.clicked.connect(lambda checked, value=i + 11: self.choosing_hole_action('a', value))
 
         for i, button in enumerate(self.board_graphic.house_b_buttons):
-            button.clicked.connect(lambda checked, value=i + 21: self.hole_button_action('b', value))
+            button.clicked.connect(lambda checked, value=i + 21: self.choosing_hole_action('b', value))
 
         self.board_graphic.play_button.clicked.connect(lambda checked:
                                                        self.start_worker_simultaneous_sowing(self.player_a_hand_pos,
@@ -142,6 +150,16 @@ class GameManager:
 
         self.board_graphic.save_game_button_action.triggered.connect(lambda checked: self.save_moves())
         self.board_graphic.load_game_button_action.triggered.connect(lambda checked: self.load_moves())
+
+        self.board_graphic.player_a_dropdown. \
+            activated.connect(lambda
+                                  index=self.board_graphic.player_a_dropdown.
+                                      currentIndex(): self.set_player_agent('a', index))
+
+        self.board_graphic.player_b_dropdown. \
+            activated.connect(lambda
+                                  index=self.board_graphic.player_b_dropdown.
+                                      currentIndex(): self.set_player_agent('b', index))
 
     # makes worker constantly update graphics
     def start_worker_graphic_updater(self):
@@ -176,12 +194,10 @@ class GameManager:
         worker_b.signals.finished.connect(self.next_action)
         self.threadpool.start(worker_b)
 
-    # def
-
     # iterate sowing in board model
     def sow(self, player, hole):
-        false_list = [False,False,False,False,False,False,False]
-        self.board_graphic.set_enable_player_inputs(player, enable_list=false_list)
+        # false_list = [False, False, False, False, False, False, False]
+        self.board_graphic.set_enable_player_inputs(player, False)
         self.update_sowing_speed(self.board_graphic.move_speed_slider.value())
 
         new_hand = Hand(player=player, hole_pos=hole, counter_count=0)
@@ -225,6 +241,9 @@ class GameManager:
 
     # ends the game
     def end_game(self):
+
+        self.board_graphic.end_game_prompt()
+
         if self.board_model.storeroom_a_value == self.board_model.storeroom_b_value:
             print("Draw")
         elif self.board_model.storeroom_a_value > self.board_model.storeroom_b_value:
@@ -232,12 +251,13 @@ class GameManager:
         elif self.board_model.storeroom_b_value > self.board_model.storeroom_a_value:
             print("Player B wins")
 
-        # print("moves made: ")
-        # for move in self.board_model.moves_made:
-        #     print(move)
+        print("moves made: ")
 
-    # decides what action the hole button should take
-    def hole_button_action(self, player, hole):
+        for move in self.board_model.moves_made:
+            print(move)
+
+    # decides what action to take when the hole input is chosen
+    def choosing_hole_action(self, player, hole):
         if self.autoplay_hands:
             self.start_worker_sowing(player, hole)
         else:
@@ -254,8 +274,58 @@ class GameManager:
     # prompts the corresponding player
     def prompt_player(self, player):
 
-        self.board_graphic.set_enable_player_inputs(player=player,
-                                                    enable_list=self.board_model.does_hole_have_counter(player))
+        available_moves = self.board_model.available_moves(player)
+        print("available moves: " + str(available_moves))
+
+        if player == 'a':
+            if self.player_a_agent == 'user':
+                self.board_graphic.set_enable_player_specific_inputs(player=player,
+                                                                     enable_list=available_moves)
+            else:
+                self.choosing_hole_action(player=player, hole=self.prompt_agent_for_input(player))
+
+            # elif self.player_a_agent == 'random':
+            #     hole = RandomAgent.choose_move(available_moves) + 10
+            #     print("random has chosen: " + str(hole))
+            #     self.choosing_hole_action(player=player, hole=hole)
+            #     # self.start_worker_sowing('a', move + 11)
+
+        elif player == 'b':
+            if self.player_b_agent == 'user':
+                self.board_graphic.set_enable_player_specific_inputs(player=player,
+                                                                     enable_list=available_moves)
+            else:
+                self.choosing_hole_action(player=player, hole=self.prompt_agent_for_input(player))
+            # elif self.player_b_agent == 'random':
+            #     hole = RandomAgent.choose_move(available_moves) + 20
+            #     print("random has chosen: " + str(hole))
+            #     self.choosing_hole_action(player=player, hole=hole)
+            #     # self.start_worker_sowing('a', move + 21)
+
+    def prompt_agent_for_input(self, player):
+        move = 0
+        available_moves = self.board_model.available_moves(player)
+        if player == 'a':
+            if self.player_a_agent == 'random':
+                move = RandomAgent.choose_move(available_moves=available_moves) + 10
+        elif player == 'b':
+            if self.player_a_agent == 'random':
+                move = RandomAgent.choose_move(available_moves=available_moves) + 20
+        return move
+
+    def set_player_agent(self, player, agent_index):
+
+        self.set_hand_pos(player, 0)
+
+        if player == 'a':
+            self.player_a_agent = self.agent_list[agent_index]
+        elif player == 'b':
+            self.player_b_agent = self.agent_list[agent_index]
+
+        if agent_index == 0:
+            self.board_graphic.set_enable_player_inputs(player, True)
+        else:
+            self.board_graphic.set_enable_player_inputs(player, False)
 
     # updates board graphics constantly
     def update_board_graphics_constantly(self):
@@ -283,14 +353,18 @@ class GameManager:
     def load_moves(self):
 
         self.board_model.reset_game()
+
         self.loading_game = True
 
         file = open("moves.txt", 'r')
+
         for line in file:
+
             if not (line == 'END'):
                 self.loaded_moves.append(eval(line))
             else:
                 break
+        print(self.loaded_moves)
         file.close()
 
         self.move_counter = 0
@@ -300,6 +374,7 @@ class GameManager:
 
         if self.move_counter < len(self.loaded_moves):
             current_move = self.loaded_moves[self.move_counter]
+
             if BoardModel.PROMPT_SOWING_A and not current_move[0] == 0 and current_move[1] == 0:
                 self.start_worker_sowing('a', current_move[0])
             elif BoardModel.PROMPT_SOWING_B and not current_move[1] == 0 and current_move[0] == 0:
@@ -308,8 +383,12 @@ class GameManager:
                 self.start_worker_simultaneous_sowing(current_move[0], current_move[1])
             else:
                 print("error with loading move. action: " + str(action) + " Move: " + str(current_move))
+        else:
+            print("Game Loaded")
+            self.loading_game = False
 
         self.move_counter += 1
+
         if self.move_counter >= len(self.loaded_moves):
             print("Game Loaded")
             self.loading_game = False
