@@ -133,11 +133,8 @@ class BoardGraphic(QMainWindow):
         pen.setColor(QtGui.QColor('white'))
         painter.setPen(pen)
 
-        # brush = QtGui.QBrush(QtGui.QColor(0, 0, 0), QtCore.Qt)
-        # # painter.setBackground(painter, brush)
-        # painter.setBackground(brush)
 
-        # painter.fillRect(0, 0, 800, 600)
+        painter.fillRect(0, 0, 800, 600, QtGui.QBrush((QtGui.QColor(255, 255, 255, 255))))
 
         pen.setColor(QtGui.QColor('brown'))
         painter.setPen(pen)
@@ -383,7 +380,16 @@ class BoardGraphic(QMainWindow):
         self.set_enable_player_inputs('a',enable)
         self.set_enable_player_inputs('b',enable)
 
-    def set_enable_player_inputs(self, player, enable_list):
+    # enable or disable player inputs
+    def set_enable_player_inputs(self, player, enable):
+        if enable:
+            enable_list = [1,2,3,4,5,6,7]
+        else:
+            enable_list = []
+        self.set_enable_player_specific_inputs(player, enable_list)
+
+    # enable or disable specific inputs
+    def set_enable_player_specific_inputs(self, player, enable_list):
         if player == 'a':
             for i, button in enumerate(self.house_a_buttons):
                 if i+1 in enable_list:
@@ -401,3 +407,12 @@ class BoardGraphic(QMainWindow):
                 else:
                     button.setEnabled(False)
                     button.hide()
+
+    def set_enable_play_button(self, enable):
+
+        self.play_button.setEnabled(enable)
+
+        if enable:
+            self.play_button.show()
+        else:
+            self.play_button.hide()
