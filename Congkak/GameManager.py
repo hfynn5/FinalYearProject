@@ -14,7 +14,7 @@ from PyQt6.QtGui import QPixmap
 
 from Congkak.IntelligentAgents.RandomAgent import RandomAgent
 from Congkak.IntelligentAgents.MaxAgent import MaxAgent
-from Congkak.IntelligentAgents.MinimaxAgent import MinimaxAgent
+# from Congkak.IntelligentAgents.MinimaxAgent import MinimaxAgent
 
 
 
@@ -155,8 +155,10 @@ class GameManager:
             button.clicked.connect(lambda checked, value=i + 21: self.choosing_hole_action('b', value))
 
         self.board_graphic.play_button.clicked.connect(lambda checked:
-                                                       self.start_worker_simultaneous_sowing(self.player_a_hand_pos,
-                                                                                             self.player_b_hand_pos))
+                                                       self.start_worker_simultaneous_sowing(hole_a=self.player_a_hand_pos,
+                                                                                             hole_b=self.player_b_hand_pos,
+                                                                                             hand_a=None,
+                                                                                             hand_b=None))
 
         self.board_graphic.move_speed_slider. \
             valueChanged.connect(lambda value=self.board_graphic.move_speed_slider.value():
@@ -189,45 +191,40 @@ class GameManager:
         elif player == 'b':
             self.board_model.append_move(0, hole)
 
-        worker = Worker(self.sow, player=player, hole=hole)
+        new_hand = Hand(player=player, hole_pos=hole, counter_count=0)
+
+        worker = Worker(self.sow, new_hand=new_hand)
         worker.signals.finished.connect(self.next_action)
         self.threadpool.start(worker)
 
     # starts a worker for each hand
-    def start_worker_simultaneous_sowing(self, hole_a, hole_b):
+    def start_worker_simultaneous_sowing(self, hole_a, hole_b, hand_a, hand_b):
         self.autoplay_hands = True
         self.board_graphic.set_enable_play_button(False)
 
-        if not self.player_a_agent == 'user':
-            hole_a = self.prompt_agent_for_input('a')
-            self.choosing_hole_action('a', hole_a)
+        if hand_a is None:
+            hand_a = Hand(player='a', hole_pos=hole_a, counter_count=0)
+        if hand_b is None:
+            hand_b = Hand(player='b', hole_pos=hole_b, counter_count=0)
 
-        if not self.player_b_agent == 'user':
-            hole_b = self.prompt_agent_for_input('b')
-            self.choosing_hole_action('b', hole_b)
+        worker_simul = Worker(self.simul_sow, hand_a=hand_a, hand_b=hand_b)
+        worker_simul.signals.finished.connect(self.next_action)
+        self.threadpool.start(worker_simul)
 
-        self.set_hand_pos('a', hole_a)
-        self.set_hand_pos('b', hole_b)
-
-        self.board_model.append_move(hole_a, hole_b)
-
-        worker_a = Worker(self.sow, player='a', hole=hole_a)
-        worker_a.signals.finished.connect(self.next_action)
-        self.threadpool.start(worker_a)
-
-        worker_b = Worker(self.sow, player='b', hole=hole_b)
-        worker_b.signals.finished.connect(self.next_action)
-        self.threadpool.start(worker_b)
 
     # iterate sowing in board model
-    def sow(self, player, hole):
-        # false_list = [False, False, False, False, False, False, False]
-        self.board_graphic.set_enable_player_inputs(player, False)
+    def sow(self, new_hand):
+        self.board_graphic.set_enable_player_inputs(new_hand.player, False)
         self.update_sowing_speed(self.board_graphic.move_speed_slider.value())
 
-        new_hand = Hand(player=player, hole_pos=hole, counter_count=0)
-
         self.board_model.iterate_sowing(new_hand)
+
+    def simul_sow(self, hand_a, hand_b):
+        self.board_graphic.set_enable_player_inputs('a', False)
+        self.board_graphic.set_enable_player_inputs('b', False)
+        self.update_sowing_speed(self.board_graphic.move_speed_slider.value())
+
+        self.board_model.iterated_sowing_simultaneous(hand_a, hand_b)
 
     def next_action(self):
 
@@ -287,7 +284,15 @@ class GameManager:
     # decides what action to take when the hole input is chosen
     def choosing_hole_action(self, player, hole):
         if self.autoplay_hands:
-            self.start_worker_sowing(player, hole)
+
+            if self.board_model.game_phase == BoardModel.SIMULTANEOUS_PHASE:
+                if player == 'a':
+                    self.start_worker_simultaneous_sowing(hole_a=hole, hand_b=self.board_model.player_b_hand, hole_b=None, hand_a=None)
+                elif player == 'b':
+                    self.start_worker_simultaneous_sowing(hole_b=hole, hand_a=self.board_model.player_a_hand, hole_a=None, hand_b=None)
+
+            elif self.board_model.game_phase == BoardModel.SEQUENTIAL_PHASE:
+                self.start_worker_sowing(player, hole)
         else:
             self.set_hand_pos(player, hole)
 
