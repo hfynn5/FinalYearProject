@@ -1,16 +1,18 @@
+import copy
 import sys, traceback
 import time
 
 from Congkak.CongkakBoardGraphics import BoardGraphic
-from Congkak.CongkakBoardModel import BoardModel, Hand
+from Congkak.CongkakBoardModel import BoardModel
+from Congkak.Hand import Hand
 from PyQt6.QtWidgets import *
 from PyQt6.QtCore import QObject, QThread, pyqtSignal, QRunnable, QThreadPool
-from Congkak.Hand import Hand
+
 from PyQt6.QtGui import QPixmap
 
 # from IntelligentAgents import RandomAgent, MinimaxAgent
 
-from Congkak.IntelligentAgents import RandomAgent, MinimaxAgent
+from Congkak.IntelligentAgents.RandomAgent import RandomAgent
 
 
 class Worker(QRunnable):
@@ -108,6 +110,9 @@ class GameManager:
         self.agent_list = ['user', 'random', 'minimax', 'mcts']
         self.player_a_agent = "user"
         self.player_b_agent = "user"
+
+        # create Intelligent Agents
+        self.random_agent = RandomAgent()
 
         self.autoplay_hands = False
 
@@ -307,14 +312,19 @@ class GameManager:
                 self.choosing_hole_action(player=player, hole=self.prompt_agent_for_input(player))
 
     def prompt_agent_for_input(self, player):
+        copied_board = copy.deepcopy(self.board_model)
         move = 0
         available_moves = self.board_model.available_moves(player)
         if player == 'a':
             if self.player_a_agent == 'random':
-                move = RandomAgent.choose_move(available_moves=available_moves) + 10
+                move = self.random_agent.choose_move(player, copied_board) + 10
+            elif self.player_a_agent == 'minimax':
+                move = self.random_agent.choose_move(player, copied_board) + 10
         elif player == 'b':
-            if self.player_a_agent == 'random':
-                move = RandomAgent.choose_move(available_moves=available_moves) + 20
+            if self.player_b_agent == 'random':
+                move = self.random_agent.choose_move(player, copied_board) + 20
+            elif self.player_b_agent == 'minimax':
+                move = self.random_agent.choose_move(player, copied_board) + 20
         return move
 
     def set_player_agent(self, player, agent_index):
