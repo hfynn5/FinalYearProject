@@ -13,6 +13,9 @@ from PyQt6.QtGui import QPixmap
 # from IntelligentAgents import RandomAgent, MinimaxAgent
 
 from Congkak.IntelligentAgents.RandomAgent import RandomAgent
+from Congkak.IntelligentAgents.MaxAgent import MaxAgent
+from Congkak.IntelligentAgents.MinimaxAgent import MinimaxAgent
+
 
 
 class Worker(QRunnable):
@@ -106,13 +109,15 @@ class GameManager:
         self.player_a_hand_pos = 0
         self.player_b_hand_pos = 0
 
-        # user, random, mcts, minimax
-        self.agent_list = ['user', 'random', 'minimax', 'mcts']
+        # user, random, max, minimax, mcts
+        self.agent_list = ['user', 'random', 'max', 'minimax', 'mcts']
         self.player_a_agent = "user"
         self.player_b_agent = "user"
 
         # create Intelligent Agents
         self.random_agent = RandomAgent()
+        self.max_agent = MaxAgent()
+        # self.minimax_agent = MinimaxAgent()
 
         self.autoplay_hands = False
 
@@ -128,6 +133,7 @@ class GameManager:
 
         # declare board model
         self.board_model = BoardModel()
+        self.board_model.ping = True
 
         # declare graphics
         App = QApplication(sys.argv)
@@ -172,8 +178,9 @@ class GameManager:
 
     # makes worker constantly update graphics
     def start_worker_graphic_updater(self):
-        worker = Worker(self.update_board_graphics_constantly)
-        self.threadpool.start(worker)
+        # worker = Worker(self.update_board_graphics_constantly)
+        # self.threadpool.start(worker)
+        pass
 
     # makes worker to start sowing
     def start_worker_sowing(self, player, hole):
@@ -224,6 +231,8 @@ class GameManager:
         self.board_model.iterate_sowing(new_hand)
 
     def next_action(self):
+
+        update_board_graphics(board_graphic=self.board_graphic, board_model=self.board_model)
 
         # print("next action")
 
@@ -318,13 +327,17 @@ class GameManager:
         if player == 'a':
             if self.player_a_agent == 'random':
                 move = self.random_agent.choose_move(player, copied_board) + 10
+            elif self.player_a_agent == 'max':
+                move = self.max_agent.choose_move(player, copied_board) + 10
             elif self.player_a_agent == 'minimax':
-                move = self.random_agent.choose_move(player, copied_board) + 10
+                move = self.minimax_agent.choose_move(player, copied_board) + 10
         elif player == 'b':
             if self.player_b_agent == 'random':
                 move = self.random_agent.choose_move(player, copied_board) + 20
+            elif self.player_a_agent == 'max':
+                move = self.max_agent.choose_move(player, copied_board) + 10
             elif self.player_b_agent == 'minimax':
-                move = self.random_agent.choose_move(player, copied_board) + 20
+                move = self.minimax_agent.choose_move(player, copied_board) + 20
         return move
 
     def set_player_agent(self, player, agent_index):

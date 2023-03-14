@@ -234,11 +234,11 @@ class BoardGraphic(QMainWindow):
 
         self.player_a_dropdown = QComboBox(self)
         self.player_a_dropdown.move(650, 100)
-        self.player_a_dropdown.addItems(['Human', 'Random', 'Minimax', 'MCTS'])
+        self.player_a_dropdown.addItems(['Human', 'Random', 'Max', 'Minimax', 'MCTS'])
 
         self.player_b_dropdown = QComboBox(self)
         self.player_b_dropdown.move(650, 380)
-        self.player_b_dropdown.addItems(['Human', 'Random', 'Minimax', 'MCTS'])
+        self.player_b_dropdown.addItems(['Human', 'Random', 'Max', 'Minimax', 'MCTS'])
 
         slider_label = QLabel(self)
         slider_label.move(360, 500)
