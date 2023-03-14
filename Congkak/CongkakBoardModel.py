@@ -295,32 +295,31 @@ class BoardModel:
                 action = self.GAME_END
             elif sum(self.house_a_values) == 0:
                 action = self.PROMPT_SOWING_B
-                print("prompt player b 1")
+                if self.ping: print("prompt player b 1")
             elif sum(self.house_b_values) == 0:
                 action = self.PROMPT_SOWING_A
-                print("prompt player a 1")
+                if self.ping: print("prompt player a 1")
             elif self.player_a_status == self.PROMPT_SOWING_A:
                 action = self.PROMPT_SOWING_A
-                print("prompt player a 2 ")
+                if self.ping: print("prompt player a 2")
             elif self.player_b_status == self.PROMPT_SOWING_B:
                 action = self.PROMPT_SOWING_B
-                print("prompt player b 2")
+                if self.ping: print("prompt player b 2")
             elif self.player_a_status == self.STOP_SOWING_A and self.player_b_status == self.STOP_SOWING_B:
                 if self.last_active_player == 'a':
                     action = self.PROMPT_SOWING_B
-                    print("prompt player b 3")
+                    if self.ping: print("prompt player b 3")
                 elif self.last_active_player == 'b':
                     action = self.PROMPT_SOWING_A
-                    print("prompt player a 3")
-
+                    if self.ping: print("prompt player a 3")
         elif self.game_phase == self.SIMULTANEOUS_PHASE:
 
             if self.player_a_status == self.PROMPT_SOWING_A and self.player_b_status == self.PROMPT_SOWING_B:
-                print("both are prompted")
+                if self.ping: print("both are prompted")
                 action = self.PROMPT_SOWING_BOTH
             elif self.player_a_status == self.STOP_SOWING_A and self.player_b_status == self.STOP_SOWING_B and \
                     self.no_of_micromoves_made_player_a == self.no_of_micromoves_made_player_b:
-                print("both stopped at the same time. prompting both")
+                if self.ping: print("both stopped at the same time. prompting both")
                 action = self.PROMPT_SOWING_BOTH
             elif self.player_a_status == self.TIKAM_A and self.player_b_status == self.TIKAM_B:
                 print("both tikam. prompting both. honestly, this should never be printed so you fucked up")
@@ -400,6 +399,9 @@ class BoardModel:
 
     # wait time
     def wait_between_micromoves(self, player):
+
+        if (self.ping):
+            print("ping")
 
         start_time = time.time()
 
