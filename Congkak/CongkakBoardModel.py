@@ -57,6 +57,8 @@ class BoardModel:
         self.no_of_micromoves_made_player_a = 0
         self.no_of_micromoves_made_player_b = 0
 
+        self.ping = False
+
         self.moves_made = []
 
     # do repeated sowing
@@ -83,6 +85,7 @@ class BoardModel:
         self.wait_between_micromoves(current_hand.player)
 
         while status == self.CONTINUE_SOWING:
+
             current_hand = self.sow_once(current_hand)
 
             self.update_player_hands_from_current_hand(current_hand)
@@ -341,10 +344,10 @@ class BoardModel:
                 self.game_phase = self.SEQUENTIAL_PHASE
 
             elif self.player_a_status == self.PROMPT_SOWING_A:
-                # print("prompt player a 2")
+                print("prompt player a 2")
                 action = self.PROMPT_SOWING_A
             elif self.player_b_status == self.PROMPT_SOWING_B:
-                # print("prompt player b 2")
+                print("prompt player b 2")
                 action = self.PROMPT_SOWING_B
         return action
 
