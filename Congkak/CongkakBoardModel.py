@@ -57,6 +57,8 @@ class BoardModel:
         self.no_of_micromoves_made_player_a = 0
         self.no_of_micromoves_made_player_b = 0
 
+        self.ping = False
+
         self.moves_made = []
 
     # do repeated sowing
@@ -83,6 +85,7 @@ class BoardModel:
         self.wait_between_micromoves(current_hand.player)
 
         while status == self.CONTINUE_SOWING:
+
             current_hand = self.sow_once(current_hand)
 
             self.update_player_hands_from_current_hand(current_hand)
@@ -288,23 +291,23 @@ class BoardModel:
                 action = self.GAME_END
             elif sum(self.house_a_values) == 0:
                 action = self.PROMPT_SOWING_B
-                print("prompt player b")
+                # print("prompt player b")
             elif sum(self.house_b_values) == 0:
                 action = self.PROMPT_SOWING_A
-                print("prompt player a")
+                # print("prompt player a")
             elif self.player_a_status == self.PROMPT_SOWING_A:
                 action = self.PROMPT_SOWING_A
-                print("prompt player a")
+                # print("prompt player a")
             elif self.player_b_status == self.PROMPT_SOWING_B:
                 action = self.PROMPT_SOWING_B
-                print("prompt player b")
+                # print("prompt player b")
             elif self.player_a_status == self.STOP_SOWING_A and self.player_b_status == self.STOP_SOWING_B:
                 if self.last_active_player == 'a':
                     action = self.PROMPT_SOWING_B
-                    print("prompt player b")
+                    # print("prompt player b")
                 elif self.last_active_player == 'b':
                     action = self.PROMPT_SOWING_A
-                    print("prompt player a")
+                    # print("prompt player a")
 
         elif self.game_phase == self.SIMULTANEOUS_PHASE:
 
@@ -393,6 +396,9 @@ class BoardModel:
 
     # wait time
     def wait_between_micromoves(self, player):
+
+        if(self.ping):
+            print("ping")
 
         start_time = time.time()
 
