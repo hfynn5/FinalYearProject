@@ -1,7 +1,5 @@
 import sys
 import time
-import traceback
-
 from Congkak.Hand import Hand
 
 
@@ -65,7 +63,7 @@ class BoardModel:
 
         self.running = True
 
-    # do repeated sowing
+    # do repeated sowing. has waiting
     def iterate_sowing(self, current_hand):
 
         if current_hand.player not in self.active_players:
@@ -89,6 +87,7 @@ class BoardModel:
         self.wait_between_micromoves(current_hand.player)
 
         while status == self.CONTINUE_SOWING:
+
             current_hand = self.sow_once(current_hand)
 
             self.update_player_hands_from_current_hand(current_hand)
@@ -279,8 +278,7 @@ class BoardModel:
     # returns the action the game manager should do
     def action_to_take(self):
 
-        if self.ping:
-            print("checking action")
+        # print("\n\nchecking action")
         #
         # print("status a: " + str(self.player_a_status))
         # print("status b: " + str(self.player_b_status))
@@ -347,10 +345,10 @@ class BoardModel:
                 self.game_phase = self.SEQUENTIAL_PHASE
 
             elif self.player_a_status == self.PROMPT_SOWING_A:
-                if self.ping: print("prompt player a 2")
+                print("prompt player a 2")
                 action = self.PROMPT_SOWING_A
             elif self.player_b_status == self.PROMPT_SOWING_B:
-                if self.ping: print("prompt player b 2")
+                print("prompt player b 2")
                 action = self.PROMPT_SOWING_B
         return action
 
