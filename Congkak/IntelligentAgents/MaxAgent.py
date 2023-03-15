@@ -24,7 +24,7 @@ class MaxAgent:
 
         for move in available_moves:
             new_board = copy.deepcopy(self.board_model)
-            print("testing main move: " + str(move))
+            # print("testing main move: " + str(move))
             # new_board.print_holes()
             evaluation = self.evaluate(player, move, new_board)
             # print("main move " + str(move) + " tested. evaluation: " + str(evaluation))
@@ -32,8 +32,8 @@ class MaxAgent:
                 self.final_best_value = evaluation
                 self.final_best_move = move
 
-        print("final eval: " + str(self.final_best_value))
-        print("final best move: " + str(self.final_best_move))
+        # print("final eval: " + str(self.final_best_value))
+        # print("final best move: " + str(self.final_best_move))
         return self.final_best_move
 
     def evaluate(self, player, move, board_model):
@@ -52,12 +52,12 @@ class MaxAgent:
         board_model.iterate_sowing(new_hand)
 
         if player == 'a' and board_model.storeroom_a_value > self.final_best_value:
-            print("optimal")
+            # print("optimal")
             return board_model.storeroom_a_value
         elif player == 'b' and board_model.storeroom_b_value > self.final_best_value:
             return board_model.storeroom_b_value
 
-        print(board_model.storeroom_a_value)
+        # print(board_model.storeroom_a_value)
 
         if board_model.action_to_take() == BoardModel.PROMPT_SOWING_A and player == 'a' or \
                 board_model.action_to_take() == BoardModel.PROMPT_SOWING_B and player == 'b':

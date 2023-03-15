@@ -178,8 +178,8 @@ class GameManager:
 
     # makes worker constantly update graphics
     def start_worker_graphic_updater(self):
-        # worker = Worker(self.update_board_graphics_constantly)
-        # self.threadpool.start(worker)
+        worker = Worker(self.update_board_graphics_constantly)
+        self.threadpool.start(worker)
         pass
 
     # makes worker to start sowing
@@ -334,8 +334,8 @@ class GameManager:
         elif player == 'b':
             if self.player_b_agent == 'random':
                 move = self.random_agent.choose_move(player, copied_board) + 20
-            elif self.player_a_agent == 'max':
-                move = self.max_agent.choose_move(player, copied_board) + 10
+            elif self.player_b_agent == 'max':
+                move = self.max_agent.choose_move(player, copied_board) + 20
             elif self.player_b_agent == 'minimax':
                 move = self.minimax_agent.choose_move(player, copied_board) + 20
         return move
