@@ -1,16 +1,22 @@
+import copy
 import sys, traceback
 import time
 
 from Congkak.CongkakBoardGraphics import BoardGraphic
-from Congkak.CongkakBoardModel import BoardModel, Hand
+from Congkak.CongkakBoardModel import BoardModel
+from Congkak.Hand import Hand
 from PyQt6.QtWidgets import *
 from PyQt6.QtCore import QObject, QThread, pyqtSignal, QRunnable, QThreadPool
-from Congkak.Hand import Hand
+
 from PyQt6.QtGui import QPixmap
 
 # from IntelligentAgents import RandomAgent, MinimaxAgent
 
-from Congkak.IntelligentAgents import RandomAgent, MinimaxAgent
+from Congkak.IntelligentAgents.RandomAgent import RandomAgent
+from Congkak.IntelligentAgents.MaxAgent import MaxAgent
+from Congkak.IntelligentAgents.MinimaxAgent import MinimaxAgent
+
+
 
 class Worker(QRunnable):
     """
@@ -103,10 +109,15 @@ class GameManager:
         self.player_a_hand_pos = 0
         self.player_b_hand_pos = 0
 
-        # user, random, mcts, minimax
-        self.agent_list = ['user', 'random', 'minimax', 'mcts']
+        # user, random, max, minimax, mcts
+        self.agent_list = ['user', 'random', 'max', 'minimax', 'mcts']
         self.player_a_agent = "user"
         self.player_b_agent = "user"
+
+        # create Intelligent Agents
+        self.random_agent = RandomAgent()
+        self.max_agent = MaxAgent()
+        # self.minimax_agent = MinimaxAgent()
 
         self.autoplay_hands = False
 
@@ -114,12 +125,15 @@ class GameManager:
         self.loaded_moves = []
         self.move_counter = 0
 
+        self.show_starting_hands = True
+
         # declare threadpool
         self.threadpool = QThreadPool()
         print("Multithreading with maximum %d threads" % self.threadpool.maxThreadCount())
 
         # declare board model
         self.board_model = BoardModel()
+        self.board_model.ping = True
 
         # declare graphics
         App = QApplication(sys.argv)
@@ -150,6 +164,7 @@ class GameManager:
 
         self.board_graphic.save_game_button_action.triggered.connect(lambda checked: self.save_moves())
         self.board_graphic.load_game_button_action.triggered.connect(lambda checked: self.load_moves())
+        self.board_graphic.new_game_button_action.triggered.connect(lambda checked: self.new_game())
 
         self.board_graphic.player_a_dropdown. \
             activated.connect(lambda
@@ -178,11 +193,21 @@ class GameManager:
         worker.signals.finished.connect(self.next_action)
         self.threadpool.start(worker)
 
-    # TODO: disable play button if sequential mode or choices are not made.
-
     # starts a worker for each hand
     def start_worker_simultaneous_sowing(self, hole_a, hole_b):
         self.autoplay_hands = True
+        self.board_graphic.set_enable_play_button(False)
+
+        if not self.player_a_agent == 'user':
+            hole_a = self.prompt_agent_for_input('a')
+            self.choosing_hole_action('a', hole_a)
+
+        if not self.player_b_agent == 'user':
+            hole_b = self.prompt_agent_for_input('b')
+            self.choosing_hole_action('b', hole_b)
+
+        self.set_hand_pos('a', hole_a)
+        self.set_hand_pos('b', hole_b)
 
         self.board_model.append_move(hole_a, hole_b)
 
@@ -205,6 +230,8 @@ class GameManager:
         self.board_model.iterate_sowing(new_hand)
 
     def next_action(self):
+
+        update_board_graphics(board_graphic=self.board_graphic, board_model=self.board_model)
 
         # print("next action")
 
@@ -235,6 +262,7 @@ class GameManager:
                 self.autoplay_hands = False
                 self.prompt_player('a')
                 self.prompt_player('b')
+                self.board_graphic.set_enable_play_button(True)
         elif action == BoardModel.GAME_END:
             print("Game over")
             self.end_game()
@@ -265,7 +293,8 @@ class GameManager:
 
     # sets the hand position
     def set_hand_pos(self, player, hole):
-        self.board_model.update_player_hand_pos(player, hole)
+        if self.show_starting_hands:
+            self.board_model.update_player_hand_pos(player, hole)
         if player == 'a':
             self.player_a_hand_pos = hole
         elif player == 'b':
@@ -275,7 +304,6 @@ class GameManager:
     def prompt_player(self, player):
 
         available_moves = self.board_model.available_moves(player)
-        print("available moves: " + str(available_moves))
 
         if player == 'a':
             if self.player_a_agent == 'user':
@@ -284,33 +312,31 @@ class GameManager:
             else:
                 self.choosing_hole_action(player=player, hole=self.prompt_agent_for_input(player))
 
-            # elif self.player_a_agent == 'random':
-            #     hole = RandomAgent.choose_move(available_moves) + 10
-            #     print("random has chosen: " + str(hole))
-            #     self.choosing_hole_action(player=player, hole=hole)
-            #     # self.start_worker_sowing('a', move + 11)
-
         elif player == 'b':
             if self.player_b_agent == 'user':
                 self.board_graphic.set_enable_player_specific_inputs(player=player,
                                                                      enable_list=available_moves)
             else:
                 self.choosing_hole_action(player=player, hole=self.prompt_agent_for_input(player))
-            # elif self.player_b_agent == 'random':
-            #     hole = RandomAgent.choose_move(available_moves) + 20
-            #     print("random has chosen: " + str(hole))
-            #     self.choosing_hole_action(player=player, hole=hole)
-            #     # self.start_worker_sowing('a', move + 21)
 
     def prompt_agent_for_input(self, player):
+        copied_board = copy.deepcopy(self.board_model)
         move = 0
         available_moves = self.board_model.available_moves(player)
         if player == 'a':
             if self.player_a_agent == 'random':
-                move = RandomAgent.choose_move(available_moves=available_moves) + 10
+                move = self.random_agent.choose_move(player, copied_board) + 10
+            elif self.player_a_agent == 'max':
+                move = self.max_agent.choose_move(player, copied_board) + 10
+            elif self.player_a_agent == 'minimax':
+                move = self.minimax_agent.choose_move(player, copied_board) + 10
         elif player == 'b':
-            if self.player_a_agent == 'random':
-                move = RandomAgent.choose_move(available_moves=available_moves) + 20
+            if self.player_b_agent == 'random':
+                move = self.random_agent.choose_move(player, copied_board) + 20
+            elif self.player_b_agent == 'max':
+                move = self.max_agent.choose_move(player, copied_board) + 20
+            elif self.player_b_agent == 'minimax':
+                move = self.minimax_agent.choose_move(player, copied_board) + 20
         return move
 
     def set_player_agent(self, player, agent_index):
@@ -340,6 +366,17 @@ class GameManager:
             self.board_model.sowing_speed = 0
         else:
             self.board_model.sowing_speed = 1 / move_per_second
+
+    def new_game(self):
+        self.board_model.reset_game()
+        self.move_counter = 0
+        self.autoplay_hands = False
+        self.player_a_hand_pos = 0
+        self.player_b_hand_pos = 0
+        self.threadpool.clear()
+        self.board_graphic.set_enable_play_button(True)
+        self.prompt_player('a')
+        self.prompt_player('b')
 
     def save_moves(self):
         file = open("moves.txt", 'w')
@@ -392,3 +429,6 @@ class GameManager:
         if self.move_counter >= len(self.loaded_moves):
             print("Game Loaded")
             self.loading_game = False
+
+
+
