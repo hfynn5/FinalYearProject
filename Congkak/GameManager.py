@@ -157,8 +157,7 @@ class GameManager:
         self.board_graphic.play_button.clicked.connect(lambda checked:
                                                        self.start_worker_simultaneous_sowing(hole_a=self.player_a_hand_pos,
                                                                                              hole_b=self.player_b_hand_pos,
-                                                                                             hand_a=None,
-                                                                                             hand_b=None))
+                                                                                            ))
 
         self.board_graphic.move_speed_slider. \
             valueChanged.connect(lambda value=self.board_graphic.move_speed_slider.value():
@@ -184,21 +183,22 @@ class GameManager:
         self.threadpool.start(worker)
 
     # makes worker to start sowing
-    def start_worker_sowing(self, player, hole):
+    def start_worker_sowing(self, player = None, hole = None, new_hand = None):
 
         if player == 'a':
             self.board_model.append_move(hole, 0)
         elif player == 'b':
             self.board_model.append_move(0, hole)
 
-        new_hand = Hand(player=player, hole_pos=hole, counter_count=0)
+        if new_hand is None:
+            new_hand = Hand(player=player, hole_pos=hole, counter_count=0)
 
         worker = Worker(self.sow, new_hand=new_hand)
         worker.signals.finished.connect(self.next_action)
         self.threadpool.start(worker)
 
     # starts a worker for each hand
-    def start_worker_simultaneous_sowing(self, hole_a, hole_b, hand_a, hand_b):
+    def start_worker_simultaneous_sowing(self, hole_a = None, hole_b = None, hand_a = None, hand_b = None):
         self.autoplay_hands = True
         self.board_graphic.set_enable_play_button(False)
 
@@ -211,6 +211,8 @@ class GameManager:
         worker_simul.signals.finished.connect(self.next_action)
         self.threadpool.start(worker_simul)
 
+    def start_worker_tikam(self, hand):
+        worker_tikam = Worker(self.tikam, hand=hand)
 
     # iterate sowing in board model
     def sow(self, new_hand):
@@ -226,6 +228,11 @@ class GameManager:
 
         self.board_model.iterated_sowing_simultaneous(hand_a, hand_b)
 
+    def tikam(self, hand):
+        self.update_sowing_speed(self.board_graphic.move_speed_slider.value())
+
+        self.board_model.tikam(hand=hand)
+
     def next_action(self):
 
         update_board_graphics(board_graphic=self.board_graphic, board_model=self.board_model)
@@ -238,31 +245,76 @@ class GameManager:
         # print("player a: " + str(self.board_model.player_a_status))
         # print("player b: " + str(self.board_model.player_b_status))
 
-        if action == BoardModel.PROMPT_SOWING_A and not self.board_model.player_a_status == BoardModel.CONTINUE_SOWING:
+        if self.board_model.player_a_status == BoardModel.TIKAM_A:
+            self.start_worker_tikam(hand=self.board_model.player_a_hand)
+        if self.board_model.player_b_status == BoardModel.TIKAM_B:
+            self.start_worker_tikam(hand=self.board_model.player_b_hand)
 
-            if self.loading_game:
-                self.do_next_move_from_loaded_moves(action)
-            else:
-                self.prompt_player('a')
-                self.board_model.player_b_sowing_slowed = True
+        match action:
+            case BoardModel.PROMPT_SOWING_A:
+                if self.loading_game:
+                    self.do_next_move_from_loaded_moves(action)
+                else:
+                    self.prompt_player('a')
+            case BoardModel.PROMPT_SOWING_B:
+                if self.loading_game:
+                    self.do_next_move_from_loaded_moves(action)
+                else:
+                    self.prompt_player('b')
+            case BoardModel.PROMPT_SOWING_BOTH:
+                if self.loading_game:
+                    self.do_next_move_from_loaded_moves(action)
+                else:
+                    self.autoplay_hands = False
+                    self.prompt_player('a')
+                    self.prompt_player('b')
+                    self.board_graphic.set_enable_play_button(True)
 
-        elif action == BoardModel.PROMPT_SOWING_B and not self.board_model.player_b_status == BoardModel.CONTINUE_SOWING:
-            if self.loading_game:
-                self.do_next_move_from_loaded_moves(action)
-            else:
-                self.prompt_player('b')
-                self.board_model.player_a_sowing_slowed = True
-        elif action == BoardModel.PROMPT_SOWING_BOTH:
-            if self.loading_game:
-                self.do_next_move_from_loaded_moves(action)
-            else:
-                self.autoplay_hands = False
-                self.prompt_player('a')
-                self.prompt_player('b')
-                self.board_graphic.set_enable_play_button(True)
-        elif action == BoardModel.GAME_END:
-            print("Game over")
-            self.end_game()
+            case BoardModel.CONTINUE_SOWING_A:
+                self.start_worker_sowing(new_hand=self.board_model.player_a_hand)
+                pass
+            case BoardModel.CONTINUE_SOWING_B:
+                self.start_worker_sowing(new_hand=self.board_model.player_b_hand)
+                pass
+            case BoardModel.GAME_END:
+                print("Game over")
+                self.end_game()
+
+        # if action == BoardModel.PROMPT_SOWING_A:
+        #
+        # elif action == BoardModel.PROMPT_SOWING_B:
+        #     if self.loading_game:
+        #         self.do_next_move_from_loaded_moves(action)
+        #     else:
+        #         self.prompt_player('b')
+
+        # elif action == BoardModel.PROMPT_SOWING_BOTH:
+        #     if self.loading_game:
+        #         self.do_next_move_from_loaded_moves(action)
+        #     else:
+        #         self.autoplay_hands = False
+        #         self.prompt_player('a')
+        #         self.prompt_player('b')
+        #         self.board_graphic.set_enable_play_button(True)
+
+        # elif action ==
+        #
+        # elif action == BoardModel.GAME_END:
+
+        #
+        # if action == BoardModel.PROMPT_SOWING_A and not self.board_model.player_a_status == BoardModel.CONTINUE_SOWING:
+        #     if self.loading_game:
+        #         self.do_next_move_from_loaded_moves(action)
+        #     else:
+        #         self.prompt_player('a')
+        #         self.board_model.player_b_sowing_slowed = True
+
+        # elif action == BoardModel.PROMPT_SOWING_B and not self.board_model.player_b_status == BoardModel.CONTINUE_SOWING:
+        #     if self.loading_game:
+        #         self.do_next_move_from_loaded_moves(action)
+        #     else:
+        #         self.prompt_player('b')
+        #         self.board_model.player_a_sowing_slowed = True
 
     # ends the game
     def end_game(self):
@@ -286,13 +338,15 @@ class GameManager:
         if self.autoplay_hands:
 
             if self.board_model.game_phase == BoardModel.SIMULTANEOUS_PHASE:
+                print("simul")
                 if player == 'a':
-                    self.start_worker_simultaneous_sowing(hole_a=hole, hand_b=self.board_model.player_b_hand, hole_b=None, hand_a=None)
+                    self.start_worker_simultaneous_sowing(hole_a=hole, hand_b=self.board_model.player_b_hand)
                 elif player == 'b':
-                    self.start_worker_simultaneous_sowing(hole_b=hole, hand_a=self.board_model.player_a_hand, hole_a=None, hand_b=None)
+                    self.start_worker_simultaneous_sowing(hole_b=hole, hand_a=self.board_model.player_a_hand)
 
             elif self.board_model.game_phase == BoardModel.SEQUENTIAL_PHASE:
-                self.start_worker_sowing(player, hole)
+                print("seq")
+                self.start_worker_sowing(player=player, hole=hole)
         else:
             self.set_hand_pos(player, hole)
 
