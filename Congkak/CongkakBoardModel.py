@@ -147,9 +147,6 @@ class BoardModel:
         self.player_a_status = self.CONTINUE_SOWING
         self.player_b_status = self.CONTINUE_SOWING
 
-        # status_a = self.CONTINUE_SOWING
-        # status_b = self.CONTINUE_SOWING
-
         self.player_a_hand = hand_a
         self.player_b_hand = hand_b
 
@@ -167,31 +164,21 @@ class BoardModel:
             self.player_a_status = self.check_hand_status(hand_a)
             self.player_b_status = self.check_hand_status(hand_b)
 
-        print("end simul sowing")
+        # print("end simul sowing")
+        #
+        # print("status a:" + str(self.player_a_status))
+        # print("status b:" + str(self.player_b_status))
 
-        print("status a:" + str(self.player_a_status))
-        print("status b:" + str(self.player_b_status))
-
-        if self.player_a_status == self.TIKAM_A:
-            print("tikam a")
-        elif self.player_b_status == self.TIKAM_B:
-            print("tikam b")
-
-        elif self.player_a_status == self.STOP_SOWING_A:
+        if self.player_a_status == self.STOP_SOWING_A:
             self.reset_hand('a')
             self.active_players.remove('a')
-            print("stop a")
         elif self.player_b_status == self.STOP_SOWING_B:
             self.reset_hand('b')
             self.active_players.remove('b')
-            print("stop b")
-
         elif self.player_a_status == self.PROMPT_SOWING_A:
             self.reset_hand('a')
-            print("stop a")
         elif self.player_b_status == self.PROMPT_SOWING_B:
             self.reset_hand('b')
-            print("stop b")
 
         pass
 
@@ -361,13 +348,10 @@ class BoardModel:
     # returns the action the game manager should do
     def action_to_take(self):
 
-        print("\n\nchecking action")
-
-        print("status a: " + str(self.player_a_status))
-        print("status b: " + str(self.player_b_status))
-
-        # print("micromove a: " + str(self.no_of_micromoves_made_player_a))
-        # print("micromove b: " + str(self.no_of_micromoves_made_player_b))
+        # print("checking action")
+        #
+        # print("status a: " + str(self.player_a_status))
+        # print("status b: " + str(self.player_b_status))
 
         action = self.ERROR
         if self.game_phase == self.SEQUENTIAL_PHASE:
@@ -516,12 +500,12 @@ class BoardModel:
         available_move = []
 
         if player == 'a':
-            for i, hole in enumerate(self.house_a_values):
-                if hole > 0:
+            for i, counter_count in enumerate(self.house_a_values):
+                if counter_count > 0 and not self.player_b_hand.hole_pos == i+11:
                     available_move.append(i + 1)
         elif player == 'b':
-            for i, hole in enumerate(self.house_b_values):
-                if hole > 0:
+            for i, counter_count in enumerate(self.house_b_values):
+                if counter_count > 0 and not self.player_a_hand.hole_pos == i+21:
                     available_move.append(i + 1)
 
         return available_move
