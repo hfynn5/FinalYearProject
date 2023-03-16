@@ -502,68 +502,6 @@ class BoardModel:
         self.no_of_micromoves_made_player_a = 0
         self.no_of_micromoves_made_player_b = 0
 
-    # wait time
-    # TODO: add waiting if both players
-    def wait_between_micromoves(self, player):
-
-        if (self.ping):
-            print("ping")
-
-        start_time = time.time()
-
-        wait_length = self.sowing_speed
-        slow_speed = self.slowed_sowing_multiplier
-
-        if slow_speed >= 10:
-            slow_speed = 99999
-
-        if self.game_phase == self.SIMULTANEOUS_PHASE:
-
-            if player == 'a':
-                while self.no_of_micromoves_made_player_b < self.no_of_micromoves_made:
-                    if self.game_phase == self.SEQUENTIAL_PHASE: break
-                    # print("waiting for b")
-                    pass
-            elif player == 'b':
-                while self.no_of_micromoves_made_player_a < self.no_of_micromoves_made:
-                    if self.game_phase == self.SEQUENTIAL_PHASE: break
-                    # print("waiting for a")
-                    pass
-
-            if player == 'a' and self.player_a_sowing_slowed or player == 'b' and self.player_b_sowing_slowed:
-
-                if self.sowing_speed < 0.1:
-                    wait_length = 99999
-                else:
-                    wait_length = self.sowing_speed * slow_speed
-            else:
-                wait_length = self.sowing_speed
-            pass
-
-            while time.time() - start_time < wait_length:
-                if player == 'a' and self.player_a_sowing_slowed or player == 'b' and self.player_b_sowing_slowed:
-                    if self.sowing_speed < 0.1:
-                        wait_length = 99999
-                    else:
-                        wait_length = self.sowing_speed * slow_speed
-                else:
-                    wait_length = self.sowing_speed
-                # time.sleep(0.001)
-
-        elif self.game_phase == self.SEQUENTIAL_PHASE:
-
-            while time.time() - start_time < wait_length:
-                # print(wait)
-                pass
-            pass
-
-        if player == 'a':
-            self.no_of_micromoves_made_player_a += 1
-        elif player == 'b':
-            self.no_of_micromoves_made_player_b += 1
-
-        self.no_of_micromoves_made = max(self.no_of_micromoves_made_player_a, self.no_of_micromoves_made_player_b)
-
     def append_move(self, player_a_move, player_b_move):
         if not (type(player_a_move) == int) or 1 <= player_a_move <= 7:
             player_a_move = ''
