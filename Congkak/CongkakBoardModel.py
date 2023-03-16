@@ -61,8 +61,6 @@ class BoardModel:
 
         self.moves_made = []
 
-        self.running = True
-
     # do repeated sowing. has waiting
     def iterate_sowing(self, current_hand):
 
@@ -84,7 +82,7 @@ class BoardModel:
 
         self.update_player_hands_from_current_hand(current_hand)
 
-        self.wait_between_micromoves(current_hand.player)
+        time.sleep(self.sowing_speed)
 
         while status == self.CONTINUE_SOWING:
 
@@ -92,7 +90,7 @@ class BoardModel:
 
             self.update_player_hands_from_current_hand(current_hand)
 
-            self.wait_between_micromoves(current_hand.player)
+            time.sleep(self.sowing_speed)
 
             status = self.check_hand_status(current_hand)
 
@@ -110,10 +108,10 @@ class BoardModel:
             if len(self.active_players) == 0:
                 self.last_active_player = current_hand.player
 
-        self.reset_hands(current_hand.player)
+        self.reset_hand(current_hand.player)
         return status
 
-    # sows once
+    # sows once. has waiting
     def sow_once(self, hand):
 
         hand = self.pick_up_all_counters(hand)
@@ -134,6 +132,89 @@ class BoardModel:
                 self.player_b_hand = hand
 
         return hand
+
+    # do repeated simultaneous sowing
+    def iterated_sowing_simultaneous(self, hand_a, hand_b):
+
+        if 'a' not in self.active_players:
+            self.active_players.append('a')
+
+        if 'b' not in self.active_players:
+            self.active_players.append('b')
+
+        self.player_a_status = self.CONTINUE_SOWING
+        self.player_b_status = self.CONTINUE_SOWING
+
+        # status_a = self.CONTINUE_SOWING
+        # status_b = self.CONTINUE_SOWING
+
+        self.player_a_hand = hand_a
+        self.player_b_hand = hand_b
+
+        time.sleep(self.sowing_speed)
+
+        while self.player_a_status == self.CONTINUE_SOWING and self.player_b_status == self.CONTINUE_SOWING:
+
+            hand_a, hand_b = self.sow_once_simultaneous(hand_a, hand_b)
+
+            self.player_a_hand = hand_a
+            self.player_b_hand = hand_b
+
+            time.sleep(self.sowing_speed)
+
+            self.player_a_status = self.check_hand_status(hand_a)
+            self.player_b_status = self.check_hand_status(hand_b)
+
+        print("end simul sowing")
+
+        print("status a:" + str(self.player_a_status))
+        print("status b:" + str(self.player_b_status))
+
+        if self.player_a_status == self.TIKAM_A:
+            print("tikam a")
+        elif self.player_b_status == self.TIKAM_B:
+            print("tikam b")
+
+        elif self.player_a_status == self.STOP_SOWING_A:
+            self.reset_hand('a')
+            self.active_players.remove('a')
+            print("stop a")
+        elif self.player_b_status == self.STOP_SOWING_B:
+            self.reset_hand('b')
+            self.active_players.remove('b')
+            print("stop b")
+
+        elif self.player_a_status == self.PROMPT_SOWING_A:
+            self.reset_hand('a')
+            print("stop a")
+        elif self.player_b_status == self.PROMPT_SOWING_B:
+            self.reset_hand('b')
+            print("stop b")
+
+        pass
+
+    def sow_once_simultaneous(self, hand_a, hand_b):
+
+        hand_a = self.pick_up_all_counters(hand_a)
+        hand_b = self.pick_up_all_counters(hand_b)
+
+        if hand_a.counter_count == 0 or hand_b.counter_count == 0:
+            return hand_a, hand_b
+
+        while hand_a.counter_count > 0 and hand_b.counter_count > 0:
+
+            time.sleep(self.sowing_speed)
+
+            hand_a.move_one_pos()
+            hand_b.move_one_pos()
+
+            hand_a = self.drop_counter(hand_a)
+            hand_b = self.drop_counter(hand_b)
+
+            self.player_a_hand = hand_a
+            self.player_b_hand = hand_b
+
+        return hand_a, hand_b
 
     # pick up all counters at the hand position and put into hand
     def pick_up_all_counters(self, hand):
@@ -171,7 +252,7 @@ class BoardModel:
 
         return hand
 
-    # tikam the hand (will check if its possible to tikam or not
+    # tikam the hand (will check if its possible to tikam or not). has waiting
     def tikam(self, hand):
 
         if hand.player == 'a' and hand.has_looped and hand.hole_pos < 20:
@@ -353,7 +434,7 @@ class BoardModel:
         return action
 
     # reset hands to empty and no position
-    def reset_hands(self, player):
+    def reset_hand(self, player):
 
         if player == 'a':
             self.player_a_hand = Hand(player='a', hole_pos=-1, counter_count=0)
@@ -375,8 +456,8 @@ class BoardModel:
             self.player_b_hand.hole_pos = pos
 
     def reset_game(self):
-        self.reset_hands('a')
-        self.reset_hands('b')
+        self.reset_hand('a')
+        self.reset_hand('b')
 
         self.house_a_values = [7, 7, 7, 7, 7, 7, 7]
         self.house_b_values = [7, 7, 7, 7, 7, 7, 7]
@@ -396,6 +477,7 @@ class BoardModel:
         self.no_of_micromoves_made_player_b = 0
 
     # wait time
+    # TODO: add waiting if both players
     def wait_between_micromoves(self, player):
 
         if (self.ping):
