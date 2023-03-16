@@ -361,13 +361,10 @@ class BoardModel:
     # returns the action the game manager should do
     def action_to_take(self):
 
-        # print("\n\nchecking action")
+        # print("checking action")
         #
         # print("status a: " + str(self.player_a_status))
         # print("status b: " + str(self.player_b_status))
-        #
-        # print("micromove a: " + str(self.no_of_micromoves_made_player_a))
-        # print("micromove b: " + str(self.no_of_micromoves_made_player_b))
 
         action = self.ERROR
         if self.game_phase == self.SEQUENTIAL_PHASE:
@@ -441,6 +438,22 @@ class BoardModel:
                     self.game_phase = self.SEQUENTIAL_PHASE
                 if self.ping: print("prompt player b")
                 action = self.PROMPT_SOWING_B
+
+
+
+
+            # elif self.player_a_status == self.STOP_SOWING_A and not self.player_b_status == self.STOP_SOWING_B:
+            #     print("player a has stopped. player b has not: " + str(self.player_b_status) +
+            #           ". wait for player b to stop")
+            #     action = self.CONTINUE_SOWING_B
+            #     self.game_phase = self.SEQUENTIAL_PHASE
+            # elif self.player_b_status == self.STOP_SOWING_B and not self.player_a_status == self.STOP_SOWING_A:
+            #     print("player b has stopped. player a has not: " + str(self.player_a_status) +
+            #           ". wait for player a to stop")
+            #     action = self.CONTINUE_SOWING_A
+            #     self.game_phase = self.SEQUENTIAL_PHASE
+
+
         return action
 
     # reset hands to empty and no position
