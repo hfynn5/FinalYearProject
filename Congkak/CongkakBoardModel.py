@@ -184,6 +184,8 @@ class BoardModel:
 
     def sow_once_simultaneous(self, hand_a, hand_b):
 
+        # TODO: this process will take time. picking up counters is technically a micromove
+        #  therefore if one hand picks, the other must move. fix this.
         if hand_a.counter_count <= 0:
             hand_a = self.pick_up_all_counters(hand_a)
         if hand_b.counter_count <= 0:
@@ -245,8 +247,7 @@ class BoardModel:
 
     # tikam the hand (will check if its possible to tikam or not). has waiting
     def tikam(self, hand):
-
-        print("trying to tikam: " + hand.player)
+        # print("trying to tikam: " + hand.player)
 
         if hand.player == 'a' and hand.has_looped and hand.hole_pos < 20:
             self.player_a_hand = hand
@@ -328,22 +329,17 @@ class BoardModel:
 
         status = self.CONTINUE_SOWING
 
-        hand.print_data()
-
-        if 10 < hand.hole_pos < 18:
-            print("counters at hole pos: " + str(self.house_a_values[hand.hole_pos - 11]))
-        if 20 < hand.hole_pos < 28:
-            print("counters at hole pos: " + str(self.house_b_values[hand.hole_pos - 21]))
+        # hand.print_data()
+        #
+        # if 10 < hand.hole_pos < 18:
+        #     print("counters at hole pos: " + str(self.house_a_values[hand.hole_pos - 11]))
+        # if 20 < hand.hole_pos < 28:
+        #     print("counters at hole pos: " + str(self.house_b_values[hand.hole_pos - 21]))
 
         if hand.hole_pos == 28 and hand.counter_count == 0:
             status = self.PROMPT_SOWING_A
         elif hand.hole_pos == 18 and hand.counter_count == 0:
             status = self.PROMPT_SOWING_B
-        # elif (10 < hand.hole_pos < 18 and
-        #       (self.house_a_values[hand.hole_pos - 11] == 0)) or \
-        #         (20 < hand.hole_pos < 28 and
-        #          (self.house_b_values[hand.hole_pos - 21] == 0)):
-        #     status = self.ERROR
 
         elif (10 < hand.hole_pos < 18 and
               (self.house_a_values[hand.hole_pos - 11] == 1) and
@@ -427,18 +423,6 @@ class BoardModel:
                 if self.ping: print("both tikam. prompting both. honestly, this should never be printed so you fucked up")
                 action = self.PROMPT_SOWING_BOTH
 
-            # # remove
-            # elif self.player_a_status == self.STOP_SOWING_A and self.player_b_status == self.STOP_SOWING_B and not \
-            #         self.no_of_micromoves_made_player_a == self.no_of_micromoves_made_player_b:
-            #     print("sequential phase")
-            #     self.game_phase = self.SEQUENTIAL_PHASE
-            #     if self.last_active_player == 'a':
-            #         print("prompt player b")
-            #         action = self.PROMPT_SOWING_B
-            #     elif self.last_active_player == 'b':
-            #         print("prompt player a")
-            #         action = self.PROMPT_SOWING_A
-
             elif self.player_a_status == self.STOP_SOWING_A and self.player_b_status == self.CONTINUE_SOWING:
                 if self.ping: print("player a has stopped. player b has not. continue sowing b")
                 action = self.CONTINUE_SOWING_B
@@ -467,7 +451,6 @@ class BoardModel:
                     self.game_phase = self.SEQUENTIAL_PHASE
                 if self.ping: print("prompt player b")
                 action = self.PROMPT_SOWING_B
-
 
         return action
 
@@ -558,8 +541,10 @@ class BoardModel:
         return truth_list
 
     # print holes
-    def print_holes(self):
+    def print_all_data(self):
         print("house a: " + str(self.house_a_values))
         print("house b: " + str(self.house_b_values))
         print("store a: " + str(self.storeroom_a_value))
         print("store b: " + str(self.storeroom_b_value))
+        self.player_a_hand.print_data()
+        self.player_b_hand.print_data()
