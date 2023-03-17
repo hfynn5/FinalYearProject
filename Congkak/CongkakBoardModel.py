@@ -246,6 +246,8 @@ class BoardModel:
     # tikam the hand (will check if its possible to tikam or not). has waiting
     def tikam(self, hand):
 
+        print("trying to tikam: " + hand.player)
+
         if hand.player == 'a' and hand.has_looped and hand.hole_pos < 20:
             self.player_a_hand = hand
 
@@ -276,6 +278,12 @@ class BoardModel:
 
             self.reset_hand('a')
 
+            self.player_a_status = self.STOP_SOWING_A
+
+            self.active_players.remove('a')
+            if len(self.active_players) == 0:
+                self.last_active_player = 'a'
+
         elif hand.player == 'b' and hand.has_looped and hand.hole_pos > 20:
             self.player_b_hand = hand
 
@@ -305,6 +313,13 @@ class BoardModel:
             time.sleep(self.sowing_speed)
 
             self.reset_hand('b')
+
+            self.player_b_status = self.STOP_SOWING_B
+
+            self.active_players.remove('b')
+            if len(self.active_players) == 0:
+                self.last_active_player = 'b'
+
         else:
             print("cannot tikam")
 
@@ -313,17 +328,26 @@ class BoardModel:
 
         status = self.CONTINUE_SOWING
 
-        if hand.hole_pos == 28:
+        hand.print_data()
+
+        if 10 < hand.hole_pos < 18:
+            print("counters at hole pos: " + str(self.house_a_values[hand.hole_pos - 11]))
+        if 20 < hand.hole_pos < 28:
+            print("counters at hole pos: " + str(self.house_b_values[hand.hole_pos - 21]))
+
+        if hand.hole_pos == 28 and hand.counter_count == 0:
             status = self.PROMPT_SOWING_A
-        elif hand.hole_pos == 18:
+        elif hand.hole_pos == 18 and hand.counter_count == 0:
             status = self.PROMPT_SOWING_B
-        elif (hand.hole_pos < 20 and
-              (self.house_a_values[hand.hole_pos - 11] == 0)) or \
-                (hand.hole_pos > 20 and
-                 (self.house_b_values[hand.hole_pos - 21] == 0)):
-            status = self.ERROR
-        elif (hand.hole_pos < 20 and
-              (self.house_a_values[hand.hole_pos - 11] == 1)):
+        # elif (10 < hand.hole_pos < 18 and
+        #       (self.house_a_values[hand.hole_pos - 11] == 0)) or \
+        #         (20 < hand.hole_pos < 28 and
+        #          (self.house_b_values[hand.hole_pos - 21] == 0)):
+        #     status = self.ERROR
+
+        elif (10 < hand.hole_pos < 18 and
+              (self.house_a_values[hand.hole_pos - 11] == 1) and
+                hand.counter_count == 0):
             if hand.player == 'a':
                 if hand.has_looped:
                     status = self.TIKAM_A
@@ -331,9 +355,10 @@ class BoardModel:
                     status = self.STOP_SOWING_A
             elif hand.player == 'b':
                 status = self.STOP_SOWING_B
-        elif (hand.hole_pos > 20 and
-              (self.house_b_values[hand.hole_pos - 21] == 1)):
 
+        elif (20 < hand.hole_pos < 28 and
+              (self.house_b_values[hand.hole_pos - 21] == 1) and
+                hand.counter_count == 0):
             if hand.player == 'a':
                 status = self.STOP_SOWING_A
             elif hand.player == 'b':
@@ -348,6 +373,8 @@ class BoardModel:
             self.player_a_status = status
         if hand.player == 'b':
             self.player_b_status = status
+
+        print("status: " + str(status))
 
         return status
 
@@ -418,6 +445,15 @@ class BoardModel:
                 self.game_phase = self.SEQUENTIAL_PHASE
             elif self.player_b_status == self.STOP_SOWING_B and self.player_a_status == self.CONTINUE_SOWING:
                 if self.ping: print("player b has stopped. player a has not. continue sowing a")
+                action = self.CONTINUE_SOWING_A
+                self.game_phase = self.SEQUENTIAL_PHASE
+
+            elif self.player_a_status == self.TIKAM_A and self.player_b_status == self.CONTINUE_SOWING:
+                if self.ping: print("player a has tikam. player b has not. continue sowing b")
+                action = self.CONTINUE_SOWING_B
+                self.game_phase = self.SEQUENTIAL_PHASE
+            elif self.player_b_status == self.TIKAM_B and self.player_a_status == self.CONTINUE_SOWING:
+                if self.ping: print("player b has tikam. player a has not. continue sowing a")
                 action = self.CONTINUE_SOWING_A
                 self.game_phase = self.SEQUENTIAL_PHASE
 
