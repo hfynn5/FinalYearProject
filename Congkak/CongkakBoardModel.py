@@ -184,8 +184,10 @@ class BoardModel:
 
     def sow_once_simultaneous(self, hand_a, hand_b):
 
-        hand_a = self.pick_up_all_counters(hand_a)
-        hand_b = self.pick_up_all_counters(hand_b)
+        if hand_a.counter_count <= 0:
+            hand_a = self.pick_up_all_counters(hand_a)
+        if hand_b.counter_count <= 0:
+            hand_b = self.pick_up_all_counters(hand_b)
 
         if hand_a.counter_count == 0 or hand_b.counter_count == 0:
             return hand_a, hand_b
@@ -271,7 +273,9 @@ class BoardModel:
             self.storeroom_a_value += self.player_a_hand.drop_all_counters()
 
             time.sleep(self.sowing_speed)
-            pass
+
+            self.reset_hand('a')
+
         elif hand.player == 'b' and hand.has_looped and hand.hole_pos > 20:
             self.player_b_hand = hand
 
@@ -299,6 +303,8 @@ class BoardModel:
             self.storeroom_b_value += self.player_b_hand.drop_all_counters()
 
             time.sleep(self.sowing_speed)
+
+            self.reset_hand('b')
         else:
             print("cannot tikam")
 
@@ -425,20 +431,6 @@ class BoardModel:
                     self.game_phase = self.SEQUENTIAL_PHASE
                 if self.ping: print("prompt player b")
                 action = self.PROMPT_SOWING_B
-
-
-
-
-            # elif self.player_a_status == self.STOP_SOWING_A and not self.player_b_status == self.STOP_SOWING_B:
-            #     print("player a has stopped. player b has not: " + str(self.player_b_status) +
-            #           ". wait for player b to stop")
-            #     action = self.CONTINUE_SOWING_B
-            #     self.game_phase = self.SEQUENTIAL_PHASE
-            # elif self.player_b_status == self.STOP_SOWING_B and not self.player_a_status == self.STOP_SOWING_A:
-            #     print("player b has stopped. player a has not: " + str(self.player_a_status) +
-            #           ". wait for player a to stop")
-            #     action = self.CONTINUE_SOWING_A
-            #     self.game_phase = self.SEQUENTIAL_PHASE
 
 
         return action

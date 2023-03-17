@@ -213,6 +213,8 @@ class GameManager:
 
     def start_worker_tikam(self, hand):
         worker_tikam = Worker(self.tikam, hand=hand)
+        worker_tikam.signals.finished.connect(self.next_action)
+        self.threadpool.start(worker_tikam)
 
     # iterate sowing in board model
     def sow(self, new_hand):
