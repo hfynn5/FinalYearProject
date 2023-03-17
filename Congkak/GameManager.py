@@ -10,12 +10,9 @@ from PyQt6.QtCore import QObject, QThread, pyqtSignal, QRunnable, QThreadPool
 
 from PyQt6.QtGui import QPixmap
 
-# from IntelligentAgents import RandomAgent, MinimaxAgent
-
+# from Congkak.IntelligentAgents.MinimaxAgent import MinimaxAgent
 from Congkak.IntelligentAgents.RandomAgent import RandomAgent
 from Congkak.IntelligentAgents.MaxAgent import MaxAgent
-# from Congkak.IntelligentAgents.MinimaxAgent import MinimaxAgent
-
 
 
 class Worker(QRunnable):
@@ -133,7 +130,7 @@ class GameManager:
 
         # declare board model
         self.board_model = BoardModel()
-        self.board_model.ping = True
+        self.board_model.ping = False
 
         # declare graphics
         App = QApplication(sys.argv)
@@ -201,6 +198,12 @@ class GameManager:
     def start_worker_simultaneous_sowing(self, hole_a = None, hole_b = None, hand_a = None, hand_b = None):
         self.autoplay_hands = True
         self.board_graphic.set_enable_play_button(False)
+
+        if not self.player_a_agent == 'user':
+            hole_a = self.prompt_agent_for_input('a')
+
+        if not self.player_b_agent == 'user':
+            hole_b = self.prompt_agent_for_input('b')
 
         if hand_a is None:
             hand_a = Hand(player='a', hole_pos=hole_a, counter_count=0)
@@ -304,7 +307,6 @@ class GameManager:
     # decides what action to take when the hole input is chosen
     def choosing_hole_action(self, player, hole):
         if self.autoplay_hands:
-
             if self.board_model.game_phase == BoardModel.SIMULTANEOUS_PHASE:
                 # print("simul")
                 if player == 'a':
@@ -349,7 +351,6 @@ class GameManager:
     def prompt_agent_for_input(self, player):
         copied_board = copy.deepcopy(self.board_model)
         move = 0
-        available_moves = self.board_model.available_moves(player)
         if player == 'a':
             if self.player_a_agent == 'random':
                 move = self.random_agent.choose_move(player, copied_board) + 10
@@ -364,6 +365,7 @@ class GameManager:
                 move = self.max_agent.choose_move(player, copied_board) + 20
             elif self.player_b_agent == 'minimax':
                 move = self.minimax_agent.choose_move(player, copied_board) + 20
+
         return move
 
     def set_player_agent(self, player, agent_index):
@@ -372,8 +374,10 @@ class GameManager:
 
         if player == 'a':
             self.player_a_agent = self.agent_list[agent_index]
+            print(self.player_a_agent)
         elif player == 'b':
             self.player_b_agent = self.agent_list[agent_index]
+            print(self.player_b_agent)
 
         if agent_index == 0:
             self.board_graphic.set_enable_player_inputs(player, True)

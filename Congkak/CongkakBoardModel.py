@@ -106,9 +106,10 @@ class BoardModel:
             status = self.STOP_SOWING_B
 
         if status == self.STOP_SOWING_A or status == self.STOP_SOWING_B:
-            self.active_players.remove(current_hand.player)
-            if len(self.active_players) == 0:
-                self.last_active_player = current_hand.player
+            if current_hand.player in self.active_players:
+                self.active_players.remove(current_hand.player)
+                if len(self.active_players) == 0:
+                    self.last_active_player = current_hand.player
 
         self.reset_hand(current_hand.player)
         return status
@@ -167,31 +168,16 @@ class BoardModel:
             self.player_a_status = self.check_hand_status(hand_a)
             self.player_b_status = self.check_hand_status(hand_b)
 
-        print("end simul sowing")
-
-        print("status a:" + str(self.player_a_status))
-        print("status b:" + str(self.player_b_status))
-
-        if self.player_a_status == self.TIKAM_A:
-            print("tikam a")
-        elif self.player_b_status == self.TIKAM_B:
-            print("tikam b")
-
-        elif self.player_a_status == self.STOP_SOWING_A:
+        if self.player_a_status == self.STOP_SOWING_A:
             self.reset_hand('a')
             self.active_players.remove('a')
-            print("stop a")
         elif self.player_b_status == self.STOP_SOWING_B:
             self.reset_hand('b')
             self.active_players.remove('b')
-            print("stop b")
-
         elif self.player_a_status == self.PROMPT_SOWING_A:
             self.reset_hand('a')
-            print("stop a")
         elif self.player_b_status == self.PROMPT_SOWING_B:
             self.reset_hand('b')
-            print("stop b")
 
         pass
 
@@ -231,7 +217,7 @@ class BoardModel:
             hand.counter_count = self.house_b_values[hand.hole_pos - 21]
             self.house_b_values[hand.hole_pos - 21] = 0
         else:
-            print(hand)
+            print(hand.hole_pos)
             print("player " + hand.player + " at storeroom. cant pick up")
         return hand
 
@@ -260,7 +246,6 @@ class BoardModel:
 
     # tikam the hand (will check if its possible to tikam or not). has waiting
     def tikam(self, hand):
-        # print("trying to tikam: " + hand.player)
 
         if hand.player == 'a' and hand.has_looped and hand.hole_pos < 20:
             self.player_a_hand = hand
@@ -342,13 +327,6 @@ class BoardModel:
 
         status = self.CONTINUE_SOWING
 
-        # hand.print_data()
-        #
-        # if 10 < hand.hole_pos < 18:
-        #     print("counters at hole pos: " + str(self.house_a_values[hand.hole_pos - 11]))
-        # if 20 < hand.hole_pos < 28:
-        #     print("counters at hole pos: " + str(self.house_b_values[hand.hole_pos - 21]))
-
         if hand.hole_pos == 28 and hand.counter_count == 0:
             status = self.PROMPT_SOWING_A
         elif hand.hole_pos == 18 and hand.counter_count == 0:
@@ -383,17 +361,10 @@ class BoardModel:
         if hand.player == 'b':
             self.player_b_status = status
 
-        print("status: " + str(status))
-
         return status
 
     # returns the action the game manager should do
     def action_to_take(self):
-
-        # print("checking action")
-        #
-        # print("status a: " + str(self.player_a_status))
-        # print("status b: " + str(self.player_b_status))
 
         action = self.ERROR
         if self.game_phase == self.SEQUENTIAL_PHASE:
@@ -468,6 +439,7 @@ class BoardModel:
         return action
 
     # reset hands to empty and no position
+    # TODO: find vanishing counter.
     def reset_hand(self, player):
 
         if player == 'a':
