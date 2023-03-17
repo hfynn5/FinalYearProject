@@ -241,13 +241,13 @@ class GameManager:
 
         update_board_graphics(board_graphic=self.board_graphic, board_model=self.board_model)
 
-        # print("next action")
+        print("next action")
 
         action = self.board_model.action_to_take()
 
-        # print("player: " + player + " action: " + str(action))
-        # print("player a: " + str(self.board_model.player_a_status))
-        # print("player b: " + str(self.board_model.player_b_status))
+        print("action: " + str(action))
+        print("player a: " + str(self.board_model.player_a_status))
+        print("player b: " + str(self.board_model.player_b_status))
 
         if self.board_model.player_a_status == BoardModel.TIKAM_A:
             self.start_worker_tikam(hand=self.board_model.player_a_hand)
