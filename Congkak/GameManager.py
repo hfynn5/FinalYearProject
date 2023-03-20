@@ -10,7 +10,7 @@ from PyQt6.QtCore import QObject, QThread, pyqtSignal, QRunnable, QThreadPool
 
 from PyQt6.QtGui import QPixmap
 
-# from Congkak.IntelligentAgents.MinimaxAgent import MinimaxAgent
+from Congkak.IntelligentAgents.MinimaxAgent import MinimaxAgent
 from Congkak.IntelligentAgents.RandomAgent import RandomAgent
 from Congkak.IntelligentAgents.MaxAgent import MaxAgent
 
@@ -114,7 +114,7 @@ class GameManager:
         # create Intelligent Agents
         self.random_agent = RandomAgent()
         self.max_agent = MaxAgent()
-        # self.minimax_agent = MinimaxAgent()
+        self.minimax_agent = MinimaxAgent((0, 0, 0, 0, 0, 0), 1, 0)
 
         self.autoplay_hands = False
 
