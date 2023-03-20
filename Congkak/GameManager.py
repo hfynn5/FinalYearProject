@@ -114,7 +114,7 @@ class GameManager:
         # create Intelligent Agents
         self.random_agent = RandomAgent()
         self.max_agent = MaxAgent()
-        self.minimax_agent = MinimaxAgent((0, 0, 0, 0, 0, 0), 1, 0)
+        self.minimax_agent = MinimaxAgent((0, 0, 0, 0, 0, 0), 2, 0)
 
         self.autoplay_hands = False
 
@@ -199,10 +199,10 @@ class GameManager:
         self.autoplay_hands = True
         self.board_graphic.set_enable_play_button(False)
 
-        if not self.player_a_agent == 'user':
+        if not self.player_a_agent == 'user' and hand_a is None:
             hole_a = self.prompt_agent_for_input('a')
 
-        if not self.player_b_agent == 'user':
+        if not self.player_b_agent == 'user' and hand_b is None:
             hole_b = self.prompt_agent_for_input('b')
 
         if hand_a is None:

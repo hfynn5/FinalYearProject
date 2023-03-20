@@ -7,36 +7,48 @@ from Congkak.Hand import Hand
 class MaxAgent:
     def __init__(self):
         self.board_model = BoardModel()
-
         self.final_best_value = 1
         self.final_best_move = 0
+
+        self.no_of_node = 0
+
+        self.depth = 0
 
         pass
 
     def choose_move(self, player, board_model):
         self.final_best_value = 1
         self.final_best_move = 0
+        self.depth = 1
         available_moves = board_model.available_moves(player)
-        self.board_model = board_model
-        self.board_model.sowing_speed = 0
-        self.board_model.game_phase = BoardModel.SEQUENTIAL_PHASE
-        self.board_model.ping = False
+
+        board_model.sowing_speed = 0
+        board_model.game_phase = BoardModel.SEQUENTIAL_PHASE
+        board_model.ping = False
+
+        board_model.reset_hand('a')
+        board_model.reset_hand('b')
+        board_model.player_a_status = BoardModel.STOP_SOWING_A
+        board_model.player_b_status = BoardModel.STOP_SOWING_B
+
+        self.no_of_node = 0
 
         for move in available_moves:
-            new_board = copy.deepcopy(self.board_model)
-            # print("testing main move: " + str(move))
-            # new_board.print_holes()
-            evaluation = self.evaluate(player, move, new_board)
-            # print("main move " + str(move) + " tested. evaluation: " + str(evaluation))
+            new_board = copy.deepcopy(board_model)
+            evaluation = self.maximising(player, move, new_board, 1)
+
             if evaluation >= self.final_best_value:
                 self.final_best_value = evaluation
                 self.final_best_move = move
 
-        # print("final eval: " + str(self.final_best_value))
-        # print("final best move: " + str(self.final_best_move))
+        print("nodes explored: " + str(self.no_of_node))
         return self.final_best_move
 
-    def evaluate(self, player, move, board_model):
+    def maximising(self, player, move, board_model, depth):
+
+        self.no_of_node += 1
+
+        self.depth = max(self.depth, depth)
 
         hole = 0
 
@@ -51,22 +63,12 @@ class MaxAgent:
 
         board_model.iterate_sowing(new_hand)
 
-        if player == 'a' and board_model.storeroom_a_value > self.final_best_value:
-            # print("optimal")
-            return board_model.storeroom_a_value
-        elif player == 'b' and board_model.storeroom_b_value > self.final_best_value:
-            return board_model.storeroom_b_value
-
-        # print(board_model.storeroom_a_value)
-
         if board_model.action_to_take() == BoardModel.PROMPT_SOWING_A and player == 'a' or \
                 board_model.action_to_take() == BoardModel.PROMPT_SOWING_B and player == 'b':
             available_moves = board_model.available_moves(player)
             for move in available_moves:
                 new_board = copy.deepcopy(board_model)
-                # print("testing mini move: " + str(move))
-                # new_board.print_holes()
-                evaluation = self.evaluate(player, move, new_board)
+                evaluation = self.maximising(player, move, new_board, depth + 1)
 
                 if evaluation > self.final_best_value:
                     return evaluation
@@ -74,11 +76,9 @@ class MaxAgent:
                 if evaluation >= best_value:
                     best_value = evaluation
         else:
-
             if player == 'a':
                 best_value = board_model.storeroom_a_value
             elif player == 'b':
                 best_value = board_model.storeroom_b_value
 
-        # print("eval: " + str(best_value))
         return best_value

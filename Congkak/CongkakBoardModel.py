@@ -46,9 +46,6 @@ class BoardModel:
 
         self.game_phase = self.SIMULTANEOUS_PHASE
 
-        self.turn_count = 0
-        self.current_player_turn = ''
-
         self.sowing_speed = 0
         self.slowed_sowing_multiplier = 10  # if more than 10, slowing is infinite
 
@@ -77,10 +74,6 @@ class BoardModel:
             self.player_a_sowing_slowed = False
 
         status = self.CONTINUE_SOWING
-
-        if not current_hand.player == self.current_player_turn and self.game_phase == self.SEQUENTIAL_PHASE:
-            self.turn_count += 1
-            self.current_player_turn = current_hand.player
 
         self.update_player_hands_from_current_hand(current_hand)
 
@@ -390,6 +383,7 @@ class BoardModel:
                 elif self.last_active_player == 'b':
                     action = self.PROMPT_SOWING_A
                     if self.ping: print("prompt player a 3")
+
         elif self.game_phase == self.SIMULTANEOUS_PHASE:
 
             # keep
