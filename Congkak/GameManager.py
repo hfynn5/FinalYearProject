@@ -352,7 +352,6 @@ class GameManager:
 
     def prompt_agent_for_input(self, player):
         copied_board = copy.deepcopy(self.board_model)
-        print("prompting agent for input player: " + player + " . board state: ")
         move = 0
         if player == 'a':
             if self.player_a_agent == 'random':

@@ -33,8 +33,6 @@ class MinimaxAgent:
 
     def choose_move(self, player, board_model):
 
-        print("minimax player: " + str(player))
-
         self.node_count = 0
 
         final_best_move = 0
@@ -48,8 +46,6 @@ class MinimaxAgent:
         board_model.player_a_status = BoardModel.STOP_SOWING_A
         board_model.player_b_status = BoardModel.STOP_SOWING_B
 
-        board_model.print_all_data()
-
         final_best_value = 0
         if player == 'a':
             final_best_value = -math.inf
@@ -62,11 +58,7 @@ class MinimaxAgent:
 
         for move in available_moves:
             new_board = copy.deepcopy(board_model)
-            # print("testing main move: " + str(move))
-            # evaluation = self.new_minimax(board_model=new_board, move=move, depth=self.maximum_depth, player=player)
             evaluation, board = self.minimax(board_model=new_board, move=move, depth=self.maximum_depth, player=player, alpha=-math.inf, beta=math.inf)
-            # print("main move " + str(move) + " tested. evaluation: " + str(evaluation))
-            # print("total nodes searched: " + str(self.node_count))
 
             if player == 'a' and (evaluation >= final_best_value):
                 final_best_value = evaluation
@@ -77,13 +69,13 @@ class MinimaxAgent:
                 final_best_move = move
                 optimal_board = board
 
-            print("total nodes searched: " + str(self.node_count))
+            # print("total nodes searched: " + str(self.node_count))
+            # print("optimal board so far: ")
+            # optimal_board.print_all_data()
 
-            print("optimal board so far: ")
-            optimal_board.print_all_data()
-
-        print("optimal board: ")
-        optimal_board.print_all_data()
+        # print("optimal board: ")
+        # optimal_board.print_all_data()
+        print("minimax: total nodes searched: " + str(self.node_count))
 
         return final_best_move
 
@@ -91,13 +83,9 @@ class MinimaxAgent:
 
         self.node_count += 1
 
-        if not player == 'a' and not player == 'b':
-            print("wtf is the player here omg: " + player)
-
         optimal_board = BoardModel()
 
         if depth == 0:
-            # print("depth reached")
             return self.evaluate_position(board_model, player), board_model
 
         hole = 0
@@ -111,10 +99,7 @@ class MinimaxAgent:
         available_moves = board_model.available_moves(player)
 
         if depth == 0 or len(available_moves) == 0:
-            print("leaf node reached")
             return self.evaluate_position(board_model, player), board_model
-
-        # print("action to take: " + str(board_model.action_to_take()))
 
         if player == 'a':
             max_eva = -math.inf
@@ -122,7 +107,6 @@ class MinimaxAgent:
             match board_model.action_to_take():
 
                 case BoardModel.PROMPT_SOWING_BOTH: # similar to prompt sowing a
-                    # print("prompting both")
                     available_moves = board_model.available_moves('a')
                     for move in available_moves:
                         new_board = copy.deepcopy(board_model)
@@ -138,7 +122,6 @@ class MinimaxAgent:
 
                 case BoardModel.PROMPT_SOWING_A:
                     available_moves = board_model.available_moves('a')
-                    print("prompting a again")
                     for move in available_moves:
                         new_board = copy.deepcopy(board_model)
 
@@ -152,7 +135,6 @@ class MinimaxAgent:
                             break
 
                 case BoardModel.PROMPT_SOWING_B:
-                    print("prompring b from a")
                     available_moves = board_model.available_moves('b')
                     for move in available_moves:
                         new_board = copy.deepcopy(board_model)
@@ -188,7 +170,6 @@ class MinimaxAgent:
                             break
 
                 case BoardModel.PROMPT_SOWING_A:
-                    print("prompring a from b")
                     available_moves = board_model.available_moves('a')
                     for move in available_moves:
                         new_board = copy.deepcopy(board_model)
@@ -203,7 +184,6 @@ class MinimaxAgent:
 
                 case BoardModel.PROMPT_SOWING_B:
                     available_moves = board_model.available_moves('b')
-                    print("prompting b again")
                     for move in available_moves:
                         new_board = copy.deepcopy(board_model)
 

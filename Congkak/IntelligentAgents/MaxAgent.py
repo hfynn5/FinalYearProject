@@ -41,7 +41,7 @@ class MaxAgent:
                 self.final_best_value = evaluation
                 self.final_best_move = move
 
-        print("nodes explored: " + str(self.no_of_node))
+        print("max: total nodes searched: " + str(self.no_of_node))
         return self.final_best_move
 
     def maximising(self, player, move, board_model, depth):

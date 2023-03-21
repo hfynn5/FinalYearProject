@@ -361,25 +361,25 @@ class BoardModel:
 
         action = self.ERROR
 
-        print("chceking action: status a: " + str(self.player_a_status) + ". status b: " + str(
-            self.player_b_status) + ". phase: " + str(self.game_phase) + ". last active player" )
-
         if self.game_phase == self.SEQUENTIAL_PHASE:
 
             if sum(self.house_a_values) == 0 and sum(self.house_b_values) == 0:
                 action = self.GAME_END
+
             elif sum(self.house_a_values) == 0:
                 action = self.PROMPT_SOWING_B
                 if self.ping: print("all of a houses empty. prompt player b")
             elif sum(self.house_b_values) == 0:
                 action = self.PROMPT_SOWING_A
                 if self.ping: print("all of b houses empty. prompt player a")
+
             elif self.player_a_status == self.PROMPT_SOWING_A:
                 action = self.PROMPT_SOWING_A
                 if self.ping: print("prompt player a 2")
             elif self.player_b_status == self.PROMPT_SOWING_B:
                 action = self.PROMPT_SOWING_B
                 if self.ping: print("prompt player b 2")
+
             elif self.player_a_status == self.STOP_SOWING_A and self.player_b_status == self.STOP_SOWING_B:
                 if self.last_active_player == 'a':
                     action = self.PROMPT_SOWING_B
