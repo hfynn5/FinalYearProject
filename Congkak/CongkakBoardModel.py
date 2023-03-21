@@ -360,6 +360,10 @@ class BoardModel:
     def action_to_take(self):
 
         action = self.ERROR
+
+        print("chceking action: status a: " + str(self.player_a_status) + ". status b: " + str(
+            self.player_b_status) + ". phase: " + str(self.game_phase) + ". last active player" )
+
         if self.game_phase == self.SEQUENTIAL_PHASE:
 
             if sum(self.house_a_values) == 0 and sum(self.house_b_values) == 0:
@@ -383,6 +387,8 @@ class BoardModel:
                 elif self.last_active_player == 'b':
                     action = self.PROMPT_SOWING_A
                     if self.ping: print("prompt player a 3")
+            else:
+                print("error. status a: " + str(self.player_a_status) + ". status b: " + str(self.player_b_status))
 
         elif self.game_phase == self.SIMULTANEOUS_PHASE:
 
@@ -429,6 +435,10 @@ class BoardModel:
                     self.game_phase = self.SEQUENTIAL_PHASE
                 if self.ping: print("prompt player b")
                 action = self.PROMPT_SOWING_B
+
+        else:
+            print("super weird bug. its neither seq nor simul")
+            print("error. status a: " + str(self.player_a_status) + ". status b: " + str(self.player_b_status) + ". phase: " + str(self.game_phase))
 
         return action
 

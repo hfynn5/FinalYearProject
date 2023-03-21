@@ -133,7 +133,6 @@ class BoardGraphic(QMainWindow):
         pen.setColor(QtGui.QColor('white'))
         painter.setPen(pen)
 
-
         painter.fillRect(0, 0, 800, 600, QtGui.QBrush((QtGui.QColor(255, 255, 255, 255))))
 
         pen.setColor(QtGui.QColor('brown'))

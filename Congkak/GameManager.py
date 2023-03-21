@@ -103,8 +103,8 @@ class GameManager:
 
     def __init__(self):
 
-        self.player_a_hand_pos = 0
-        self.player_b_hand_pos = 0
+        self.player_a_hand_pos = -1
+        self.player_b_hand_pos = -1
 
         # user, random, max, minimax, mcts
         self.agent_list = ['user', 'random', 'max', 'minimax', 'mcts']
@@ -199,10 +199,14 @@ class GameManager:
         self.autoplay_hands = True
         self.board_graphic.set_enable_play_button(False)
 
-        if not self.player_a_agent == 'user' and hand_a is None:
+        # print("hand a pos: " + str(hand_a.hole_pos))
+        # print("hand b pos: " + str(hand_b.hole_pos))
+
+        if not self.player_a_agent == 'user' and (hole_a is None or hole_a <= 0) and hand_a is None:
+            # print()
             hole_a = self.prompt_agent_for_input('a')
 
-        if not self.player_b_agent == 'user' and hand_b is None:
+        if not self.player_b_agent == 'user' and (hole_b is None or hole_b <= 0) and hand_b is None:
             hole_b = self.prompt_agent_for_input('b')
 
         if hand_a is None:
@@ -218,8 +222,6 @@ class GameManager:
         worker_tikam = Worker(self.tikam, hand=hand)
         worker_tikam.signals.finished.connect(self.next_action)
         self.threadpool.start(worker_tikam)
-
-    # def
 
     # iterate sowing in board model
     def sow(self, new_hand):
@@ -273,8 +275,8 @@ class GameManager:
                     self.do_next_move_from_loaded_moves(action)
                 else:
                     self.autoplay_hands = False
-                    self.prompt_player('a')
                     self.prompt_player('b')
+                    self.prompt_player('a')
                     self.board_graphic.set_enable_play_button(True)
 
             case BoardModel.CONTINUE_SOWING_A:
@@ -350,6 +352,7 @@ class GameManager:
 
     def prompt_agent_for_input(self, player):
         copied_board = copy.deepcopy(self.board_model)
+        print("prompting agent for input player: " + player + " . board state: ")
         move = 0
         if player == 'a':
             if self.player_a_agent == 'random':

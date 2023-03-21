@@ -19,9 +19,6 @@ class MinimaxAgent:
         self.final_best_move = 0
         self.board_model = BoardModel()
 
-        # self.best_a_value_sofar = -math.inf
-        # self.best_b_value_sofar = math.inf
-
         self.maximum_depth = maximum_depth
         self.maximum_number_of_node = maximum_number_node
 
@@ -36,49 +33,74 @@ class MinimaxAgent:
 
     def choose_move(self, player, board_model):
 
-        self.final_best_value = 1
-        self.final_best_move = 0
-        available_moves = board_model.available_moves(player)
-        self.board_model = board_model
-        self.board_model.sowing_speed = 0
-        self.board_model.game_phase = BoardModel.SEQUENTIAL_PHASE
-        self.board_model.ping = False
-
-        self.best_a_value_sofar = -math.inf
-        self.best_b_value_sofar = math.inf
+        print("minimax player: " + str(player))
 
         self.node_count = 0
 
+        final_best_move = 0
+        available_moves = board_model.available_moves(player)
+        board_model.sowing_speed = 0
+        board_model.game_phase = BoardModel.SEQUENTIAL_PHASE
+        board_model.ping = False
+
+        board_model.reset_hand('a')
+        board_model.reset_hand('b')
+        board_model.player_a_status = BoardModel.STOP_SOWING_A
+        board_model.player_b_status = BoardModel.STOP_SOWING_B
+
+        board_model.print_all_data()
+
+        final_best_value = 0
         if player == 'a':
-            self.final_best_value = -math.inf
+            final_best_value = -math.inf
+            board_model.last_active_player = 'b'
         elif player == 'b':
-            self.final_best_value = math.inf
+            final_best_value = math.inf
+            board_model.last_active_player = 'a'
+
+        optimal_board = BoardModel()
 
         for move in available_moves:
-            new_board = copy.deepcopy(self.board_model)
-            print("testing main move: " + str(move))
-            evaluation = self.minimax(board_model=new_board, move=move, depth=self.maximum_depth, player=player, alpha=-math.inf, beta=math.inf)
-            print("main move " + str(move) + " tested. evaluation: " + str(evaluation))
+            new_board = copy.deepcopy(board_model)
+            # print("testing main move: " + str(move))
+            # evaluation = self.new_minimax(board_model=new_board, move=move, depth=self.maximum_depth, player=player)
+            evaluation, board = self.minimax(board_model=new_board, move=move, depth=self.maximum_depth, player=player, alpha=-math.inf, beta=math.inf)
+            # print("main move " + str(move) + " tested. evaluation: " + str(evaluation))
+            # print("total nodes searched: " + str(self.node_count))
 
-            if player == 'a':
-                if evaluation >= self.final_best_value:
-                    self.final_best_value = evaluation
-                    self.final_best_move = move
-            elif player == 'b':
-                if evaluation <= self.final_best_value:
-                    self.final_best_value = evaluation
-                    self.final_best_move = move
+            if player == 'a' and (evaluation >= final_best_value):
+                final_best_value = evaluation
+                final_best_move = move
+                optimal_board = board
+            elif player == 'b' and (evaluation <= final_best_value):
+                final_best_value = evaluation
+                final_best_move = move
+                optimal_board = board
 
-        return self.final_best_move
+            print("total nodes searched: " + str(self.node_count))
+
+            print("optimal board so far: ")
+            optimal_board.print_all_data()
+
+        print("optimal board: ")
+        optimal_board.print_all_data()
+
+        return final_best_move
 
     def minimax(self, board_model, move, depth, player, alpha, beta):
 
         self.node_count += 1
 
-        print("node count: " + str(self.node_count))
+        if not player == 'a' and not player == 'b':
+            print("wtf is the player here omg: " + player)
+
+        optimal_board = BoardModel()
+
+        if depth == 0:
+            # print("depth reached")
+            return self.evaluate_position(board_model, player), board_model
 
         hole = 0
-
         if player == 'a':
             hole = move + 10
         elif player == 'b':
@@ -87,11 +109,12 @@ class MinimaxAgent:
         new_hand = Hand(player=player, hole_pos=hole, counter_count=0)
         board_model.iterate_sowing(new_hand)
         available_moves = board_model.available_moves(player)
-        evaluation = self.evaluate_position(board_model, player)
 
         if depth == 0 or len(available_moves) == 0:
-            print("terminating")
-            return evaluation
+            print("leaf node reached")
+            return self.evaluate_position(board_model, player), board_model
+
+        # print("action to take: " + str(board_model.action_to_take()))
 
         if player == 'a':
             max_eva = -math.inf
@@ -99,10 +122,15 @@ class MinimaxAgent:
             match board_model.action_to_take():
 
                 case BoardModel.PROMPT_SOWING_BOTH: # similar to prompt sowing a
+                    # print("prompting both")
                     available_moves = board_model.available_moves('a')
                     for move in available_moves:
                         new_board = copy.deepcopy(board_model)
-                        eva = self.minimax(new_board, move, depth, 'a', alpha, beta)
+
+                        eva, board = self.minimax(new_board, move, depth - 1, 'a', alpha, beta)
+                        if eva > max_eva:
+                            max_eva = eva
+                            optimal_board = board
                         max_eva = max(max_eva, eva)
                         alpha = max(alpha, max_eva)
                         if beta <= alpha:
@@ -110,132 +138,154 @@ class MinimaxAgent:
 
                 case BoardModel.PROMPT_SOWING_A:
                     available_moves = board_model.available_moves('a')
+                    print("prompting a again")
                     for move in available_moves:
                         new_board = copy.deepcopy(board_model)
-                        eva = self.minimax(new_board, move, depth,'a', alpha, beta)
-                        max_eva = max(max_eva,eva)
-                        alpha = max(alpha, max_eva)
-                        if beta <= alpha:
-                            break
 
-                case BoardModel.PROMPT_SOWING_B:
-                    available_moves = board_model.available_moves('b')
-                    for move in available_moves:
-                        new_board = copy.deepcopy(board_model)
-                        eva = self.minimax(new_board, move, depth-1, 'b', alpha, beta)
+                        eva, board = self.minimax(new_board, move, depth - 1, 'a', alpha, beta)
+                        if eva > max_eva:
+                            max_eva = eva
+                            optimal_board = board
                         max_eva = max(max_eva, eva)
                         alpha = max(alpha, max_eva)
                         if beta <= alpha:
                             break
 
-            # if evaluation > self.current_best_a_value:
-            #     return evaluation
+                case BoardModel.PROMPT_SOWING_B:
+                    print("prompring b from a")
+                    available_moves = board_model.available_moves('b')
+                    for move in available_moves:
+                        new_board = copy.deepcopy(board_model)
+                        eva, board = self.minimax(new_board, move, depth - 1, 'b', alpha, beta)
+                        if eva > max_eva:
+                            max_eva = eva
+                            optimal_board = board
+                        max_eva = max(max_eva, eva)
+                        alpha = max(alpha, max_eva)
+                        if beta <= alpha:
+                            break
 
-            return max_eva
+            return max_eva, optimal_board
 
         elif player == 'b':
-
-            # print("testing player b")
 
             min_eva = math.inf
 
             match board_model.action_to_take():
 
-                case BoardModel.PROMPT_SOWING_BOTH:  # similar to prompt sowing a
+                case BoardModel.PROMPT_SOWING_BOTH:  # similar to prompt sowing b
                     available_moves = board_model.available_moves('b')
                     for move in available_moves:
                         new_board = copy.deepcopy(board_model)
-                        eva = self.minimax(new_board, move, depth, 'b', alpha, beta)
+
+                        eva, board = self.minimax(new_board, move, depth - 1, 'b', alpha, beta)
+                        if eva < min_eva:
+                            min_eva = eva
+                            optimal_board = board
                         min_eva = min(min_eva, eva)
-                        beta = min(alpha, min_eva)
+                        beta = min(beta, min_eva)
                         if beta <= alpha:
-                            print("alpha beta-d")
                             break
 
                 case BoardModel.PROMPT_SOWING_A:
+                    print("prompring a from b")
                     available_moves = board_model.available_moves('a')
                     for move in available_moves:
                         new_board = copy.deepcopy(board_model)
-                        eva = self.minimax(new_board, move, depth - 1, 'a', alpha, beta)
+                        eva, board = self.minimax(new_board, move, depth - 1, 'a', alpha, beta)
+                        if eva < min_eva:
+                            min_eva = eva
+                            optimal_board = board
                         min_eva = min(min_eva, eva)
-                        beta = min(alpha, min_eva)
+                        beta = min(beta, min_eva)
                         if beta <= alpha:
-                            print("alpha beta-d")
                             break
 
                 case BoardModel.PROMPT_SOWING_B:
                     available_moves = board_model.available_moves('b')
+                    print("prompting b again")
                     for move in available_moves:
                         new_board = copy.deepcopy(board_model)
-                        eva = self.minimax(new_board, move, depth, 'b', alpha, beta)
+
+                        eva, board = self.minimax(new_board, move, depth - 1, 'b', alpha, beta)
+                        if eva < min_eva:
+                            min_eva = eva
+                            optimal_board = board
                         min_eva = min(min_eva, eva)
-                        beta = min(alpha, min_eva)
+                        beta = min(beta, min_eva)
                         if beta <= alpha:
                             break
 
-            return min_eva
+            return min_eva, optimal_board
 
-            #
-            # if evaluation < self.current_best_b_value:
-            #     return evaluation
-
-        pass
-
-    def maximising(self, player, move, board_model):
-
-        self.node_count += 1
-
-        hole = 0
-
-        best_value = -1
-
-        if player == 'a':
-            hole = move + 10
-        elif player == 'b':
-            hole = move + 20
-
-        new_hand = Hand(player=player, hole_pos=hole, counter_count=0)
-
-        board_model.iterate_sowing(new_hand)
-
-        evaluation = self.evaluate_position(board_model, player)
-
-        if player == 'a' and evaluation > self.best_a_value_sofar:
-            # print("optimal")
-            return evaluation
-        elif player == 'b' and evaluation < self.best_b_value_sofar:
-            return evaluation
-
-        # print(board_model.storeroom_a_value)
-
-        if board_model.action_to_take() == BoardModel.PROMPT_SOWING_A and player == 'a' or \
-                board_model.action_to_take() == BoardModel.PROMPT_SOWING_B and player == 'b':
-            available_moves = board_model.available_moves(player)
-            for move in available_moves:
-                new_board = copy.deepcopy(board_model)
-                # print("testing mini move: " + str(move))
-                # new_board.print_holes()
-                evaluation = self.maximising(player, move, new_board)
-
-                if evaluation > self.final_best_value:
-                    return evaluation
-
-                if evaluation >= best_value:
-                    best_value = evaluation
-        else:
-
-            if player == 'a':
-                best_value = board_model.storeroom_a_value
-            elif player == 'b':
-                best_value = board_model.storeroom_b_value
+    # def new_minimax(self, board_model, move, depth, player):
+    #
+    #     hole = 0
+    #
+    #     best_value = 0
+    #
+    #     if player == 'a':
+    #         best_value = -math.inf
+    #     elif player == 'b':
+    #         best_value = math.inf
+    #
+    #     if player == 'a':
+    #         hole = move + 10
+    #     elif player == 'b':
+    #         hole = move + 20
+    #
+    #     print("player: " + str(player) + " depth: " + str(depth))
+    #
+    #     new_hand = Hand(player=player, hole_pos=hole, counter_count=0)
+    #     board_model.iterate_sowing(new_hand)
+    #     available_moves = board_model.available_moves(player)
+    #
+    #     if depth == 0 or len(available_moves) == 0:
+    #         # print("terminating")
+    #         return self.evaluate_position(board_model, player)
+    #
+    #     if board_model.action_to_take() == BoardModel.PROMPT_SOWING_A and player == 'a' or \
+    #             board_model.action_to_take() == BoardModel.PROMPT_SOWING_B and player == 'b':
+    #         available_moves = board_model.available_moves(player)
+    #         for move in available_moves:
+    #             new_board = copy.deepcopy(board_model)
+    #             # print("testing mini move: " + str(move))
+    #             # new_board.print_holes()
+    #             evaluation = self.new_minimax(new_board, move, depth, player)
+    #
+    #             if player == 'a' and evaluation > best_value:
+    #                 best_value = evaluation
+    #
+    #             if player == 'b' and evaluation < best_value:
+    #                 best_value = evaluation
+    #
+    #     else:
+    #
+    #         available_moves = board_model.available_moves(player)
+    #         for move in available_moves:
+    #             new_board = copy.deepcopy(board_model)
+    #             # print("testing mini move: " + str(move))
+    #             # new_board.print_holes()
+    #
+    #             new_player = ''
+    #             if player == 'a':
+    #                 new_player = 'b'
+    #             elif player == 'b':
+    #                 new_player = 'a'
+    #
+    #             evaluation = self.new_minimax(new_board, move, depth-1, new_player)
+    #
+    #             if player == 'a' and evaluation > best_value:
+    #                 best_value = evaluation
+    #
+    #             if player == 'b' and evaluation < best_value:
+    #                 best_value = evaluation
+    #
+    #     pass
 
     def evaluate_position(self, board_model, player):
         best_value = 0
 
         best_value = board_model.storeroom_a_value - board_model.storeroom_b_value
-        #
-        # if player == 'a':
-        #     best_value = board_model.storeroom_a_value
-        # elif player == 'b':
-        #     best_value = -board_model.storeroom_b_value
+
         return best_value
