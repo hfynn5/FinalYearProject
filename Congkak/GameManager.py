@@ -114,7 +114,7 @@ class GameManager:
         # create Intelligent Agents
         self.random_agent = RandomAgent()
         self.max_agent = MaxAgent()
-        self.minimax_agent = MinimaxAgent((0, 0, 0, 0, 0, 0), 2, 0)
+        self.minimax_agent = MinimaxAgent(weights=(0, 0, 0, 0, 0, 0), maximum_depth=2, maximum_self_depth=3, maximum_number_node=0)
 
         self.autoplay_hands = False
 
@@ -350,6 +350,7 @@ class GameManager:
             else:
                 self.choosing_hole_action(player=player, hole=self.prompt_agent_for_input(player))
 
+    # TODO: add a way to save future moves to save time
     def prompt_agent_for_input(self, player):
         copied_board = copy.deepcopy(self.board_model)
         move = 0

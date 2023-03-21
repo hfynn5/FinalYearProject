@@ -14,15 +14,17 @@ class MinimaxAgent:
     # h6 = maximise the difference between the player's and opponent's storeroom
     # h7 =
 
-    def __init__(self, weights, maximum_depth, maximum_number_node):
+    def __init__(self, weights, maximum_depth, maximum_self_depth, maximum_number_node):
         self.final_best_value = 1
         self.final_best_move = 0
         self.board_model = BoardModel()
 
         self.maximum_depth = maximum_depth
+        self.maximum_self_depth = maximum_self_depth
         self.maximum_number_of_node = maximum_number_node
 
         self.node_count = 0
+        self.checked_opponent = False
 
         self.heuristics_weights = range(6)
 
@@ -34,6 +36,7 @@ class MinimaxAgent:
     def choose_move(self, player, board_model):
 
         self.node_count = 0
+        self.checked_opponent = False
 
         final_best_move = 0
         available_moves = board_model.available_moves(player)
@@ -57,8 +60,9 @@ class MinimaxAgent:
         optimal_board = BoardModel()
 
         for move in available_moves:
+            self.checked_opponent = False
             new_board = copy.deepcopy(board_model)
-            evaluation, board = self.minimax(board_model=new_board, move=move, depth=self.maximum_depth, player=player, alpha=-math.inf, beta=math.inf)
+            evaluation, board = self.minimax(board_model=new_board, move=move, depth=self.maximum_depth, self_depth=self.maximum_self_depth, player=player, alpha=-math.inf, beta=math.inf)
 
             if player == 'a' and (evaluation >= final_best_value):
                 final_best_value = evaluation
@@ -69,7 +73,7 @@ class MinimaxAgent:
                 final_best_move = move
                 optimal_board = board
 
-            # print("total nodes searched: " + str(self.node_count))
+            print("total nodes searched: " + str(self.node_count))
             # print("optimal board so far: ")
             # optimal_board.print_all_data()
 
@@ -79,13 +83,17 @@ class MinimaxAgent:
 
         return final_best_move
 
-    def minimax(self, board_model, move, depth, player, alpha, beta):
+    def minimax(self, board_model, move, depth, self_depth, player, alpha, beta):
 
         self.node_count += 1
 
+        if self.node_count % 100 == 0:
+            print("total nodes searched: " + str(self.node_count))
+
         optimal_board = BoardModel()
 
-        if depth == 0:
+        if depth == 0 or self_depth == 0:
+            # print("depth reached")
             return self.evaluate_position(board_model, player), board_model
 
         hole = 0
@@ -111,7 +119,10 @@ class MinimaxAgent:
                     for move in available_moves:
                         new_board = copy.deepcopy(board_model)
 
-                        eva, board = self.minimax(new_board, move, depth - 1, 'a', alpha, beta)
+                        if not self.checked_opponent:
+                            depth += 1
+
+                        eva, board = self.minimax(new_board, move, depth - 1, self_depth - 1, 'a', alpha, beta)
                         if eva > max_eva:
                             max_eva = eva
                             optimal_board = board
@@ -125,7 +136,10 @@ class MinimaxAgent:
                     for move in available_moves:
                         new_board = copy.deepcopy(board_model)
 
-                        eva, board = self.minimax(new_board, move, depth - 1, 'a', alpha, beta)
+                        if not self.checked_opponent:
+                            depth += 1
+
+                        eva, board = self.minimax(new_board, move, depth - 1, self_depth - 1, 'a', alpha, beta)
                         if eva > max_eva:
                             max_eva = eva
                             optimal_board = board
@@ -138,7 +152,10 @@ class MinimaxAgent:
                     available_moves = board_model.available_moves('b')
                     for move in available_moves:
                         new_board = copy.deepcopy(board_model)
-                        eva, board = self.minimax(new_board, move, depth - 1, 'b', alpha, beta)
+
+                        self.checked_opponent = True
+
+                        eva, board = self.minimax(new_board, move, depth - 1, self_depth - 1, 'b', alpha, beta)
                         if eva > max_eva:
                             max_eva = eva
                             optimal_board = board
@@ -160,7 +177,10 @@ class MinimaxAgent:
                     for move in available_moves:
                         new_board = copy.deepcopy(board_model)
 
-                        eva, board = self.minimax(new_board, move, depth - 1, 'b', alpha, beta)
+                        if not self.checked_opponent:
+                            depth += 1
+
+                        eva, board = self.minimax(new_board, move, depth - 1, self_depth - 1, 'b', alpha, beta)
                         if eva < min_eva:
                             min_eva = eva
                             optimal_board = board
@@ -173,7 +193,10 @@ class MinimaxAgent:
                     available_moves = board_model.available_moves('a')
                     for move in available_moves:
                         new_board = copy.deepcopy(board_model)
-                        eva, board = self.minimax(new_board, move, depth - 1, 'a', alpha, beta)
+
+                        self.checked_opponent = True
+
+                        eva, board = self.minimax(new_board, move, depth - 1, self_depth - 1, 'a', alpha, beta)
                         if eva < min_eva:
                             min_eva = eva
                             optimal_board = board
@@ -187,7 +210,10 @@ class MinimaxAgent:
                     for move in available_moves:
                         new_board = copy.deepcopy(board_model)
 
-                        eva, board = self.minimax(new_board, move, depth - 1, 'b', alpha, beta)
+                        if not self.checked_opponent:
+                            depth += 1
+
+                        eva, board = self.minimax(new_board, move, depth - 1, self_depth - 1, 'b', alpha, beta)
                         if eva < min_eva:
                             min_eva = eva
                             optimal_board = board
