@@ -91,7 +91,7 @@ class WorkerSignals(QObject):
 
 # updates board graphic
 def update_board_graphics(board_graphic: BoardGraphic, board_model: BoardModel):
-    board_graphic.update_labels(house_a_values=board_model.house_a_values,
+    board_graphic.update_values(house_a_values=board_model.house_a_values,
                                 house_b_values=board_model.house_b_values,
                                 storeroom_a_value=board_model.storeroom_a_value,
                                 storeroom_b_value=board_model.storeroom_b_value,
@@ -163,15 +163,16 @@ class GameManager:
         self.board_model.ping = False
 
         # declare graphics
-        App = QApplication(sys.argv)
+        app = QApplication(sys.argv)
         self.board_graphic = BoardGraphic()
+        self.board_graphic.show()
 
         self.connect_inputs_to_functions()
 
         # start constantly updating graphics
         self.start_worker_graphic_updater()
 
-        sys.exit(App.exec())
+        sys.exit(app.exec())
 
     # connect the available input to its functions
     def connect_inputs_to_functions(self):

@@ -1,3 +1,4 @@
+from graphics import *
 from PyQt6.QtWidgets import QApplication, QWidget
 from PyQt6.QtWidgets import *
 from PyQt6.QtGui import QPixmap, QPainter, QPen, QAction, QIcon, QPalette
@@ -11,13 +12,27 @@ from Congkak.DialogueBoxes.MultiGameEndDialogBox import MultiGameEndDialogBox
 from Congkak.DialogueBoxes.TournamentEndDialogBox import TournamentEndDialogBox
 import sys
 
+from PyQt6.QtWidgets import QApplication, QWidget, QLabel, QMainWindow
+from PyQt6.QtWidgets import *
+from PyQt6.QtGui import QIcon, QFont, QPixmap, QMovie, QRegion
+from PyQt6.QtCore import Qt, QPoint
+import sys
 
+
+# TODO: Better Graphics
 class BoardGraphic(QMainWindow):
 
     def __init__(self):
         super().__init__()
 
         self.active = True
+
+        # set the title
+        self.setWindowTitle("Congkak")
+
+        # setting the geometry of window
+        self.setGeometry(100, 100, 800, 600)
+        self.setAutoFillBackground(True)
 
         self.house_a_points = []
         self.house_b_points = []
@@ -39,6 +54,9 @@ class BoardGraphic(QMainWindow):
 
         self.player_a_hand_point = QPoint(0, 0)
         self.player_b_hand_point = QPoint(0, 0)
+
+        self.player_a_hand_img_label = QLabel()
+        self.player_b_hand_img_label = QLabel()
 
         self.player_a_dropdown = QComboBox()
         self.player_b_dropdown = QComboBox()
@@ -78,6 +96,19 @@ class BoardGraphic(QMainWindow):
         # show all the widgets
         self.show()
 
+        # comment out afterwards
+
+        # msg = QMessageBox()
+        # msg.setWindowTitle("Round Robin Result")
+        # msg.setText("Results\n\n"
+        #             "Rounds: 100\n"
+        #             "Random: 2 wins"
+        #             "Minimax: 60 wins\n"
+        #             "MCTS: 40 wins\n"
+        #             "Q-Learning: 40 wins"
+        #             )
+        #
+        # x = msg.exec()
 
     # what to do if close window
     def closeEvent(self, a0: QtGui.QCloseEvent) -> None:
@@ -167,6 +198,48 @@ class BoardGraphic(QMainWindow):
 
         painter.end()
 
+    # updates the hand value label
+    def update_hand_label(self):
+
+        offset = QPoint(22, 5)
+
+        self.player_a_hand_text_label.move(self.player_a_hand_point + offset)
+        self.player_a_hand_text_label.setText(str(self.player_a_hand.counter_count))
+
+        offset = QPoint(22, 15)
+
+        self.player_b_hand_text_label.move(self.player_b_hand_point + offset)
+        self.player_b_hand_text_label.setText(str(self.player_b_hand.counter_count))
+
+    # update images
+    def update_images(self):
+
+        offset = QPoint(5, -10)
+
+        print(self.player_a_hand_point + offset)
+
+        self.player_a_hand_img_label.move(self.player_a_hand_point + offset)
+
+        offset = QPoint(-5, 10)
+        self.player_b_hand_img_label.move(self.player_b_hand_point + offset)
+
+    # set pictures
+    def set_pictures(self):
+
+        pixmap = QPixmap('Congkak/Assets/Sprites/Hand_sprite.png')
+        pixmap_b = pixmap.scaled(45, 89)
+        pixmap_a = pixmap_b.transformed(QtGui.QTransform().rotate(180))
+
+        self.player_a_hand_img_label = QLabel(self)
+        self.player_a_hand_img_label.resize(45, 89)
+        self.player_a_hand_img_label.setPixmap(pixmap_a)
+
+        self.player_b_hand_img_label = QLabel(self)
+        self.player_b_hand_img_label.resize(45, 89)
+        self.player_b_hand_img_label.setPixmap(pixmap_b)
+
+        self.update_images()
+
     # create the label for all the holes
     def create_hole_labels(self):
 
@@ -244,22 +317,22 @@ class BoardGraphic(QMainWindow):
     # creates the menus
     def create_menus(self):
 
-        # File Menu
+        # save games?
         file_menu = self.menuBar().addMenu("File")
 
-        self.new_game_menu_button_action = QAction("New Game", self)
-        self.new_game_menu_button_action.setStatusTip("Create a new game from the start")
-        file_menu.addAction(self.new_game_menu_button_action)
+        self.new_game_button_action = QAction("New Game", self)
+        self.new_game_button_action.setStatusTip("Create a new game from the start")
+        file_menu.addAction(self.new_game_button_action)
 
-        self.save_game_menu_button_action = QAction("Save Game", self)
-        self.save_game_menu_button_action.setStatusTip("Save the game to a text file")
-        file_menu.addAction(self.save_game_menu_button_action)
+        self.save_game_button_action = QAction("Save Game", self)
+        self.save_game_button_action.setStatusTip("Save the game to a text file")
+        file_menu.addAction(self.save_game_button_action)
 
         self.load_game_menu_button_action = QAction("Load Game", self)
         self.load_game_menu_button_action.setStatusTip("Load a game from a text file")
         file_menu.addAction(self.load_game_menu_button_action)
 
-        # Edit Menu
+        # edit games?
         edit_menu = self.menuBar().addMenu("Edit")
 
         submenu = edit_menu.addMenu("Edit Player")
@@ -278,46 +351,40 @@ class BoardGraphic(QMainWindow):
 
         train_menu = self.menuBar().addMenu("Training")
 
-        # View Menu
+        # views
         view_menu = self.menuBar().addMenu("View")
 
         button_action = QAction("idk", self)
         view_menu.addAction(button_action)
-
-        # Game Menu
+        #
         game_menu = self.menuBar().addMenu("Game")
 
-        self.run_multiple_games_menu_button_action = QAction("Run Multiple Games...", self)
-        self.run_multiple_games_menu_button_action.setStatusTip("Run Multiple Games")
-        self.run_multiple_games_menu_button_action.triggered.connect(self.multiple_games_dialog_box.exec)
-        game_menu.addAction(self.run_multiple_games_menu_button_action)
+        button_action = QAction("Run Multiple Games...", self)
+        game_menu.addAction(button_action)
 
-        self.run_tournament_menu_button_action = QAction("Run Round Robin Tournament...", self)
-        self.run_tournament_menu_button_action.setStatusTip("Run Round Robin Tournament")
-        self.run_tournament_menu_button_action.triggered.connect(self.tournament_dialog_box.exec)
-        game_menu.addAction(self.run_tournament_menu_button_action)
+        button_action = QAction("Run Round Robin Tournament...", self)
+        game_menu.addAction(button_action)
 
         help_menu = self.menuBar().addMenu("Help")
 
         about_menu = self.menuBar().addMenu("About")
 
-    # updates the hand value label
-    def update_hand_label(self):
+    def update_values(self, house_a_values, house_b_values,
+                      storeroom_a_value, storeroom_b_value,
+                      player_a_hand, player_b_hand):
 
-        offset = QPoint(22, 5)
+        self.update_labels(house_a_values, house_b_values, storeroom_a_value, storeroom_b_value)
 
-        self.player_a_hand_text_label.move(self.player_a_hand_point + offset)
-        self.player_a_hand_text_label.setText(str(self.player_a_hand.counter_count))
+        self.player_a_hand = player_a_hand
+        self.player_b_hand = player_b_hand
 
-        offset = QPoint(22, 15)
-
-        self.player_b_hand_text_label.move(self.player_b_hand_point + offset)
-        self.player_b_hand_text_label.setText(str(self.player_b_hand.counter_count))
+        self.update_hand_label()
+        self.update_images()
+        self.update()
 
     # updates the labels
     def update_labels(self, house_a_values, house_b_values,
-                      storeroom_a_value, storeroom_b_value,
-                      player_a_hand, player_b_hand):
+                      storeroom_a_value, storeroom_b_value):
 
         for i, label in enumerate(self.house_a_text_labels):
             label.setText(str(house_a_values[i]))
@@ -327,12 +394,6 @@ class BoardGraphic(QMainWindow):
 
         self.storeroom_a_text_label.setText(str(storeroom_a_value))
         self.storeroom_b_text_label.setText(str(storeroom_b_value))
-
-        self.player_a_hand = player_a_hand
-        self.player_b_hand = player_b_hand
-
-        self.update()
-        self.update_hand_label()
 
     # update the hand positions
     def update_hand_positions(self):
@@ -414,7 +475,7 @@ class BoardGraphic(QMainWindow):
             enable_list = []
         self.set_enable_player_specific_inputs(player, enable_list)
 
-    # enable or disable specific inputs
+    # enable or disable specific inputs of a player
     def set_enable_player_specific_inputs(self, player, enable_list):
         if player == 'a':
             for i, button in enumerate(self.house_a_buttons):
@@ -442,4 +503,3 @@ class BoardGraphic(QMainWindow):
             self.play_button.show()
         else:
             self.play_button.hide()
-
