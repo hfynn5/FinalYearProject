@@ -24,6 +24,7 @@ class MinimaxAgent:
         self.maximum_number_of_node = maximum_number_node
 
         self.node_count = 0
+        self.leaf_node_count = 0
         self.checked_opponent = False
 
         self.heuristics_weights = range(6)
@@ -36,6 +37,7 @@ class MinimaxAgent:
     def choose_move(self, player, board_model):
 
         self.node_count = 0
+        self.leaf_node_count = 0
         self.checked_opponent = False
 
         final_best_move = 0
@@ -73,13 +75,13 @@ class MinimaxAgent:
                 final_best_move = move
                 optimal_board = board
 
-            print("total nodes searched: " + str(self.node_count))
+            # print("total nodes searched: " + str(self.node_count) + " leaf nodes reached: " + str(self.leaf_node_count))
             # print("optimal board so far: ")
             # optimal_board.print_all_data()
 
         # print("optimal board: ")
         # optimal_board.print_all_data()
-        print("minimax: total nodes searched: " + str(self.node_count))
+        print("minimax: total nodes searched: " + str(self.node_count) + " leaf nodes reached: " + str(self.leaf_node_count))
 
         return final_best_move
 
@@ -94,6 +96,7 @@ class MinimaxAgent:
 
         if depth == 0 or self_depth == 0:
             # print("depth reached")
+            self.leaf_node_count += 1
             return self.evaluate_position(board_model, player), board_model
 
         hole = 0
@@ -107,6 +110,7 @@ class MinimaxAgent:
         available_moves = board_model.available_moves(player)
 
         if depth == 0 or len(available_moves) == 0:
+            self.leaf_node_count += 1
             return self.evaluate_position(board_model, player), board_model
 
         if player == 'a':
@@ -121,6 +125,8 @@ class MinimaxAgent:
 
                         if not self.checked_opponent:
                             depth += 1
+                        # else:
+                        #     self_depth += 1
 
                         eva, board = self.minimax(new_board, move, depth - 1, self_depth - 1, 'a', alpha, beta)
                         if eva > max_eva:

@@ -10,7 +10,8 @@ class MaxAgent:
         self.final_best_value = 1
         self.final_best_move = 0
 
-        self.no_of_node = 0
+        self.node_count = 0
+        self.leaf_node_count = 0
 
         self.depth = 0
 
@@ -31,7 +32,8 @@ class MaxAgent:
         board_model.player_a_status = BoardModel.STOP_SOWING_A
         board_model.player_b_status = BoardModel.STOP_SOWING_B
 
-        self.no_of_node = 0
+        self.node_count = 0
+        self.leaf_node_count = 0
 
         for move in available_moves:
             new_board = copy.deepcopy(board_model)
@@ -41,12 +43,12 @@ class MaxAgent:
                 self.final_best_value = evaluation
                 self.final_best_move = move
 
-        print("max: total nodes searched: " + str(self.no_of_node))
+        print("max: total nodes searched: " + str(self.node_count) + " no of leaf nodes reached: " + str(self.leaf_node_count))
         return self.final_best_move
 
     def maximising(self, player, move, board_model, depth):
 
-        self.no_of_node += 1
+        self.node_count += 1
 
         self.depth = max(self.depth, depth)
 
@@ -76,6 +78,7 @@ class MaxAgent:
                 if evaluation >= best_value:
                     best_value = evaluation
         else:
+            self.leaf_node_count += 1
             if player == 'a':
                 best_value = board_model.storeroom_a_value
             elif player == 'b':
