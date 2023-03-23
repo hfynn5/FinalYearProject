@@ -100,7 +100,6 @@ def update_board_graphics(board_graphic: BoardGraphic, board_model: BoardModel):
 
 
 class GameManager:
-
     AGENT_USER = 'user'
     AGENT_RANDOM = 'random'
     AGENT_MAX = 'max'
@@ -113,14 +112,15 @@ class GameManager:
         self.player_b_hand_pos = -1
 
         # user, random, max, minimax, mcts
-        self.agent_list = [self.AGENT_USER,self.AGENT_RANDOM,self.AGENT_MAX,self.AGENT_MINIMAX,self.AGENT_MCTS]
+        self.agent_list = [self.AGENT_USER, self.AGENT_RANDOM, self.AGENT_MAX, self.AGENT_MINIMAX, self.AGENT_MCTS]
         self.player_a_agent = self.AGENT_USER
         self.player_b_agent = self.AGENT_USER
 
         # create Intelligent Agents
         self.random_agent = RandomAgent()
         self.max_agent = MaxAgent()
-        self.minimax_agent = MinimaxAgent(weights=(0, 0, 0, 0, 0, 0), maximum_depth=2, maximum_self_depth=3, maximum_number_node=0)
+        self.minimax_agent = MinimaxAgent(weights=(0, 0, 0, 0, 0, 0), maximum_depth=2, maximum_self_depth=3,
+                                          maximum_number_node=0)
 
         self.autoplay_hands = False
 
@@ -158,9 +158,10 @@ class GameManager:
             button.clicked.connect(lambda checked, value=i + 21: self.choosing_hole_action('b', value))
 
         self.board_graphic.play_button.clicked.connect(lambda checked:
-                                                       self.start_worker_simultaneous_sowing(hole_a=self.player_a_hand_pos,
-                                                                                             hole_b=self.player_b_hand_pos,
-                                                                                            ))
+                                                       self.start_worker_simultaneous_sowing(
+                                                           hole_a=self.player_a_hand_pos,
+                                                           hole_b=self.player_b_hand_pos,
+                                                           ))
 
         self.board_graphic.move_speed_slider. \
             valueChanged.connect(lambda value=self.board_graphic.move_speed_slider.value():
@@ -186,7 +187,7 @@ class GameManager:
         self.threadpool.start(worker)
 
     # makes worker to start sowing
-    def start_worker_sowing(self, player = None, hole = None, new_hand = None):
+    def start_worker_sowing(self, player=None, hole=None, new_hand=None):
 
         if player == 'a':
             self.board_model.append_move(hole, 0)
@@ -201,7 +202,7 @@ class GameManager:
         self.threadpool.start(worker)
 
     # starts a worker for each hand
-    def start_worker_simultaneous_sowing(self, hole_a = None, hole_b = None, hand_a = None, hand_b = None):
+    def start_worker_simultaneous_sowing(self, hole_a=None, hole_b=None, hand_a=None, hand_b=None):
         self.autoplay_hands = True
         self.board_graphic.set_enable_play_button(False)
 
@@ -209,7 +210,6 @@ class GameManager:
         # print("hand b pos: " + str(hand_b.hole_pos))
 
         if not self.player_a_agent == self.AGENT_USER and (hole_a is None or hole_a <= 0) and hand_a is None:
-            # print()
             hole_a = self.prompt_agent_for_input('a')
 
         if not self.player_b_agent == self.AGENT_USER and (hole_b is None or hole_b <= 0) and hand_b is None:
@@ -254,10 +254,16 @@ class GameManager:
 
         action = self.board_model.action_to_take()
 
-        if self.board_model.player_a_status == BoardModel.TIKAM_A:
-            self.start_worker_tikam(hand=self.board_model.player_a_hand)
-        if self.board_model.player_b_status == BoardModel.TIKAM_B:
-            self.start_worker_tikam(hand=self.board_model.player_b_hand)
+        if self.board_model.player_a_status == BoardModel.TIKAM_A or \
+                self.board_model.player_b_status == BoardModel.TIKAM_B:
+
+            if self.board_model.player_a_status == BoardModel.TIKAM_A:
+                self.start_worker_tikam(hand=self.board_model.player_a_hand)
+
+            if self.board_model.player_b_status == BoardModel.TIKAM_B:
+                self.start_worker_tikam(hand=self.board_model.player_b_hand)
+
+            return
 
         match action:
             case BoardModel.PROMPT_SOWING_A:
@@ -278,7 +284,9 @@ class GameManager:
                         self.autoplay_hands = False
                         self.prompt_player('b')
                         self.prompt_player('a')
-                    self.board_graphic.set_enable_play_button(True)
+                        self.board_graphic.set_enable_play_button(True)
+                    else:
+                        self.start_worker_simultaneous_sowing()
 
             case BoardModel.CONTINUE_SOWING_A:
                 self.start_worker_sowing(new_hand=self.board_model.player_a_hand)
@@ -456,6 +464,3 @@ class GameManager:
         if self.move_counter >= len(self.loaded_moves):
             print("Game Loaded")
             self.loading_game = False
-
-
-

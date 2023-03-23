@@ -164,12 +164,15 @@ class BoardModel:
         if self.player_a_status == self.STOP_SOWING_A:
             self.reset_hand('a')
             self.active_players.remove('a')
-        elif self.player_b_status == self.STOP_SOWING_B:
+
+        if self.player_b_status == self.STOP_SOWING_B:
             self.reset_hand('b')
             self.active_players.remove('b')
-        elif self.player_a_status == self.PROMPT_SOWING_A:
+
+        if self.player_a_status == self.PROMPT_SOWING_A:
             self.reset_hand('a')
-        elif self.player_b_status == self.PROMPT_SOWING_B:
+
+        if self.player_b_status == self.PROMPT_SOWING_B:
             self.reset_hand('b')
 
         pass
