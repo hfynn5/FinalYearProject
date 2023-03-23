@@ -7,13 +7,27 @@ from PyQt6.QtCore import QPoint, Qt
 from Congkak.Hand import Hand
 import sys
 
+from PyQt6.QtWidgets import QApplication, QWidget, QLabel, QMainWindow
+from PyQt6.QtWidgets import *
+from PyQt6.QtGui import QIcon, QFont, QPixmap, QMovie, QRegion
+from PyQt6.QtCore import Qt, QPoint
+import sys
 
+
+# TODO: Better Graphics
 class BoardGraphic(QMainWindow):
 
     def __init__(self):
         super().__init__()
 
         self.active = True
+
+        # set the title
+        self.setWindowTitle("Congkak")
+
+        # setting the geometry of window
+        self.setGeometry(100, 100, 800, 600)
+        self.setAutoFillBackground(True)
 
         self.house_a_points = []
         self.house_b_points = []
@@ -36,7 +50,8 @@ class BoardGraphic(QMainWindow):
         self.player_a_hand_point = QPoint(0, 0)
         self.player_b_hand_point = QPoint(0, 0)
 
-        # self.player_b_hand_point.x()
+        self.player_a_hand_img_label = QLabel()
+        self.player_b_hand_img_label = QLabel()
 
         self.player_a_dropdown = QComboBox()
         self.player_b_dropdown = QComboBox()
@@ -49,18 +64,27 @@ class BoardGraphic(QMainWindow):
         self.load_game_button_action = QAction()
 
         self.acceptDrops()
-        # set the title
-        self.setWindowTitle("Congkak")
-
-        # setting the geometry of window
-        self.setGeometry(100, 100, 800, 600)
-        self.setAutoFillBackground(True)
 
         self.generate_points()
 
         self.create_hole_labels()
         self.create_inputs()
         self.create_menus()
+
+        self.set_pictures()
+
+        # label = QLabel(self)
+        # label.resize(136, 267)
+        # pixmap = QPixmap('Assets/Sprites/Hand_sprite.png')
+        # label.move(QPoint(100, 120))
+        # label.setPixmap(pixmap)
+
+        # self.player_a_hand_img_label = QLabel(self)
+        # self.player_a_hand_img_label.resize(136, 267)
+        # pixmap = QPixmap('Assets/Sprites/Hand_sprite.png')
+        # self.player_a_hand_img_label.move(QPoint(300, 200))
+        # self.player_a_hand_img_label.setPixmap(pixmap)
+        # self.player_b_hand_img_label.show()
 
         # show all the widgets
         self.show()
@@ -133,7 +157,7 @@ class BoardGraphic(QMainWindow):
         pen.setColor(QtGui.QColor('white'))
         painter.setPen(pen)
 
-        painter.fillRect(0, 0, 800, 600, QtGui.QBrush((QtGui.QColor(255, 255, 255, 255))))
+        # painter.fillRect(0, 0, 800, 600, QtGui.QBrush((QtGui.QColor(255, 255, 255, 255))))
 
         pen.setColor(QtGui.QColor('brown'))
         painter.setPen(pen)
@@ -154,18 +178,60 @@ class BoardGraphic(QMainWindow):
 
         self.update_hand_positions()
 
-        # player hand a
-        pen.setColor(QtGui.QColor('blue'))
-        painter.setPen(pen)
-        painter.drawArc(round(self.player_a_hand_point.x()), round(self.player_a_hand_point.y()), hand_diameter,
-                        hand_diameter, 0 * 16, 180 * 16)
-        # player hand b
-        pen.setColor(QtGui.QColor('red'))
-        painter.setPen(pen)
-        painter.drawArc(round(self.player_b_hand_point.x()), round(self.player_b_hand_point.y()), hand_diameter,
-                        hand_diameter, 180 * 16, 180 * 16)
+        # # player hand a
+        # pen.setColor(QtGui.QColor('blue'))
+        # painter.setPen(pen)
+        # painter.drawArc(round(self.player_a_hand_point.x()), round(self.player_a_hand_point.y()), hand_diameter,
+        #                 hand_diameter, 0 * 16, 180 * 16)
+        # # player hand b
+        # pen.setColor(QtGui.QColor('red'))
+        # painter.setPen(pen)
+        # painter.drawArc(round(self.player_b_hand_point.x()), round(self.player_b_hand_point.y()), hand_diameter,
+        #                 hand_diameter, 180 * 16, 180 * 16)
 
         painter.end()
+
+    # updates the hand value label
+    def update_hand_label(self):
+
+        offset = QPoint(22, 5)
+
+        self.player_a_hand_text_label.move(self.player_a_hand_point + offset)
+        self.player_a_hand_text_label.setText(str(self.player_a_hand.counter_count))
+
+        offset = QPoint(22, 15)
+
+        self.player_b_hand_text_label.move(self.player_b_hand_point + offset)
+        self.player_b_hand_text_label.setText(str(self.player_b_hand.counter_count))
+
+    # update images
+    def update_images(self):
+
+        offset = QPoint(5, -10)
+
+        print(self.player_a_hand_point + offset)
+
+        self.player_a_hand_img_label.move(self.player_a_hand_point + offset)
+
+        offset = QPoint(-5, 10)
+        self.player_b_hand_img_label.move(self.player_b_hand_point + offset)
+
+    # set pictures
+    def set_pictures(self):
+
+        pixmap = QPixmap('Congkak/Assets/Sprites/Hand_sprite.png')
+        pixmap_b = pixmap.scaled(45, 89)
+        pixmap_a = pixmap_b.transformed(QtGui.QTransform().rotate(180))
+
+        self.player_a_hand_img_label = QLabel(self)
+        self.player_a_hand_img_label.resize(45, 89)
+        self.player_a_hand_img_label.setPixmap(pixmap_a)
+
+        self.player_b_hand_img_label = QLabel(self)
+        self.player_b_hand_img_label.resize(45, 89)
+        self.player_b_hand_img_label.setPixmap(pixmap_b)
+
+        self.update_images()
 
     # create the label for all the holes
     def create_hole_labels(self):
@@ -196,19 +262,6 @@ class BoardGraphic(QMainWindow):
         self.player_a_hand_text_label = QLabel(self)
 
         self.player_b_hand_text_label = QLabel(self)
-
-    # updates the hand value label
-    def update_hand_label(self):
-
-        offset = QPoint(22, 5)
-
-        self.player_a_hand_text_label.move(self.player_a_hand_point + offset)
-        self.player_a_hand_text_label.setText(str(self.player_a_hand.counter_count))
-
-        offset = QPoint(22, 15)
-
-        self.player_b_hand_text_label.move(self.player_b_hand_point + offset)
-        self.player_b_hand_text_label.setText(str(self.player_b_hand.counter_count))
 
     # creates the UI.
     def create_inputs(self):
@@ -309,10 +362,22 @@ class BoardGraphic(QMainWindow):
 
         about_menu = self.menuBar().addMenu("About")
 
-    # updates the labels
-    def update_labels(self, house_a_values, house_b_values,
+    def update_values(self, house_a_values, house_b_values,
                       storeroom_a_value, storeroom_b_value,
                       player_a_hand, player_b_hand):
+
+        self.update_labels(house_a_values, house_b_values, storeroom_a_value, storeroom_b_value)
+
+        self.player_a_hand = player_a_hand
+        self.player_b_hand = player_b_hand
+
+        self.update_hand_label()
+        self.update_images()
+        self.update()
+
+    # updates the labels
+    def update_labels(self, house_a_values, house_b_values,
+                      storeroom_a_value, storeroom_b_value):
 
         for i, label in enumerate(self.house_a_text_labels):
             label.setText(str(house_a_values[i]))
@@ -322,12 +387,6 @@ class BoardGraphic(QMainWindow):
 
         self.storeroom_a_text_label.setText(str(storeroom_a_value))
         self.storeroom_b_text_label.setText(str(storeroom_b_value))
-
-        self.player_a_hand = player_a_hand
-        self.player_b_hand = player_b_hand
-
-        self.update()
-        self.update_hand_label()
 
     # update the hand positions
     def update_hand_positions(self):
@@ -370,6 +429,8 @@ class BoardGraphic(QMainWindow):
         # self.player_b_hand_point.x = x_coord
         # self.player_b_hand_point.y = y_coord
 
+    # end game prompt
+    # TODO: add end game prompt
     def end_game_prompt(self):
         print("game ended.")
         pass
@@ -387,7 +448,7 @@ class BoardGraphic(QMainWindow):
             enable_list = []
         self.set_enable_player_specific_inputs(player, enable_list)
 
-    # enable or disable specific inputs
+    # enable or disable specific inputs of a player
     def set_enable_player_specific_inputs(self, player, enable_list):
         if player == 'a':
             for i, button in enumerate(self.house_a_buttons):
@@ -407,6 +468,7 @@ class BoardGraphic(QMainWindow):
                     button.setEnabled(False)
                     button.hide()
 
+    # enable or disable play button
     def set_enable_play_button(self, enable):
 
         self.play_button.setEnabled(enable)
