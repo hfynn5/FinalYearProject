@@ -101,15 +101,21 @@ def update_board_graphics(board_graphic: BoardGraphic, board_model: BoardModel):
 
 class GameManager:
 
+    AGENT_USER = 'user'
+    AGENT_RANDOM = 'random'
+    AGENT_MAX = 'max'
+    AGENT_MINIMAX = 'minimax'
+    AGENT_MCTS = 'mcts'
+
     def __init__(self):
 
         self.player_a_hand_pos = -1
         self.player_b_hand_pos = -1
 
         # user, random, max, minimax, mcts
-        self.agent_list = ['user', 'random', 'max', 'minimax', 'mcts']
-        self.player_a_agent = "user"
-        self.player_b_agent = "user"
+        self.agent_list = [self.AGENT_USER,self.AGENT_RANDOM,self.AGENT_MAX,self.AGENT_MINIMAX,self.AGENT_MCTS]
+        self.player_a_agent = self.AGENT_USER
+        self.player_b_agent = self.AGENT_USER
 
         # create Intelligent Agents
         self.random_agent = RandomAgent()
@@ -202,11 +208,11 @@ class GameManager:
         # print("hand a pos: " + str(hand_a.hole_pos))
         # print("hand b pos: " + str(hand_b.hole_pos))
 
-        if not self.player_a_agent == 'user' and (hole_a is None or hole_a <= 0) and hand_a is None:
+        if not self.player_a_agent == self.AGENT_USER and (hole_a is None or hole_a <= 0) and hand_a is None:
             # print()
             hole_a = self.prompt_agent_for_input('a')
 
-        if not self.player_b_agent == 'user' and (hole_b is None or hole_b <= 0) and hand_b is None:
+        if not self.player_b_agent == self.AGENT_USER and (hole_b is None or hole_b <= 0) and hand_b is None:
             hole_b = self.prompt_agent_for_input('b')
 
         if hand_a is None:
@@ -246,13 +252,7 @@ class GameManager:
 
         update_board_graphics(board_graphic=self.board_graphic, board_model=self.board_model)
 
-        # print("next action")
-
         action = self.board_model.action_to_take()
-
-        # print("action: " + str(action))
-        # print("player a: " + str(self.board_model.player_a_status))
-        # print("player b: " + str(self.board_model.player_b_status))
 
         if self.board_model.player_a_status == BoardModel.TIKAM_A:
             self.start_worker_tikam(hand=self.board_model.player_a_hand)
@@ -274,9 +274,10 @@ class GameManager:
                 if self.loading_game:
                     self.do_next_move_from_loaded_moves(action)
                 else:
-                    self.autoplay_hands = False
-                    self.prompt_player('b')
-                    self.prompt_player('a')
+                    if self.player_a_agent == self.AGENT_USER or self.player_b_agent == self.AGENT_USER:
+                        self.autoplay_hands = False
+                        self.prompt_player('b')
+                        self.prompt_player('a')
                     self.board_graphic.set_enable_play_button(True)
 
             case BoardModel.CONTINUE_SOWING_A:
@@ -337,36 +338,37 @@ class GameManager:
         available_moves = self.board_model.available_moves(player)
 
         if player == 'a':
-            if self.player_a_agent == 'user':
+            if self.player_a_agent == self.AGENT_USER:
                 self.board_graphic.set_enable_player_specific_inputs(player=player,
                                                                      enable_list=available_moves)
             else:
                 self.choosing_hole_action(player=player, hole=self.prompt_agent_for_input(player))
 
         elif player == 'b':
-            if self.player_b_agent == 'user':
+            if self.player_b_agent == self.AGENT_USER:
                 self.board_graphic.set_enable_player_specific_inputs(player=player,
                                                                      enable_list=available_moves)
             else:
                 self.choosing_hole_action(player=player, hole=self.prompt_agent_for_input(player))
 
     # TODO: add a way to save future moves to save time
+    # prompt agent for move. returns  move
     def prompt_agent_for_input(self, player):
         copied_board = copy.deepcopy(self.board_model)
         move = 0
         if player == 'a':
-            if self.player_a_agent == 'random':
+            if self.player_a_agent == self.AGENT_RANDOM:
                 move = self.random_agent.choose_move(player, copied_board) + 10
-            elif self.player_a_agent == 'max':
+            elif self.player_a_agent == self.AGENT_MAX:
                 move = self.max_agent.choose_move(player, copied_board) + 10
-            elif self.player_a_agent == 'minimax':
+            elif self.player_a_agent == self.AGENT_MINIMAX:
                 move = self.minimax_agent.choose_move(player, copied_board) + 10
         elif player == 'b':
-            if self.player_b_agent == 'random':
+            if self.player_b_agent == self.AGENT_RANDOM:
                 move = self.random_agent.choose_move(player, copied_board) + 20
-            elif self.player_b_agent == 'max':
+            elif self.player_b_agent == self.AGENT_MAX:
                 move = self.max_agent.choose_move(player, copied_board) + 20
-            elif self.player_b_agent == 'minimax':
+            elif self.player_b_agent == self.AGENT_MINIMAX:
                 move = self.minimax_agent.choose_move(player, copied_board) + 20
 
         return move
