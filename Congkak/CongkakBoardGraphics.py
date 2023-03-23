@@ -39,12 +39,15 @@ class BoardGraphic(QMainWindow):
         self.storeroom_a_point = QPoint(0, 0)
         self.storeroom_b_point = QPoint(0, 0)
 
+        self.player_a_hand_img_label = QLabel(self)
+        self.player_b_hand_img_label = QLabel(self)
+
         self.house_a_text_labels = []
         self.house_b_text_labels = []
-        self.storeroom_a_text_label = QLabel()
-        self.storeroom_b_text_label = QLabel()
-        self.player_a_hand_text_label = QLabel()
-        self.player_b_hand_text_label = QLabel()
+        self.storeroom_a_text_label = QLabel(self)
+        self.storeroom_b_text_label = QLabel(self)
+        self.player_a_hand_text_label = QLabel(self)
+        self.player_b_hand_text_label = QLabel(self)
 
         self.house_a_buttons = []
         self.house_b_buttons = []
@@ -54,9 +57,6 @@ class BoardGraphic(QMainWindow):
 
         self.player_a_hand_point = QPoint(0, 0)
         self.player_b_hand_point = QPoint(0, 0)
-
-        self.player_a_hand_img_label = QLabel()
-        self.player_b_hand_img_label = QLabel()
 
         self.player_a_dropdown = QComboBox()
         self.player_b_dropdown = QComboBox()
@@ -201,12 +201,12 @@ class BoardGraphic(QMainWindow):
     # updates the hand value label
     def update_hand_label(self):
 
-        offset = QPoint(22, 5)
+        offset = QPoint(22, -30)
 
         self.player_a_hand_text_label.move(self.player_a_hand_point + offset)
         self.player_a_hand_text_label.setText(str(self.player_a_hand.counter_count))
 
-        offset = QPoint(22, 15)
+        offset = QPoint(22, 50)
 
         self.player_b_hand_text_label.move(self.player_b_hand_point + offset)
         self.player_b_hand_text_label.setText(str(self.player_b_hand.counter_count))
@@ -214,14 +214,13 @@ class BoardGraphic(QMainWindow):
     # update images
     def update_images(self):
 
-        offset = QPoint(5, -10)
-
-        print(self.player_a_hand_point + offset)
-
+        offset = QPoint(5, -50)
         self.player_a_hand_img_label.move(self.player_a_hand_point + offset)
+        # self.player_a_hand_img_label.setText(str(self.player_a_hand.counter_count))
 
-        offset = QPoint(-5, 10)
+        offset = QPoint(0, 15)
         self.player_b_hand_img_label.move(self.player_b_hand_point + offset)
+        # self.player_b_hand_img_label.setText(str(self.player_b_hand.counter_count))
 
     # set pictures
     def set_pictures(self):
@@ -230,11 +229,11 @@ class BoardGraphic(QMainWindow):
         pixmap_b = pixmap.scaled(45, 89)
         pixmap_a = pixmap_b.transformed(QtGui.QTransform().rotate(180))
 
-        self.player_a_hand_img_label = QLabel(self)
+        # self.player_a_hand_img_label = QLabel(self)
         self.player_a_hand_img_label.resize(45, 89)
         self.player_a_hand_img_label.setPixmap(pixmap_a)
 
-        self.player_b_hand_img_label = QLabel(self)
+        # self.player_b_hand_img_label = QLabel(self)
         self.player_b_hand_img_label.resize(45, 89)
         self.player_b_hand_img_label.setPixmap(pixmap_b)
 
@@ -258,22 +257,22 @@ class BoardGraphic(QMainWindow):
             label.setText("7")
             self.house_b_text_labels.append(label)
 
-        self.storeroom_a_text_label = QLabel(self)
+        # self.storeroom_a_text_label = QLabel(self)
         self.storeroom_a_text_label.move(self.storeroom_a_point + offset)
         self.storeroom_a_text_label.setText("0")
 
-        self.storeroom_b_text_label = QLabel(self)
+        # self.storeroom_b_text_label = QLabel(self)
         self.storeroom_b_text_label.move(self.storeroom_b_point + offset)
         self.storeroom_b_text_label.setText("0")
-
-        self.player_a_hand_text_label = QLabel(self)
-
-        self.player_b_hand_text_label = QLabel(self)
+        #
+        # self.player_a_hand_text_label = QLabel(self)
+        #
+        # self.player_b_hand_text_label = QLabel(self)
 
     # creates the UI.
     def create_inputs(self):
 
-        offset = QPoint(-22, -60)
+        offset = QPoint(-22, -55)
 
         for pos in self.house_a_points:
             button = QPushButton(self)
@@ -282,7 +281,7 @@ class BoardGraphic(QMainWindow):
             button.setText("Pick")
             self.house_a_buttons.append(button)
 
-        offset = QPoint(-22, 40)
+        offset = QPoint(-22, 31)
 
         for pos in self.house_b_points:
             button = QPushButton(self)
