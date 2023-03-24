@@ -82,7 +82,6 @@ class BoardModel:
         self.wait_micromove()
 
         while status == self.CONTINUE_SOWING:
-
             current_hand = self.sow_once(current_hand)
 
             self.update_player_hands_from_current_hand(current_hand)
@@ -152,7 +151,6 @@ class BoardModel:
         self.wait_micromove()
 
         while self.player_a_status == self.CONTINUE_SOWING and self.player_b_status == self.CONTINUE_SOWING:
-
             hand_a, hand_b = self.sow_once_simultaneous(hand_a, hand_b)
 
             self.player_a_hand = hand_a
@@ -192,7 +190,6 @@ class BoardModel:
             return hand_a, hand_b
 
         while hand_a.counter_count > 0 and hand_b.counter_count > 0:
-
             self.wait_micromove()
 
             hand_a.move_one_pos()
@@ -244,6 +241,9 @@ class BoardModel:
 
     # tikam the hand (will check if its possible to tikam or not). has waiting
     def tikam(self, hand):
+
+        # print("tikaming")
+        # # self.print_all_data()
 
         if hand.player == 'a' and hand.has_looped and hand.hole_pos < 20:
             self.player_a_hand = hand
@@ -324,6 +324,8 @@ class BoardModel:
         else:
             print("cannot tikam")
 
+        # print("tikamed")
+
     # check status of hand
     def check_hand_status(self, hand):
 
@@ -336,7 +338,7 @@ class BoardModel:
 
         elif (10 < hand.hole_pos < 18 and
               (self.house_a_values[hand.hole_pos - 11] == 1) and
-                hand.counter_count == 0):
+              hand.counter_count == 0):
             if hand.player == 'a':
                 if hand.has_looped:
                     status = self.TIKAM_A
@@ -347,7 +349,7 @@ class BoardModel:
 
         elif (20 < hand.hole_pos < 28 and
               (self.house_b_values[hand.hole_pos - 21] == 1) and
-                hand.counter_count == 0):
+              hand.counter_count == 0):
             if hand.player == 'a':
                 status = self.STOP_SOWING_A
             elif hand.player == 'b':
@@ -423,7 +425,8 @@ class BoardModel:
 
             # probably keep
             elif self.player_a_status == self.TIKAM_A and self.player_b_status == self.TIKAM_B:
-                if self.ping: print("both tikam. prompting both. honestly, this should never be printed so you fucked up")
+                if self.ping: print(
+                    "both tikam. prompting both. honestly, this should never be printed so you fucked up")
                 action = self.PROMPT_SOWING_BOTH
 
             elif self.player_a_status == self.STOP_SOWING_A and self.player_b_status == self.CONTINUE_SOWING:
@@ -449,6 +452,7 @@ class BoardModel:
                     self.game_phase = self.SEQUENTIAL_PHASE
                 if self.ping: print("prompt player a")
                 action = self.PROMPT_SOWING_A
+
             elif self.player_b_status == self.PROMPT_SOWING_B:
                 if self.player_a_status == self.STOP_SOWING_A:
                     self.game_phase = self.SEQUENTIAL_PHASE
@@ -460,12 +464,15 @@ class BoardModel:
 
         else:
             print("super weird bug. its neither seq nor simul")
-            print("error. status a: " + str(self.player_a_status) + ". status b: " + str(self.player_b_status) + ". phase: " + str(self.game_phase))
+            print("error. status a: " + str(self.player_a_status) + ". status b: " + str(
+                self.player_b_status) + ". phase: " + str(self.game_phase))
 
         return action
 
     # reset hands to empty and no position
     # TODO: find vanishing counter.
+    # (17, 22)
+    # (11, '')
     def reset_hand(self, player):
 
         if player == 'a':
@@ -555,13 +562,14 @@ class BoardModel:
 
         start_time = time.time()
 
-        while self.running and time.time()-start_time < self.sowing_speed:
+        while self.running and time.time() - start_time < self.sowing_speed:
             # time.sleep(0.00001)
             pass
 
         if not self.running:
             raise Exception("Running the game is disabled.")
 
+        # self.print_all_data()
 
     # print holes
     def print_all_data(self):
@@ -571,3 +579,8 @@ class BoardModel:
         print("store b: " + str(self.storeroom_b_value))
         self.player_a_hand.print_data()
         self.player_b_hand.print_data()
+
+        total = sum(self.house_a_values) + sum(self.house_b_values) + self.storeroom_a_value + \
+                self.storeroom_b_value + self.player_a_hand.counter_count + self.player_b_hand.counter_count
+
+        print("total: " + str(total))

@@ -401,7 +401,7 @@ class GameManager:
     def update_board_graphics_constantly(self):
         while self.board_graphic.active:
             update_board_graphics(board_graphic=self.board_graphic, board_model=self.board_model)
-        sys.exit("Window closed")
+        self.close_program()
 
     # updates the sowing speed
     def update_sowing_speed(self, move_per_second):
@@ -467,6 +467,7 @@ class GameManager:
         self.move_counter = 0
         self.do_next_move_from_loaded_moves(BoardModel.PROMPT_SOWING_BOTH)
 
+    # TODO redo loading with the new rules
     def do_next_move_from_loaded_moves(self, action):
 
         if self.move_counter < len(self.loaded_moves):
@@ -484,3 +485,7 @@ class GameManager:
         if self.move_counter >= len(self.loaded_moves):
             print("Game Loaded")
             self.loading_game = False
+
+    def close_program(self):
+        self.kill_all_workers()
+        sys.exit("Window closed")
