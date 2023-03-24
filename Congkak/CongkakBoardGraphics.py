@@ -48,6 +48,8 @@ class BoardGraphic(QMainWindow):
         self.save_game_button_action = QAction()
         self.load_game_button_action = QAction()
 
+        self.run_multiple_games_button_action = QAction()
+
         self.acceptDrops()
         # set the title
         self.setWindowTitle("Congkak")
@@ -299,8 +301,9 @@ class BoardGraphic(QMainWindow):
         #
         game_menu = self.menuBar().addMenu("Game")
 
-        button_action = QAction("Run Multiple Games...", self)
-        game_menu.addAction(button_action)
+        self.run_multiple_games_button_action = QAction("Run Multiple Games...", self)
+        self.run_multiple_games_button_action.setStatusTip("Run 3 games of randomness")
+        game_menu.addAction(self.run_multiple_games_button_action)
 
         button_action = QAction("Run Round Robin Tournament...", self)
         game_menu.addAction(button_action)

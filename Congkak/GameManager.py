@@ -106,6 +106,10 @@ class GameManager:
     AGENT_MINIMAX = 'minimax'
     AGENT_MCTS = 'mcts'
 
+    PLAYER_A_WIN = 1
+    PLAYER_B_WIN = -1
+    DRAW = 0
+
     def __init__(self):
 
         self.player_a_hand_pos = -1
@@ -127,6 +131,11 @@ class GameManager:
         self.loading_game = False
         self.loaded_moves = []
         self.move_counter = 0
+
+        self.running_multiple_games = False
+        self.no_of_games_to_run = 0
+        self.no_of_games_left = 0
+        self.game_results = []
 
         self.show_starting_hands = True
 
@@ -170,6 +179,8 @@ class GameManager:
         self.board_graphic.save_game_button_action.triggered.connect(lambda checked: self.save_moves())
         self.board_graphic.load_game_button_action.triggered.connect(lambda checked: self.load_moves())
         self.board_graphic.new_game_button_action.triggered.connect(lambda checked: self.new_game(False))
+        self.board_graphic.run_multiple_games_button_action.\
+            triggered.connect(lambda checked: self.run_multiple_games(3, self.AGENT_RANDOM, self.AGENT_RANDOM))
 
         self.board_graphic.player_a_dropdown. \
             activated.connect(lambda
@@ -302,19 +313,38 @@ class GameManager:
 
         self.board_model.active_players.clear()
 
-        self.board_graphic.end_game_prompt()
+        result = self.DRAW
 
         if self.board_model.storeroom_a_value == self.board_model.storeroom_b_value:
             print("Draw")
+            result = self.DRAW
         elif self.board_model.storeroom_a_value > self.board_model.storeroom_b_value:
             print("Player A wins")
+            result = self.PLAYER_A_WIN
         elif self.board_model.storeroom_b_value > self.board_model.storeroom_a_value:
             print("Player B wins")
+            result = self.PLAYER_B_WIN
 
-        print("moves made: ")
+        if self.running_multiple_games:
 
-        for move in self.board_model.moves_made:
-            print(move)
+            self.game_results.append(result)
+
+            if self.no_of_games_left > 0:
+                self.no_of_games_left -= 1
+                self.new_game(False)
+                self.board_model.print_all_data()
+                self.start_worker_simultaneous_sowing()
+            else:
+                print(str(self.no_of_games_to_run) + " games have been run. Results: " + str(self.game_results))
+
+            pass
+        else:
+            self.board_graphic.end_game_prompt()
+
+            print("moves made: ")
+
+            for move in self.board_model.moves_made:
+                print(move)
 
     # decides what action to take when the hole input is chosen
     def choosing_hole_action(self, player, hole):
@@ -413,8 +443,8 @@ class GameManager:
         else:
             self.board_model.sowing_speed = 1 / move_per_second
 
-    # todo: check the autoplay
     # Restarts a new game
+    # TODO: fix new game not working
     def new_game(self, autorun):
 
         self.kill_all_workers()
@@ -424,6 +454,7 @@ class GameManager:
         self.autoplay_hands = autorun
         self.player_a_hand_pos = 0
         self.player_b_hand_pos = 0
+
         self.board_graphic.set_enable_play_button(not autorun)
 
         if autorun:
@@ -490,4 +521,21 @@ class GameManager:
         sys.exit("Window closed")
 
     # TODO: multiple games.
+    def run_multiple_games(self, no_of_games, agent_a, agent_b):
+
+        if agent_a == self.AGENT_USER or agent_b == self.AGENT_USER:
+            print("choose two artificial gents")
+            return
+
+        self.player_a_agent = agent_a
+        self.player_b_agent = agent_b
+
+        self.running_multiple_games = True
+        self.no_of_games_to_run = no_of_games
+        self.no_of_games_left = no_of_games
+        self.game_results = []
+
+        self.start_worker_simultaneous_sowing()
+
+        pass
 

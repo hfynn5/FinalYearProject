@@ -402,13 +402,17 @@ class BoardModel:
                     action = self.PROMPT_SOWING_A
                     if self.ping: print("prompt player a 3")
 
-            elif self.player_a_status == self.CONTINUE_SOWING and self.player_b_status == self.STOP_SOWING_B:
+            elif self.player_a_status == self.CONTINUE_SOWING and (self.player_b_status == self.STOP_SOWING_B or
+                                                                   self.player_b_status == self.TIKAM_B):
                 action = self.WAIT
                 pass
-            elif self.player_b_status == self.CONTINUE_SOWING and self.player_a_status == self.STOP_SOWING_A:
+            elif self.player_b_status == self.CONTINUE_SOWING and (self.player_a_status == self.STOP_SOWING_A or
+                                                                   self.player_a_status == self.TIKAM_A):
                 action = self.WAIT
-                # action = self.CONTINUE_SOWING_B
-                # might be the root of the problem. if not, fix it. thx <3
+            elif self.player_a_status == self.TIKAM_A and self.player_b_status == self.TIKAM_B:
+                if self.ping: print(
+                    "both tikam. prompting both. honestly, this should never be printed so you fucked up")
+                action = self.WAIT
                 pass
             else:
                 print("seq action error. status a: " + str(self.player_a_status) + ". status b: " +
