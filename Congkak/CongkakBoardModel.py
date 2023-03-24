@@ -79,7 +79,7 @@ class BoardModel:
 
         self.update_player_hands_from_current_hand(current_hand)
 
-        time.sleep(self.sowing_speed)
+        self.wait_micromove()
 
         while status == self.CONTINUE_SOWING:
 
@@ -87,7 +87,7 @@ class BoardModel:
 
             self.update_player_hands_from_current_hand(current_hand)
 
-            time.sleep(self.sowing_speed)
+            self.wait_micromove()
 
             status = self.check_hand_status(current_hand)
 
@@ -119,7 +119,7 @@ class BoardModel:
 
         while hand.counter_count > 0:
 
-            time.sleep(self.sowing_speed)
+            self.wait_micromove()
 
             hand.move_one_pos()
             hand = self.drop_counter(hand)
@@ -149,7 +149,7 @@ class BoardModel:
         self.player_a_hand = hand_a
         self.player_b_hand = hand_b
 
-        time.sleep(self.sowing_speed)
+        self.wait_micromove()
 
         while self.player_a_status == self.CONTINUE_SOWING and self.player_b_status == self.CONTINUE_SOWING:
 
@@ -158,7 +158,7 @@ class BoardModel:
             self.player_a_hand = hand_a
             self.player_b_hand = hand_b
 
-            time.sleep(self.sowing_speed)
+            self.wait_micromove()
 
             self.player_a_status = self.check_hand_status(hand_a)
             self.player_b_status = self.check_hand_status(hand_b)
@@ -193,7 +193,7 @@ class BoardModel:
 
         while hand_a.counter_count > 0 and hand_b.counter_count > 0:
 
-            time.sleep(self.sowing_speed)
+            self.wait_micromove()
 
             hand_a.move_one_pos()
             hand_b.move_one_pos()
@@ -248,30 +248,32 @@ class BoardModel:
         if hand.player == 'a' and hand.has_looped and hand.hole_pos < 20:
             self.player_a_hand = hand
 
+            self.player_a_status = self.STOP_SOWING_A
+
             opposite_hole = 17 - self.player_a_hand.hole_pos
             current_hand_pos = self.player_a_hand.hole_pos
 
             self.house_a_values[current_hand_pos - 11] = 0
             self.player_a_hand.counter_count += 1
 
-            time.sleep(self.sowing_speed)
+            self.wait_micromove()
 
             self.player_a_hand.hole_pos = 21 + opposite_hole
 
-            time.sleep(self.sowing_speed)
+            self.wait_micromove()
 
             self.player_a_hand.counter_count += self.house_b_values[opposite_hole]
             self.house_b_values[opposite_hole] = 0
 
-            time.sleep(self.sowing_speed)
+            self.wait_micromove()
 
             self.player_a_hand.hole_pos = 28
 
-            time.sleep(self.sowing_speed)
+            self.wait_micromove()
 
             self.storeroom_a_value += self.player_a_hand.drop_all_counters()
 
-            time.sleep(self.sowing_speed)
+            self.wait_micromove()
 
             self.reset_hand('a')
 
@@ -284,30 +286,32 @@ class BoardModel:
         elif hand.player == 'b' and hand.has_looped and hand.hole_pos > 20:
             self.player_b_hand = hand
 
+            self.player_b_status = self.STOP_SOWING_B
+
             opposite_hole = 27 - self.player_b_hand.hole_pos
             current_hand_pos = self.player_b_hand.hole_pos
 
             self.house_b_values[current_hand_pos - 21] = 0
             self.player_b_hand.counter_count += 1
 
-            time.sleep(self.sowing_speed)
+            self.wait_micromove()
 
             self.player_b_hand.hole_pos = 11 + opposite_hole
 
-            time.sleep(self.sowing_speed)
+            self.wait_micromove()
 
             self.player_b_hand.counter_count += self.house_a_values[opposite_hole]
             self.house_a_values[opposite_hole] = 0
 
-            time.sleep(self.sowing_speed)
+            self.wait_micromove()
 
             self.player_b_hand.hole_pos = 18
 
-            time.sleep(self.sowing_speed)
+            self.wait_micromove()
 
             self.storeroom_b_value += self.player_b_hand.drop_all_counters()
 
-            time.sleep(self.sowing_speed)
+            self.wait_micromove()
 
             self.reset_hand('b')
 
@@ -394,12 +398,14 @@ class BoardModel:
                     if self.ping: print("prompt player a 3")
 
             elif self.player_a_status == self.CONTINUE_SOWING and self.player_b_status == self.STOP_SOWING_B:
-                action = self.CONTINUE_SOWING_A
+                action = self.WAIT
+                pass
             elif self.player_b_status == self.CONTINUE_SOWING and self.player_a_status == self.STOP_SOWING_A:
-                action = self.CONTINUE_SOWING_B
-
+                action = self.WAIT
+                # action = self.CONTINUE_SOWING_B
+                # might be the root of the problem. if not, fix it. thx <3
+                pass
             else:
-                # TODO: debug this "error. status a: 21. status b: 1"
                 print("seq action error. status a: " + str(self.player_a_status) + ". status b: " +
                       str(self.player_b_status) + ". active players: " + str(self.active_players))
 
@@ -545,7 +551,7 @@ class BoardModel:
 
         return truth_list
 
-    def wait(self):
+    def wait_micromove(self):
 
         start_time = time.time()
 
@@ -555,6 +561,7 @@ class BoardModel:
 
         if not self.running:
             raise Exception("Running the game is disabled.")
+
 
     # print holes
     def print_all_data(self):
