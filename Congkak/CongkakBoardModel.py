@@ -60,6 +60,8 @@ class BoardModel:
 
         self.moves_made = []
 
+        self.running = True
+
     # do repeated sowing. has waiting
     def iterate_sowing(self, current_hand):
 
@@ -391,6 +393,7 @@ class BoardModel:
                     action = self.PROMPT_SOWING_A
                     if self.ping: print("prompt player a 3")
             else:
+                # TODO: debug this "error. status a: 21. status b: 1"
                 print("error. status a: " + str(self.player_a_status) + ". status b: " + str(self.player_b_status))
 
         elif self.game_phase == self.SIMULTANEOUS_PHASE:
@@ -531,6 +534,17 @@ class BoardModel:
                     truth_list.append(False)
 
         return truth_list
+
+    def wait(self):
+
+        start_time = time.time()
+
+        while self.running and time.time()-start_time < self.sowing_speed:
+            # time.sleep(0.00001)
+            pass
+
+        if not self.running:
+            raise Exception("Running the game is disabled.")
 
     # print holes
     def print_all_data(self):

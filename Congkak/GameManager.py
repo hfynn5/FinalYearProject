@@ -248,11 +248,12 @@ class GameManager:
 
         self.board_model.tikam(hand=hand)
 
-    def next_action(self):
+    def next_action(self, action=None):
 
         update_board_graphics(board_graphic=self.board_graphic, board_model=self.board_model)
 
-        action = self.board_model.action_to_take()
+        if action is None:
+            action = self.board_model.action_to_take()
 
         if self.board_model.player_a_status == BoardModel.TIKAM_A or \
                 self.board_model.player_b_status == BoardModel.TIKAM_B:
@@ -262,7 +263,6 @@ class GameManager:
 
             if self.board_model.player_b_status == BoardModel.TIKAM_B:
                 self.start_worker_tikam(hand=self.board_model.player_b_hand)
-
             return
 
         match action:
@@ -360,6 +360,7 @@ class GameManager:
                 self.choosing_hole_action(player=player, hole=self.prompt_agent_for_input(player))
 
     # TODO: add a way to save future moves to save time
+    # TODO: make this a worker so that it doesnt freeze the GUI
     # prompt agent for move. returns  move
     def prompt_agent_for_input(self, player):
         copied_board = copy.deepcopy(self.board_model)
@@ -412,6 +413,11 @@ class GameManager:
             self.board_model.sowing_speed = 1 / move_per_second
 
     def new_game(self):
+
+        self.threadpool.clear()
+
+        self.kill_all_workers()
+
         self.board_model.reset_game()
         self.move_counter = 0
         self.autoplay_hands = False
@@ -421,6 +427,21 @@ class GameManager:
         self.board_graphic.set_enable_play_button(True)
         self.prompt_player('a')
         self.prompt_player('b')
+
+        # self.board_model.running
+
+    def kill_all_workers(self):
+        self.board_model.running = False
+
+        time.sleep(0.01)
+
+        self.board_model.running = True
+
+        pass
+
+    # is this possible?
+    def kill_specific_workers(self):
+        pass
 
     def save_moves(self):
         file = open("moves.txt", 'w')
