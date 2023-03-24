@@ -4,21 +4,21 @@ from Congkak.Hand import Hand
 
 
 class BoardModel:
-    CONTINUE_SOWING = 1
-    CONTINUE_SOWING_A = 11
-    CONTINUE_SOWING_B = 12
-    STOP_SOWING_A = 21
-    STOP_SOWING_B = 22
-    STOP_SOWING_BOTH = 23
-    PROMPT_SOWING_A = 31
-    PROMPT_SOWING_B = 32
-    PROMPT_SOWING_BOTH = 33
-    TIKAM_A = 41
-    TIKAM_B = 42
-    TIKAM_BOTH = 43
-    WAIT = 5
-    GAME_END = 6
-    ERROR = -1
+    CONTINUE_SOWING = "CONTINUE SOWING"
+    CONTINUE_SOWING_A = "CONTINUE SOWING A"
+    CONTINUE_SOWING_B = "CONTINUE SOWING B"
+    STOP_SOWING_A = "STOP SOWING A"
+    STOP_SOWING_B = "STOP SOWING B"
+    STOP_SOWING_BOTH = "STOP SOWING BOTH"
+    PROMPT_SOWING_A = "PROMPT SOWING A"
+    PROMPT_SOWING_B = "PROMPT SOWING B"
+    PROMPT_SOWING_BOTH = "PROMPT SOWING BOTH"
+    TIKAM_A = "TIKAM A"
+    TIKAM_B = "TIKAM B"
+    TIKAM_BOTH = "TIKAM BOTH"
+    WAIT = "WAIT"
+    GAME_END = "GAME END"
+    ERROR = "ERROR"
 
     SIMULTANEOUS_PHASE = 1
     SEQUENTIAL_PHASE = 2
@@ -392,9 +392,16 @@ class BoardModel:
                 elif self.last_active_player == 'b':
                     action = self.PROMPT_SOWING_A
                     if self.ping: print("prompt player a 3")
+
+            elif self.player_a_status == self.CONTINUE_SOWING and self.player_b_status == self.STOP_SOWING_B:
+                action = self.CONTINUE_SOWING_A
+            elif self.player_b_status == self.CONTINUE_SOWING and self.player_a_status == self.STOP_SOWING_A:
+                action = self.CONTINUE_SOWING_B
+
             else:
                 # TODO: debug this "error. status a: 21. status b: 1"
-                print("error. status a: " + str(self.player_a_status) + ". status b: " + str(self.player_b_status))
+                print("seq action error. status a: " + str(self.player_a_status) + ". status b: " +
+                      str(self.player_b_status) + ". active players: " + str(self.active_players))
 
         elif self.game_phase == self.SIMULTANEOUS_PHASE:
 
@@ -441,6 +448,9 @@ class BoardModel:
                     self.game_phase = self.SEQUENTIAL_PHASE
                 if self.ping: print("prompt player b")
                 action = self.PROMPT_SOWING_B
+            else:
+                print("simul action error. status a: " + str(self.player_a_status) + ". status b: " + str(
+                    self.player_b_status))
 
         else:
             print("super weird bug. its neither seq nor simul")

@@ -206,14 +206,13 @@ class GameManager:
         self.autoplay_hands = True
         self.board_graphic.set_enable_play_button(False)
 
-        # print("hand a pos: " + str(hand_a.hole_pos))
-        # print("hand b pos: " + str(hand_b.hole_pos))
-
         if not self.player_a_agent == self.AGENT_USER and (hole_a is None or hole_a <= 0) and hand_a is None:
             hole_a = self.prompt_agent_for_input('a')
 
         if not self.player_b_agent == self.AGENT_USER and (hole_b is None or hole_b <= 0) and hand_b is None:
             hole_b = self.prompt_agent_for_input('b')
+
+        self.board_model.append_move(hole_a, hole_b)
 
         if hand_a is None:
             hand_a = Hand(player='a', hole_pos=hole_a, counter_count=0)
@@ -255,14 +254,14 @@ class GameManager:
         if action is None:
             action = self.board_model.action_to_take()
 
-        if self.board_model.player_a_status == BoardModel.TIKAM_A or \
+        if self.board_model.player_a_status == BoardModel.TIKAM_A:
+            self.start_worker_tikam(hand=self.board_model.player_a_hand)
+
+        if self.board_model.player_b_status == BoardModel.TIKAM_B:
+            self.start_worker_tikam(hand=self.board_model.player_b_hand)
+
+        if self.board_model.player_a_status == BoardModel.TIKAM_A and \
                 self.board_model.player_b_status == BoardModel.TIKAM_B:
-
-            if self.board_model.player_a_status == BoardModel.TIKAM_A:
-                self.start_worker_tikam(hand=self.board_model.player_a_hand)
-
-            if self.board_model.player_b_status == BoardModel.TIKAM_B:
-                self.start_worker_tikam(hand=self.board_model.player_b_hand)
             return
 
         match action:
