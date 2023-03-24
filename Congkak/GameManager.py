@@ -169,7 +169,7 @@ class GameManager:
 
         self.board_graphic.save_game_button_action.triggered.connect(lambda checked: self.save_moves())
         self.board_graphic.load_game_button_action.triggered.connect(lambda checked: self.load_moves())
-        self.board_graphic.new_game_button_action.triggered.connect(lambda checked: self.new_game())
+        self.board_graphic.new_game_button_action.triggered.connect(lambda checked: self.new_game(False))
 
         self.board_graphic.player_a_dropdown. \
             activated.connect(lambda
@@ -300,6 +300,8 @@ class GameManager:
     # ends the game
     def end_game(self):
 
+        self.board_model.active_players.clear()
+
         self.board_graphic.end_game_prompt()
 
         if self.board_model.storeroom_a_value == self.board_model.storeroom_b_value:
@@ -411,32 +413,29 @@ class GameManager:
         else:
             self.board_model.sowing_speed = 1 / move_per_second
 
-    def new_game(self):
-
-        self.threadpool.clear()
+    # todo: check the autoplay
+    # Restarts a new game
+    def new_game(self, autorun):
 
         self.kill_all_workers()
 
         self.board_model.reset_game()
         self.move_counter = 0
-        self.autoplay_hands = False
+        self.autoplay_hands = autorun
         self.player_a_hand_pos = 0
         self.player_b_hand_pos = 0
-        self.threadpool.clear()
-        self.board_graphic.set_enable_play_button(True)
-        self.prompt_player('a')
-        self.prompt_player('b')
+        self.board_graphic.set_enable_play_button(not autorun)
 
-        # self.board_model.running
+        if autorun:
+            self.next_action(BoardModel.PROMPT_SOWING_BOTH)
 
     def kill_all_workers(self):
         self.board_model.running = False
+        self.threadpool.clear()
 
         time.sleep(0.01)
 
         self.board_model.running = True
-
-        pass
 
     # is this possible?
     def kill_specific_workers(self):
@@ -489,3 +488,6 @@ class GameManager:
     def close_program(self):
         self.kill_all_workers()
         sys.exit("Window closed")
+
+    # TODO: multiple games.
+

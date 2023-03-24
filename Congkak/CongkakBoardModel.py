@@ -372,6 +372,9 @@ class BoardModel:
 
         action = self.ERROR
 
+        if not self.running:
+            return self.WAIT
+
         if self.game_phase == self.SEQUENTIAL_PHASE:
 
             if sum(self.house_a_values) == 0 and sum(self.house_b_values) == 0:
@@ -458,6 +461,8 @@ class BoardModel:
                     self.game_phase = self.SEQUENTIAL_PHASE
                 if self.ping: print("prompt player b")
                 action = self.PROMPT_SOWING_B
+            elif self.player_a_status == self.CONTINUE_SOWING and self.player_b_status == self.CONTINUE_SOWING:
+                action = self.WAIT
             else:
                 print("simul action error. status a: " + str(self.player_a_status) + ". status b: " + str(
                     self.player_b_status))
@@ -504,16 +509,16 @@ class BoardModel:
         self.storeroom_a_value = 0
         self.storeroom_b_value = 0
 
-        self.player_a_status = self.STOP_SOWING_A
-        self.player_b_status = self.STOP_SOWING_B
-        self.active_players = []
-        self.last_active_player = ''
-
-        self.game_phase = self.SIMULTANEOUS_PHASE
-
-        self.no_of_micromoves_made = 0
-        self.no_of_micromoves_made_player_a = 0
-        self.no_of_micromoves_made_player_b = 0
+        # self.player_a_status = self.STOP_SOWING_A
+        # self.player_b_status = self.STOP_SOWING_B
+        # self.active_players = []
+        # self.last_active_player = ''
+        #
+        # self.game_phase = self.SIMULTANEOUS_PHASE
+        #
+        # self.no_of_micromoves_made = 0
+        # self.no_of_micromoves_made_player_a = 0
+        # self.no_of_micromoves_made_player_b = 0
 
     def append_move(self, player_a_move, player_b_move):
         if not (type(player_a_move) == int) or 1 <= player_a_move <= 7:
