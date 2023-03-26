@@ -106,6 +106,8 @@ class GameManager:
     AGENT_MINIMAX = 'minimax'
     AGENT_MCTS = 'mcts'
 
+    LIST_OF_AGENTS = [AGENT_USER, AGENT_RANDOM, AGENT_MAX, AGENT_MINIMAX, AGENT_MCTS]
+
     PLAYER_A_WIN = 1
     PLAYER_B_WIN = -1
     DRAW = 0
@@ -116,7 +118,7 @@ class GameManager:
         self.player_b_hand_pos = -1
 
         # user, random, max, minimax, mcts
-        self.agent_list = [self.AGENT_USER, self.AGENT_RANDOM, self.AGENT_MAX, self.AGENT_MINIMAX, self.AGENT_MCTS]
+        # self.agent_list = [self.AGENT_USER, self.AGENT_RANDOM, self.AGENT_MAX, self.AGENT_MINIMAX, self.AGENT_MCTS]
         self.player_a_agent = self.AGENT_USER
         self.player_b_agent = self.AGENT_USER
 
@@ -172,27 +174,39 @@ class GameManager:
                                                        self.start_worker_simultaneous_sowing(
                                                            hole_a=self.player_a_hand_pos,
                                                            hole_b=self.player_b_hand_pos,
-                                                           ))
+                                                       ))
 
         self.board_graphic.move_speed_slider. \
             valueChanged.connect(lambda value=self.board_graphic.move_speed_slider.value():
                                  self.update_sowing_speed(value))
 
-        self.board_graphic.save_game_button_action.triggered.connect(lambda checked: self.save_moves())
-        self.board_graphic.load_game_button_action.triggered.connect(lambda checked: self.load_moves())
-        self.board_graphic.new_game_button_action.triggered.connect(lambda checked: self.new_game(False))
-        self.board_graphic.run_multiple_games_button_action.\
-            triggered.connect(lambda checked: self.run_multiple_games(3, self.AGENT_RANDOM, self.AGENT_RANDOM))
+        self.board_graphic.save_game_menu_button_action.triggered.connect(lambda checked: self.save_moves())
+        self.board_graphic.load_game_menu_button_action.triggered.connect(lambda checked: self.load_moves())
+        self.board_graphic.new_game_menu_button_action.triggered.connect(lambda checked: self.new_game(False))
+        # self.board_graphic.run_multiple_games_menu_button_action.\
+        #     triggered.connect(lambda checked: self.run_multiple_games(3, self.AGENT_RANDOM, self.AGENT_RANDOM))
 
         self.board_graphic.player_a_dropdown. \
             activated.connect(lambda
-                                  index=self.board_graphic.player_a_dropdown.
-                                      currentIndex(): self.set_player_agent_index('a', index))
+                              index=self.board_graphic.player_a_dropdown.
+                                    currentIndex(): self.set_player_agent_index('a', index))
 
         self.board_graphic.player_b_dropdown. \
             activated.connect(lambda
-                                  index=self.board_graphic.player_b_dropdown.
-                                      currentIndex(): self.set_player_agent_index('b', index))
+                              index=self.board_graphic.player_b_dropdown.
+                                    currentIndex(): self.set_player_agent_index('b', index))
+
+        self.board_graphic.multiple_games_dialog_box.buttonBox.accepted.connect(self.run_multiple_games)
+
+        # self.board_graphic.multiple_games_dialog_box. \
+        #     buttonBox.accepted.connect(lambda
+        #                                agent_a=self.LIST_OF_AGENTS[
+        #                                    self.board_graphic.multiple_games_dialog_box.player_a_agent],
+        #                                agent_b=self.LIST_OF_AGENTS[
+        #                                    self.board_graphic.multiple_games_dialog_box.player_b_agent],
+        #                                game_count=self.board_graphic.multiple_games_dialog_box.number_of_games:
+        #                                self.run_multiple_games(no_of_games=game_count, agent_a=agent_a, agent_b=agent_b)
+        #                                )
 
     # makes worker constantly update graphics
     def start_worker_graphic_updater(self):
@@ -425,10 +439,10 @@ class GameManager:
         self.set_hand_pos(player, 0)
 
         if player == 'a':
-            self.player_a_agent = self.agent_list[agent_index]
+            self.player_a_agent = self.LIST_OF_AGENTS[agent_index]
             print(self.player_a_agent)
         elif player == 'b':
-            self.player_b_agent = self.agent_list[agent_index]
+            self.player_b_agent = self.LIST_OF_AGENTS[agent_index]
             print(self.player_b_agent)
 
         if agent_index == 0:
@@ -451,7 +465,16 @@ class GameManager:
             self.board_model.sowing_speed = 1 / move_per_second
 
     # runs multiple games
-    def run_multiple_games(self, no_of_games, agent_a, agent_b):
+    def run_multiple_games(self, no_of_games=None, agent_a=None, agent_b=None):
+
+        if no_of_games is None:
+            no_of_games = self.board_graphic.multiple_games_dialog_box.number_of_games
+
+        if agent_a is None:
+            agent_a = self.LIST_OF_AGENTS[self.board_graphic.multiple_games_dialog_box.player_a_agent]
+
+        if agent_b is None:
+            agent_b = self.LIST_OF_AGENTS[self.board_graphic.multiple_games_dialog_box.player_b_agent]
 
         if agent_a == self.AGENT_USER or agent_b == self.AGENT_USER:
             print("choose two artificial gents")
@@ -528,7 +551,6 @@ class GameManager:
         self.move_counter = 0
         self.do_next_move_from_loaded_moves(BoardModel.PROMPT_SOWING_BOTH)
 
-    # TODO redo loading with the new rules
     def do_next_move_from_loaded_moves(self, action):
 
         if self.move_counter < len(self.loaded_moves):
@@ -550,6 +572,3 @@ class GameManager:
     def close_program(self):
         self.kill_all_workers()
         sys.exit("Window closed")
-
-
-
