@@ -47,14 +47,6 @@ class BoardModel:
         self.game_phase = self.SIMULTANEOUS_PHASE
 
         self.sowing_speed = 0
-        self.slowed_sowing_multiplier = 10  # if more than 10, slowing is infinite
-
-        self.player_a_sowing_slowed = False
-        self.player_b_sowing_slowed = False
-
-        self.no_of_micromoves_made = 0
-        self.no_of_micromoves_made_player_a = 0
-        self.no_of_micromoves_made_player_b = 0
 
         self.ping = False
 
@@ -70,10 +62,8 @@ class BoardModel:
 
         if current_hand.player == 'a':
             self.player_a_status = self.CONTINUE_SOWING
-            self.player_b_sowing_slowed = False
         elif current_hand.player == 'b':
             self.player_b_status = self.CONTINUE_SOWING
-            self.player_a_sowing_slowed = False
 
         status = self.CONTINUE_SOWING
 
@@ -504,8 +494,6 @@ class BoardModel:
             self.player_b_hand.hole_pos = pos
 
     def reset_game(self):
-        self.reset_hand('a')
-        self.reset_hand('b')
 
         self.house_a_values = [7, 7, 7, 7, 7, 7, 7]
         self.house_b_values = [7, 7, 7, 7, 7, 7, 7]
@@ -513,16 +501,19 @@ class BoardModel:
         self.storeroom_a_value = 0
         self.storeroom_b_value = 0
 
-        # self.player_a_status = self.STOP_SOWING_A
-        # self.player_b_status = self.STOP_SOWING_B
-        # self.active_players = []
-        # self.last_active_player = ''
-        #
-        # self.game_phase = self.SIMULTANEOUS_PHASE
-        #
-        # self.no_of_micromoves_made = 0
-        # self.no_of_micromoves_made_player_a = 0
-        # self.no_of_micromoves_made_player_b = 0
+        self.reset_hand('a')
+        self.reset_hand('b')
+
+        self.player_a_status = self.STOP_SOWING_A
+        self.player_b_status = self.STOP_SOWING_B
+        self.active_players = []
+        self.last_active_player = ''
+
+        self.game_phase = self.SIMULTANEOUS_PHASE
+
+        self.moves_made = []
+
+        self.running = True
 
     def append_move(self, player_a_move, player_b_move):
         if not (type(player_a_move) == int) or 1 <= player_a_move <= 7:
