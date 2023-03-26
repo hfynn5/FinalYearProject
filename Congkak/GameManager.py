@@ -106,11 +106,16 @@ class GameManager:
     AGENT_MINIMAX = 'minimax'
     AGENT_MCTS = 'mcts'
 
-    LIST_OF_AGENTS = [AGENT_USER, AGENT_RANDOM, AGENT_MAX, AGENT_MINIMAX, AGENT_MCTS]
+    LIST_OF_AGENTS = [AGENT_USER, AGENT_RANDOM, AGENT_MAX, AGENT_MINIMAX]
 
     PLAYER_A_WIN = 1
     PLAYER_B_WIN = -1
     DRAW = 0
+
+    NORMAL_MODE = 0
+    MULTI_GAME_MODE = 1
+    ROUND_ROBIN_MODE = 2
+    LOADING_MODE = 3
 
     def __init__(self):
 
@@ -128,20 +133,25 @@ class GameManager:
         self.minimax_agent = MinimaxAgent(weights=(0, 0, 0, 0, 0, 0), maximum_depth=2, maximum_self_depth=3,
                                           maximum_number_node=0)
 
+        self.game_has_ended = False
+        self.show_starting_hands = True
         self.autoplay_hands = False
 
-        self.loading_game = False
+        self.current_mode = self.NORMAL_MODE
+
+        # for loading
         self.loaded_moves = []
         self.move_counter = 0
 
-        self.running_multiple_games = False
+        # for multi games
         self.no_of_games_to_run = 0
         self.no_of_games_left = 0
         self.game_results = []
 
-        self.game_has_ended = False
+        # for round robin
+        self.round_robin_results = [[0 for x in range(len(self.LIST_OF_AGENTS)-1)]
+                                    for x in range(len(self.LIST_OF_AGENTS)-1)]
 
-        self.show_starting_hands = True
 
         # declare threadpool
         self.threadpool = QThreadPool()
@@ -346,25 +356,48 @@ class GameManager:
             print("Player B wins")
             result = self.PLAYER_B_WIN
 
-        if self.running_multiple_games:
+        match self.current_mode:
+            case self.NORMAL_MODE:
 
-            self.game_results.append(result)
+                self.board_graphic.end_game_prompt()
+                print("Game has ended. Moves made: ")
+                for move in self.board_model.moves_made:
+                    print(move)
 
-            if self.no_of_games_left > 0:
-                self.no_of_games_left -= 1
-                self.new_game(False)
-                self.start_worker_simultaneous_sowing()
-            else:
-                print(str(self.no_of_games_to_run) + " games have been run. Results: " + str(self.game_results))
+            case self.MULTI_GAME_MODE:
 
-            pass
-        else:
-            self.board_graphic.end_game_prompt()
+                self.game_results.append(result)
+                if self.no_of_games_left > 0:
+                    self.no_of_games_left -= 1
+                    self.new_game(False)
+                    self.start_worker_simultaneous_sowing()
+                else:
+                    print(str(self.no_of_games_to_run) + " games have been run. Results: " + str(self.game_results))
 
-            print("moves made: ")
+                pass
+            case self.ROUND_ROBIN_MODE:
 
-            for move in self.board_model.moves_made:
-                print(move)
+                agent_a_index = self.LIST_OF_AGENTS.index(self.player_a_agent) - 1
+                agent_b_index = self.LIST_OF_AGENTS.index(self.player_b_agent) - 1
+
+                if result == self.PLAYER_A_WIN:
+                    self.round_robin_results[agent_a_index][agent_b_index] += 1
+                elif result == self.PLAYER_B_WIN:
+                    self.round_robin_results[agent_b_index][agent_a_index] += 1
+
+                if self.no_of_games_left > 0:
+                    self.no_of_games_left -= 1
+                    self.new_game(False)
+                    self.start_worker_simultaneous_sowing()
+                else:
+
+                    self.next_round()
+
+                pass
+            case self.LOADING_MODE:
+                print("Game has loaded.")
+                pass
+
 
     # decides what action to take when the hole input is chosen
     def choosing_hole_action(self, player, hole):
@@ -482,17 +515,54 @@ class GameManager:
 
         print("running " + str(no_of_games) + " games. player a: " + str(agent_a) + ". player b: " + str(agent_b))
 
+        self.current_mode = self.MULTI_GAME_MODE
+
         self.new_game(False)
 
         self.player_a_agent = agent_a
         self.player_b_agent = agent_b
 
-        self.running_multiple_games = True
         self.no_of_games_to_run = no_of_games
         self.no_of_games_left = no_of_games - 1
         self.game_results = []
 
         self.start_worker_simultaneous_sowing()
+
+        pass
+
+    def run_round_robin_tournament(self, no_of_games):
+
+        self.current_mode = self.ROUND_ROBIN_MODE
+
+        self.player_a_agent = self.AGENT_RANDOM
+        self.player_b_agent = self.AGENT_RANDOM
+
+        self.no_of_games_to_run = no_of_games
+
+        self.round_robin_results = [[0 for x in range(len(self.LIST_OF_AGENTS) - 1)]
+                                    for x in range(len(self.LIST_OF_AGENTS) - 1)]
+
+        self.run_multiple_games(self.no_of_games_to_run, self.player_a_agent, self.player_b_agent)
+
+        pass
+
+    # consider moving it all in end game function.
+    def next_round(self):
+
+        agent_a_index = self.LIST_OF_AGENTS.index(self.player_a_agent) - 1
+        agent_b_index = self.LIST_OF_AGENTS.index(self.player_b_agent) - 1
+
+        agent_b_index += 1
+
+        if agent_b_index >= len(self.LIST_OF_AGENTS):
+            agent_a_index += 1
+            agent_b_index = agent_a_index
+
+        if agent_a_index >= len(self.LIST_OF_AGENTS):
+            print("round robin over. results: ")
+            print(self.round_robin_results)
+
+        self.run_multiple_games(self.no_of_games_to_run, self.LIST_OF_AGENTS[agent_a_index], self.LIST_OF_AGENTS[agent_b_index])
 
         pass
 
@@ -538,7 +608,7 @@ class GameManager:
     def load_moves(self):
 
         self.board_model.reset_game()
-        self.loading_game = True
+        self.current_mode = self.LOADING_MODE
 
         file = open("moves.txt", 'r')
         for line in file:
@@ -572,3 +642,4 @@ class GameManager:
     def close_program(self):
         self.kill_all_workers()
         sys.exit("Window closed")
+
