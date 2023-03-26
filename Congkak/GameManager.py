@@ -137,6 +137,8 @@ class GameManager:
         self.no_of_games_left = 0
         self.game_results = []
 
+        self.game_has_ended = False
+
         self.show_starting_hands = True
 
         # declare threadpool
@@ -185,12 +187,12 @@ class GameManager:
         self.board_graphic.player_a_dropdown. \
             activated.connect(lambda
                                   index=self.board_graphic.player_a_dropdown.
-                                      currentIndex(): self.set_player_agent('a', index))
+                                      currentIndex(): self.set_player_agent_index('a', index))
 
         self.board_graphic.player_b_dropdown. \
             activated.connect(lambda
                                   index=self.board_graphic.player_b_dropdown.
-                                      currentIndex(): self.set_player_agent('b', index))
+                                      currentIndex(): self.set_player_agent_index('b', index))
 
     # makes worker constantly update graphics
     def start_worker_graphic_updater(self):
@@ -311,6 +313,11 @@ class GameManager:
     # ends the game
     def end_game(self):
 
+        if self.game_has_ended:
+            return
+        else:
+            self.game_has_ended = True
+
         self.board_model.active_players.clear()
 
         result = self.DRAW
@@ -332,7 +339,6 @@ class GameManager:
             if self.no_of_games_left > 0:
                 self.no_of_games_left -= 1
                 self.new_game(False)
-                self.board_model.print_all_data()
                 self.start_worker_simultaneous_sowing()
             else:
                 print(str(self.no_of_games_to_run) + " games have been run. Results: " + str(self.game_results))
@@ -413,7 +419,8 @@ class GameManager:
 
         return move
 
-    def set_player_agent(self, player, agent_index):
+    # sets the player agent
+    def set_player_agent_index(self, player, agent_index):
 
         self.set_hand_pos(player, 0)
 
@@ -443,9 +450,33 @@ class GameManager:
         else:
             self.board_model.sowing_speed = 1 / move_per_second
 
+    # runs multiple games
+    def run_multiple_games(self, no_of_games, agent_a, agent_b):
+
+        if agent_a == self.AGENT_USER or agent_b == self.AGENT_USER:
+            print("choose two artificial gents")
+            return
+
+        print("running " + str(no_of_games) + " games. player a: " + str(agent_a) + ". player b: " + str(agent_b))
+
+        self.new_game(False)
+
+        self.player_a_agent = agent_a
+        self.player_b_agent = agent_b
+
+        self.running_multiple_games = True
+        self.no_of_games_to_run = no_of_games
+        self.no_of_games_left = no_of_games - 1
+        self.game_results = []
+
+        self.start_worker_simultaneous_sowing()
+
+        pass
+
     # Restarts a new game
-    # TODO: fix new game not working
     def new_game(self, autorun):
+
+        self.game_has_ended = False
 
         self.kill_all_workers()
 
@@ -520,22 +551,5 @@ class GameManager:
         self.kill_all_workers()
         sys.exit("Window closed")
 
-    # TODO: multiple games.
-    def run_multiple_games(self, no_of_games, agent_a, agent_b):
 
-        if agent_a == self.AGENT_USER or agent_b == self.AGENT_USER:
-            print("choose two artificial gents")
-            return
-
-        self.player_a_agent = agent_a
-        self.player_b_agent = agent_b
-
-        self.running_multiple_games = True
-        self.no_of_games_to_run = no_of_games
-        self.no_of_games_left = no_of_games
-        self.game_results = []
-
-        self.start_worker_simultaneous_sowing()
-
-        pass
 
