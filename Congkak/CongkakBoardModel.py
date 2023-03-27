@@ -4,19 +4,21 @@ from Congkak.Hand import Hand
 
 
 class BoardModel:
-    CONTINUE_SOWING = 1
-    STOP_SOWING_A = 21
-    STOP_SOWING_B = 22
-    STOP_SOWING_BOTH = 23
-    PROMPT_SOWING_A = 31
-    PROMPT_SOWING_B = 32
-    PROMPT_SOWING_BOTH = 33
-    TIKAM_A = 41
-    TIKAM_B = 42
-    TIKAM_BOTH = 43
-    WAIT = 5
-    GAME_END = 6
-    ERROR = -1
+    CONTINUE_SOWING = "CONTINUE SOWING"
+    CONTINUE_SOWING_A = "CONTINUE SOWING A"
+    CONTINUE_SOWING_B = "CONTINUE SOWING B"
+    STOP_SOWING_A = "STOP SOWING A"
+    STOP_SOWING_B = "STOP SOWING B"
+    STOP_SOWING_BOTH = "STOP SOWING BOTH"
+    PROMPT_SOWING_A = "PROMPT SOWING A"
+    PROMPT_SOWING_B = "PROMPT SOWING B"
+    PROMPT_SOWING_BOTH = "PROMPT SOWING BOTH"
+    TIKAM_A = "TIKAM A"
+    TIKAM_B = "TIKAM B"
+    TIKAM_BOTH = "TIKAM BOTH"
+    WAIT = "WAIT"
+    GAME_END = "GAME END"
+    ERROR = "ERROR"
 
     SIMULTANEOUS_PHASE = 1
     SEQUENTIAL_PHASE = 2
@@ -44,22 +46,15 @@ class BoardModel:
 
         self.game_phase = self.SIMULTANEOUS_PHASE
 
-        self.turn_count = 0
-        self.current_player_turn = ''
-
         self.sowing_speed = 0
-        self.slowed_sowing_multiplier = 10  # if more than 10, slowing is infinite
 
-        self.player_a_sowing_slowed = False
-        self.player_b_sowing_slowed = False
-
-        self.no_of_micromoves_made = 0
-        self.no_of_micromoves_made_player_a = 0
-        self.no_of_micromoves_made_player_b = 0
+        self.ping = False
 
         self.moves_made = []
 
-    # do repeated sowing
+        self.running = True
+
+    # do repeated sowing. has waiting
     def iterate_sowing(self, current_hand):
 
         if current_hand.player not in self.active_players:
@@ -67,27 +62,21 @@ class BoardModel:
 
         if current_hand.player == 'a':
             self.player_a_status = self.CONTINUE_SOWING
-            self.player_b_sowing_slowed = False
         elif current_hand.player == 'b':
             self.player_b_status = self.CONTINUE_SOWING
-            self.player_a_sowing_slowed = False
 
         status = self.CONTINUE_SOWING
 
-        if not current_hand.player == self.current_player_turn and self.game_phase == self.SEQUENTIAL_PHASE:
-            self.turn_count += 1
-            self.current_player_turn = current_hand.player
-
         self.update_player_hands_from_current_hand(current_hand)
 
-        self.wait_between_micromoves(current_hand.player)
+        self.wait_micromove()
 
         while status == self.CONTINUE_SOWING:
             current_hand = self.sow_once(current_hand)
 
             self.update_player_hands_from_current_hand(current_hand)
 
-            self.wait_between_micromoves(current_hand.player)
+            self.wait_micromove()
 
             status = self.check_hand_status(current_hand)
 
@@ -101,14 +90,15 @@ class BoardModel:
             status = self.STOP_SOWING_B
 
         if status == self.STOP_SOWING_A or status == self.STOP_SOWING_B:
-            self.active_players.remove(current_hand.player)
-            if len(self.active_players) == 0:
-                self.last_active_player = current_hand.player
+            if current_hand.player in self.active_players:
+                self.active_players.remove(current_hand.player)
+                if len(self.active_players) == 0:
+                    self.last_active_player = current_hand.player
 
-        self.reset_hands(current_hand.player)
+        self.reset_hand(current_hand.player)
         return status
 
-    # sows once
+    # sows once. has waiting
     def sow_once(self, hand):
 
         hand = self.pick_up_all_counters(hand)
@@ -118,7 +108,7 @@ class BoardModel:
 
         while hand.counter_count > 0:
 
-            self.wait_between_micromoves(hand.player)
+            self.wait_micromove()
 
             hand.move_one_pos()
             hand = self.drop_counter(hand)
@@ -130,7 +120,80 @@ class BoardModel:
 
         return hand
 
-    # pick up all counters at the hand position and put into hand
+    # do repeated simultaneous sowing
+    def iterated_sowing_simultaneous(self, hand_a, hand_b):
+
+        if 'a' not in self.active_players:
+            self.active_players.append('a')
+
+        if 'b' not in self.active_players:
+            self.active_players.append('b')
+
+        self.player_a_status = self.CONTINUE_SOWING
+        self.player_b_status = self.CONTINUE_SOWING
+
+        # status_a = self.CONTINUE_SOWING
+        # status_b = self.CONTINUE_SOWING
+
+        self.player_a_hand = hand_a
+        self.player_b_hand = hand_b
+
+        self.wait_micromove()
+
+        while self.player_a_status == self.CONTINUE_SOWING and self.player_b_status == self.CONTINUE_SOWING:
+            hand_a, hand_b = self.sow_once_simultaneous(hand_a, hand_b)
+
+            self.player_a_hand = hand_a
+            self.player_b_hand = hand_b
+
+            self.wait_micromove()
+
+            self.player_a_status = self.check_hand_status(hand_a)
+            self.player_b_status = self.check_hand_status(hand_b)
+
+        if self.player_a_status == self.STOP_SOWING_A:
+            self.reset_hand('a')
+            self.active_players.remove('a')
+
+        if self.player_b_status == self.STOP_SOWING_B:
+            self.reset_hand('b')
+            self.active_players.remove('b')
+
+        if self.player_a_status == self.PROMPT_SOWING_A:
+            self.reset_hand('a')
+
+        if self.player_b_status == self.PROMPT_SOWING_B:
+            self.reset_hand('b')
+
+        pass
+
+    def sow_once_simultaneous(self, hand_a, hand_b):
+
+        # TODO: this process will take time. picking up counters is technically a micromove
+        #  therefore if one hand picks, the other must move. fix this.
+        if hand_a.counter_count <= 0:
+            hand_a = self.pick_up_all_counters(hand_a)
+        if hand_b.counter_count <= 0:
+            hand_b = self.pick_up_all_counters(hand_b)
+
+        if hand_a.counter_count == 0 or hand_b.counter_count == 0:
+            return hand_a, hand_b
+
+        while hand_a.counter_count > 0 and hand_b.counter_count > 0:
+            self.wait_micromove()
+
+            hand_a.move_one_pos()
+            hand_b.move_one_pos()
+
+            hand_a = self.drop_counter(hand_a)
+            hand_b = self.drop_counter(hand_b)
+
+            self.player_a_hand = hand_a
+            self.player_b_hand = hand_b
+
+        return hand_a, hand_b
+
+    # pick up all counters at the hand position and put into hand.
     def pick_up_all_counters(self, hand):
         if 10 <= hand.hole_pos < 18:
             hand.counter_count = self.house_a_values[hand.hole_pos - 11]
@@ -139,7 +202,7 @@ class BoardModel:
             hand.counter_count = self.house_b_values[hand.hole_pos - 21]
             self.house_b_values[hand.hole_pos - 21] = 0
         else:
-            print(hand)
+            print(hand.hole_pos)
             print("player " + hand.player + " at storeroom. cant pick up")
         return hand
 
@@ -166,11 +229,16 @@ class BoardModel:
 
         return hand
 
-    # tikam the hand (will check if its possible to tikam or not
+    # tikam the hand (will check if its possible to tikam or not). has waiting
     def tikam(self, hand):
+
+        # print("tikaming")
+        # # self.print_all_data()
 
         if hand.player == 'a' and hand.has_looped and hand.hole_pos < 20:
             self.player_a_hand = hand
+
+            self.player_a_status = self.STOP_SOWING_A
 
             opposite_hole = 17 - self.player_a_hand.hole_pos
             current_hand_pos = self.player_a_hand.hole_pos
@@ -178,27 +246,37 @@ class BoardModel:
             self.house_a_values[current_hand_pos - 11] = 0
             self.player_a_hand.counter_count += 1
 
-            self.wait_between_micromoves(hand.player)
+            self.wait_micromove()
 
             self.player_a_hand.hole_pos = 21 + opposite_hole
 
-            self.wait_between_micromoves(hand.player)
+            self.wait_micromove()
 
             self.player_a_hand.counter_count += self.house_b_values[opposite_hole]
             self.house_b_values[opposite_hole] = 0
 
-            self.wait_between_micromoves(hand.player)
+            self.wait_micromove()
 
             self.player_a_hand.hole_pos = 28
 
-            self.wait_between_micromoves(hand.player)
+            self.wait_micromove()
 
             self.storeroom_a_value += self.player_a_hand.drop_all_counters()
 
-            self.wait_between_micromoves(hand.player)
-            pass
+            self.wait_micromove()
+
+            self.reset_hand('a')
+
+            self.player_a_status = self.STOP_SOWING_A
+
+            self.active_players.remove('a')
+            if len(self.active_players) == 0:
+                self.last_active_player = 'a'
+
         elif hand.player == 'b' and hand.has_looped and hand.hole_pos > 20:
             self.player_b_hand = hand
+
+            self.player_b_status = self.STOP_SOWING_B
 
             opposite_hole = 27 - self.player_b_hand.hole_pos
             current_hand_pos = self.player_b_hand.hole_pos
@@ -206,43 +284,51 @@ class BoardModel:
             self.house_b_values[current_hand_pos - 21] = 0
             self.player_b_hand.counter_count += 1
 
-            self.wait_between_micromoves(hand.player)
+            self.wait_micromove()
 
             self.player_b_hand.hole_pos = 11 + opposite_hole
 
-            self.wait_between_micromoves(hand.player)
+            self.wait_micromove()
 
             self.player_b_hand.counter_count += self.house_a_values[opposite_hole]
             self.house_a_values[opposite_hole] = 0
 
-            self.wait_between_micromoves(hand.player)
+            self.wait_micromove()
 
             self.player_b_hand.hole_pos = 18
 
-            self.wait_between_micromoves(hand.player)
+            self.wait_micromove()
 
             self.storeroom_b_value += self.player_b_hand.drop_all_counters()
 
-            self.wait_between_micromoves(hand.player)
+            self.wait_micromove()
+
+            self.reset_hand('b')
+
+            self.player_b_status = self.STOP_SOWING_B
+
+            self.active_players.remove('b')
+            if len(self.active_players) == 0:
+                self.last_active_player = 'b'
+
         else:
             print("cannot tikam")
+
+        # print("tikamed")
 
     # check status of hand
     def check_hand_status(self, hand):
 
         status = self.CONTINUE_SOWING
 
-        if hand.hole_pos == 28:
+        if hand.hole_pos == 28 and hand.counter_count == 0:
             status = self.PROMPT_SOWING_A
-        elif hand.hole_pos == 18:
+        elif hand.hole_pos == 18 and hand.counter_count == 0:
             status = self.PROMPT_SOWING_B
-        elif (hand.hole_pos < 20 and
-              (self.house_a_values[hand.hole_pos - 11] == 0)) or \
-                (hand.hole_pos > 20 and
-                 (self.house_b_values[hand.hole_pos - 21] == 0)):
-            status = self.ERROR
-        elif (hand.hole_pos < 20 and
-              (self.house_a_values[hand.hole_pos - 11] == 1)):
+
+        elif (10 < hand.hole_pos < 18 and
+              (self.house_a_values[hand.hole_pos - 11] == 1) and
+              hand.counter_count == 0):
             if hand.player == 'a':
                 if hand.has_looped:
                     status = self.TIKAM_A
@@ -250,9 +336,10 @@ class BoardModel:
                     status = self.STOP_SOWING_A
             elif hand.player == 'b':
                 status = self.STOP_SOWING_B
-        elif (hand.hole_pos > 20 and
-              (self.house_b_values[hand.hole_pos - 21] == 1)):
 
+        elif (20 < hand.hole_pos < 28 and
+              (self.house_b_values[hand.hole_pos - 21] == 1) and
+              hand.counter_count == 0):
             if hand.player == 'a':
                 status = self.STOP_SOWING_A
             elif hand.player == 'b':
@@ -273,83 +360,119 @@ class BoardModel:
     # returns the action the game manager should do
     def action_to_take(self):
 
-        # print("\n\nchecking action")
-        #
-        # print("status a: " + str(self.player_a_status))
-        # print("status b: " + str(self.player_b_status))
-        #
-        # print("micromove a: " + str(self.no_of_micromoves_made_player_a))
-        # print("micromove b: " + str(self.no_of_micromoves_made_player_b))
-
         action = self.ERROR
+
+        if not self.running:
+            return self.WAIT
+
         if self.game_phase == self.SEQUENTIAL_PHASE:
 
             if sum(self.house_a_values) == 0 and sum(self.house_b_values) == 0:
                 action = self.GAME_END
+
             elif sum(self.house_a_values) == 0:
                 action = self.PROMPT_SOWING_B
-                print("prompt player b")
+                if self.ping: print("all of a houses empty. prompt player b")
             elif sum(self.house_b_values) == 0:
                 action = self.PROMPT_SOWING_A
-                print("prompt player a")
+                if self.ping: print("all of b houses empty. prompt player a")
+
             elif self.player_a_status == self.PROMPT_SOWING_A:
                 action = self.PROMPT_SOWING_A
-                print("prompt player a")
+                if self.ping: print("prompt player a 2")
             elif self.player_b_status == self.PROMPT_SOWING_B:
                 action = self.PROMPT_SOWING_B
-                print("prompt player b")
+                if self.ping: print("prompt player b 2")
+
             elif self.player_a_status == self.STOP_SOWING_A and self.player_b_status == self.STOP_SOWING_B:
                 if self.last_active_player == 'a':
                     action = self.PROMPT_SOWING_B
-                    print("prompt player b")
+                    if self.ping: print("prompt player b 3")
                 elif self.last_active_player == 'b':
                     action = self.PROMPT_SOWING_A
-                    print("prompt player a")
+                    if self.ping: print("prompt player a 3")
+
+            elif self.player_a_status == self.CONTINUE_SOWING and (self.player_b_status == self.STOP_SOWING_B or
+                                                                   self.player_b_status == self.TIKAM_B):
+                action = self.WAIT
+                pass
+            elif self.player_b_status == self.CONTINUE_SOWING and (self.player_a_status == self.STOP_SOWING_A or
+                                                                   self.player_a_status == self.TIKAM_A):
+                action = self.WAIT
+            elif self.player_a_status == self.TIKAM_A and self.player_b_status == self.TIKAM_B:
+                if self.ping: print(
+                    "both tikam. prompting both. honestly, this should never be printed so you fucked up")
+                action = self.WAIT
+                pass
+            else:
+                print("seq action error. status a: " + str(self.player_a_status) + ". status b: " +
+                      str(self.player_b_status) + ". active players: " + str(self.active_players))
 
         elif self.game_phase == self.SIMULTANEOUS_PHASE:
 
+            # keep
             if self.player_a_status == self.PROMPT_SOWING_A and self.player_b_status == self.PROMPT_SOWING_B:
-                print("both are prompted")
+                if self.ping: print("both are prompted")
                 action = self.PROMPT_SOWING_BOTH
-            elif self.player_a_status == self.STOP_SOWING_A and self.player_b_status == self.STOP_SOWING_B and \
-                    self.no_of_micromoves_made_player_a == self.no_of_micromoves_made_player_b:
-                print("both stopped at the same time. prompting both")
-                action = self.PROMPT_SOWING_BOTH
-            elif self.player_a_status == self.TIKAM_A and self.player_b_status == self.TIKAM_B:
-                print("both tikam. prompting both. honestly, this should never be printed so you fucked up")
-                action = self.PROMPT_SOWING_BOTH
-            elif self.player_a_status == self.STOP_SOWING_A and self.player_b_status == self.STOP_SOWING_B and not \
-                    self.no_of_micromoves_made_player_a == self.no_of_micromoves_made_player_b:
-                print("sequential phase")
-                self.game_phase = self.SEQUENTIAL_PHASE
-                if self.last_active_player == 'a':
-                    print("prompt player b")
-                    action = self.PROMPT_SOWING_B
-                elif self.last_active_player == 'b':
-                    print("prompt player a")
-                    action = self.PROMPT_SOWING_A
 
-            elif self.player_a_status == self.STOP_SOWING_A and not self.player_b_status == self.STOP_SOWING_B:
-                print("player a has stopped. player b has not: " + str(self.player_b_status) +
-                      ". wait for player b to stop")
-                action = self.WAIT
+            # keep
+            elif self.player_a_status == self.STOP_SOWING_A and self.player_b_status == self.STOP_SOWING_B:
+                if self.ping: print("both stopped at the same time. prompting both")
+                action = self.PROMPT_SOWING_BOTH
+
+            # probably keep
+            elif self.player_a_status == self.TIKAM_A and self.player_b_status == self.TIKAM_B:
+                if self.ping: print(
+                    "both tikam. prompting both. honestly, this should never be printed so you fucked up")
+                action = self.PROMPT_SOWING_BOTH
+
+            elif self.player_a_status == self.STOP_SOWING_A and self.player_b_status == self.CONTINUE_SOWING:
+                if self.ping: print("player a has stopped. player b has not. continue sowing b")
+                action = self.CONTINUE_SOWING_B
                 self.game_phase = self.SEQUENTIAL_PHASE
-            elif self.player_b_status == self.STOP_SOWING_B and not self.player_a_status == self.STOP_SOWING_A:
-                print("player b has stopped. player a has not: " + str(self.player_a_status) +
-                      ". wait for player a to stop")
-                action = self.WAIT
+            elif self.player_b_status == self.STOP_SOWING_B and self.player_a_status == self.CONTINUE_SOWING:
+                if self.ping: print("player b has stopped. player a has not. continue sowing a")
+                action = self.CONTINUE_SOWING_A
+                self.game_phase = self.SEQUENTIAL_PHASE
+
+            elif self.player_a_status == self.TIKAM_A and self.player_b_status == self.CONTINUE_SOWING:
+                if self.ping: print("player a has tikam. player b has not. continue sowing b")
+                action = self.CONTINUE_SOWING_B
+                self.game_phase = self.SEQUENTIAL_PHASE
+            elif self.player_b_status == self.TIKAM_B and self.player_a_status == self.CONTINUE_SOWING:
+                if self.ping: print("player b has tikam. player a has not. continue sowing a")
+                action = self.CONTINUE_SOWING_A
                 self.game_phase = self.SEQUENTIAL_PHASE
 
             elif self.player_a_status == self.PROMPT_SOWING_A:
-                print("prompt player a 2")
+                if self.player_b_status == self.STOP_SOWING_B:
+                    self.game_phase = self.SEQUENTIAL_PHASE
+                if self.ping: print("prompt player a")
                 action = self.PROMPT_SOWING_A
+
             elif self.player_b_status == self.PROMPT_SOWING_B:
-                print("prompt player b 2")
+                if self.player_a_status == self.STOP_SOWING_A:
+                    self.game_phase = self.SEQUENTIAL_PHASE
+                if self.ping: print("prompt player b")
                 action = self.PROMPT_SOWING_B
+            elif self.player_a_status == self.CONTINUE_SOWING and self.player_b_status == self.CONTINUE_SOWING:
+                action = self.WAIT
+            else:
+                print("simul action error. status a: " + str(self.player_a_status) + ". status b: " + str(
+                    self.player_b_status))
+
+        else:
+            print("super weird bug. its neither seq nor simul")
+            print("error. status a: " + str(self.player_a_status) + ". status b: " + str(
+                self.player_b_status) + ". phase: " + str(self.game_phase))
+
         return action
 
     # reset hands to empty and no position
-    def reset_hands(self, player):
+    # TODO: find vanishing counter.
+    # (17, 22)
+    # (11, '')
+    def reset_hand(self, player):
 
         if player == 'a':
             self.player_a_hand = Hand(player='a', hole_pos=-1, counter_count=0)
@@ -371,14 +494,15 @@ class BoardModel:
             self.player_b_hand.hole_pos = pos
 
     def reset_game(self):
-        self.reset_hands('a')
-        self.reset_hands('b')
 
         self.house_a_values = [7, 7, 7, 7, 7, 7, 7]
         self.house_b_values = [7, 7, 7, 7, 7, 7, 7]
 
         self.storeroom_a_value = 0
         self.storeroom_b_value = 0
+
+        self.reset_hand('a')
+        self.reset_hand('b')
 
         self.player_a_status = self.STOP_SOWING_A
         self.player_b_status = self.STOP_SOWING_B
@@ -387,67 +511,9 @@ class BoardModel:
 
         self.game_phase = self.SIMULTANEOUS_PHASE
 
-        self.no_of_micromoves_made = 0
-        self.no_of_micromoves_made_player_a = 0
-        self.no_of_micromoves_made_player_b = 0
+        self.moves_made = []
 
-    # wait time
-    def wait_between_micromoves(self, player):
-
-        start_time = time.time()
-
-        wait_length = self.sowing_speed
-        slow_speed = self.slowed_sowing_multiplier
-
-        if slow_speed >= 10:
-            slow_speed = 99999
-
-        if self.game_phase == self.SIMULTANEOUS_PHASE:
-
-            if player == 'a':
-                while self.no_of_micromoves_made_player_b < self.no_of_micromoves_made:
-                    if self.game_phase == self.SEQUENTIAL_PHASE: break
-                    # print("waiting for b")
-                    pass
-            elif player == 'b':
-                while self.no_of_micromoves_made_player_a < self.no_of_micromoves_made:
-                    if self.game_phase == self.SEQUENTIAL_PHASE: break
-                    # print("waiting for a")
-                    pass
-
-            if player == 'a' and self.player_a_sowing_slowed or player == 'b' and self.player_b_sowing_slowed:
-
-                if self.sowing_speed < 0.1:
-                    wait_length = 99999
-                else:
-                    wait_length = self.sowing_speed * slow_speed
-            else:
-                wait_length = self.sowing_speed
-            pass
-
-            while time.time() - start_time < wait_length:
-                if player == 'a' and self.player_a_sowing_slowed or player == 'b' and self.player_b_sowing_slowed:
-                    if self.sowing_speed < 0.1:
-                        wait_length = 99999
-                    else:
-                        wait_length = self.sowing_speed * slow_speed
-                else:
-                    wait_length = self.sowing_speed
-                # time.sleep(0.001)
-
-        elif self.game_phase == self.SEQUENTIAL_PHASE:
-
-            while time.time() - start_time < wait_length:
-                # print(wait)
-                pass
-            pass
-
-        if player == 'a':
-            self.no_of_micromoves_made_player_a += 1
-        elif player == 'b':
-            self.no_of_micromoves_made_player_b += 1
-
-        self.no_of_micromoves_made = max(self.no_of_micromoves_made_player_a, self.no_of_micromoves_made_player_b)
+        self.running = True
 
     def append_move(self, player_a_move, player_b_move):
         if not (type(player_a_move) == int) or 1 <= player_a_move <= 7:
@@ -492,9 +558,29 @@ class BoardModel:
 
         return truth_list
 
+    def wait_micromove(self):
+
+        start_time = time.time()
+
+        while self.running and time.time() - start_time < self.sowing_speed:
+            # time.sleep(0.00001)
+            pass
+
+        if not self.running:
+            raise Exception("Running the game is disabled.")
+
+        # self.print_all_data()
+
     # print holes
-    def print_holes(self):
+    def print_all_data(self):
         print("house a: " + str(self.house_a_values))
         print("house b: " + str(self.house_b_values))
         print("store a: " + str(self.storeroom_a_value))
         print("store b: " + str(self.storeroom_b_value))
+        self.player_a_hand.print_data()
+        self.player_b_hand.print_data()
+
+        total = sum(self.house_a_values) + sum(self.house_b_values) + self.storeroom_a_value + \
+                self.storeroom_b_value + self.player_a_hand.counter_count + self.player_b_hand.counter_count
+
+        print("total: " + str(total))
