@@ -1,4 +1,3 @@
-import sys
 import time
 from Congkak.Hand import Hand
 
@@ -95,6 +94,9 @@ class BoardModel:
                 if len(self.active_players) == 0:
                     self.last_active_player = current_hand.player
 
+        if status == self.ERROR:
+            print("bruh")
+
         self.reset_hand(current_hand.player)
         return status
 
@@ -104,6 +106,7 @@ class BoardModel:
         hand = self.pick_up_all_counters(hand)
 
         if hand.counter_count == 0:
+            print("hand already empty...")
             return hand
 
         while hand.counter_count > 0:
@@ -131,9 +134,6 @@ class BoardModel:
 
         self.player_a_status = self.CONTINUE_SOWING
         self.player_b_status = self.CONTINUE_SOWING
-
-        # status_a = self.CONTINUE_SOWING
-        # status_b = self.CONTINUE_SOWING
 
         self.player_a_hand = hand_a
         self.player_b_hand = hand_b
@@ -165,6 +165,9 @@ class BoardModel:
         if self.player_b_status == self.PROMPT_SOWING_B:
             self.reset_hand('b')
 
+        if self.player_a_status == self.ERROR or self.player_b_status == self.ERROR:
+            print("bruh")
+
         pass
 
     def sow_once_simultaneous(self, hand_a, hand_b):
@@ -177,6 +180,7 @@ class BoardModel:
             hand_b = self.pick_up_all_counters(hand_b)
 
         if hand_a.counter_count == 0 or hand_b.counter_count == 0:
+            print("hand already empty...")
             return hand_a, hand_b
 
         while hand_a.counter_count > 0 and hand_b.counter_count > 0:
@@ -229,7 +233,7 @@ class BoardModel:
 
         return hand
 
-    # tikam the hand (will check if its possible to tikam or not). has waiting
+    # tikam the hand (will not check if its possible to tikam or not). has waiting
     def tikam(self, hand):
 
         # print("tikaming")
@@ -240,7 +244,7 @@ class BoardModel:
         if hand.player == 'a' and hand.has_looped and hand.hole_pos < 20:
             self.player_a_hand = hand
 
-            self.player_a_status = self.STOP_SOWING_A
+            # self.player_a_status = self.STOP_SOWING_A
 
             opposite_hole = 17 - self.player_a_hand.hole_pos
             current_hand_pos = self.player_a_hand.hole_pos
@@ -278,7 +282,7 @@ class BoardModel:
         elif hand.player == 'b' and hand.has_looped and hand.hole_pos > 20:
             self.player_b_hand = hand
 
-            self.player_b_status = self.STOP_SOWING_B
+            # self.player_b_status = self.STOP_SOWING_B
 
             opposite_hole = 27 - self.player_b_hand.hole_pos
             current_hand_pos = self.player_b_hand.hole_pos
@@ -318,14 +322,14 @@ class BoardModel:
 
         # print("tikamed")
 
-    # tikam both hands at the same time. like literally only if they start tikam at the same time. not when theyre asynchronous
+    # tikam both hands at the same time. only if they start tikam at the same time. not when theyre asynchronous
     def simul_tikam(self):
 
         if self.player_a_hand.has_looped and self.player_b_hand.has_looped and \
                 self.player_a_hand.hole_pos < 20 and self.player_b_hand.hole_pos > 20:
 
-            self.player_a_status = self.STOP_SOWING_A
-            self.player_b_status = self.STOP_SOWING_B
+            # self.player_a_status = self.STOP_SOWING_A
+            # self.player_b_status = self.STOP_SOWING_B
 
             opposite_hole_a = 17 - self.player_a_hand.hole_pos
             opposite_hole_b = 27 - self.player_b_hand.hole_pos
@@ -421,6 +425,14 @@ class BoardModel:
                     status = self.TIKAM_B
                 else:
                     status = self.STOP_SOWING_B
+
+        elif (10 < hand.hole_pos < 18 and
+              (self.house_a_values[hand.hole_pos - 11] == 0) and
+               hand.counter_count == 0) or \
+             (20 < hand.hole_pos < 28 and
+              (self.house_b_values[hand.hole_pos - 21] == 0) and
+               hand.counter_count == 0):
+            status = self.ERROR
         else:
             status = self.CONTINUE_SOWING
 
@@ -484,17 +496,14 @@ class BoardModel:
 
         elif self.game_phase == self.SIMULTANEOUS_PHASE:
 
-            # keep
             if self.player_a_status == self.PROMPT_SOWING_A and self.player_b_status == self.PROMPT_SOWING_B:
                 if self.ping: print("both are prompted")
                 action = self.PROMPT_SOWING_BOTH
 
-            # keep
             elif self.player_a_status == self.STOP_SOWING_A and self.player_b_status == self.STOP_SOWING_B:
                 if self.ping: print("both stopped at the same time. prompting both")
                 action = self.PROMPT_SOWING_BOTH
 
-            # probably keep
             elif self.player_a_status == self.TIKAM_A and self.player_b_status == self.TIKAM_B:
                 if self.ping: print(
                     "both tikam. prompting both.")
@@ -518,17 +527,31 @@ class BoardModel:
                 action = self.CONTINUE_SOWING_A
                 self.game_phase = self.SEQUENTIAL_PHASE
 
-            elif self.player_a_status == self.PROMPT_SOWING_A:
-                if self.player_b_status == self.STOP_SOWING_B:
-                    self.game_phase = self.SEQUENTIAL_PHASE
-                if self.ping: print("prompt player a")
+            elif self.player_a_status == self.PROMPT_SOWING_A and self.player_b_status == self.CONTINUE_SOWING:
+                if self.ping: print("prompt player a. continue player b")
                 action = self.PROMPT_SOWING_A
-
-            elif self.player_b_status == self.PROMPT_SOWING_B:
-                if self.player_a_status == self.STOP_SOWING_A:
-                    self.game_phase = self.SEQUENTIAL_PHASE
-                if self.ping: print("prompt player b")
+            elif self.player_b_status == self.PROMPT_SOWING_B and self.player_a_status == self.CONTINUE_SOWING:
+                if self.ping: print("prompt player b. continue player a")
                 action = self.PROMPT_SOWING_B
+
+            elif self.player_a_status == self.PROMPT_SOWING_A and self.player_b_status == self.STOP_SOWING_B:
+                if self.ping: print("prompt player a and player b stopped. go to seq")
+                self.game_phase = self.SEQUENTIAL_PHASE
+                action = self.PROMPT_SOWING_A
+            elif self.player_b_status == self.PROMPT_SOWING_B and self.player_a_status == self.STOP_SOWING_A:
+                if self.ping: print("prompt player b and player a stopped. go to seq")
+                self.game_phase = self.SEQUENTIAL_PHASE
+                action = self.PROMPT_SOWING_B
+
+            elif self.player_a_status == self.PROMPT_SOWING_A and self.player_b_status == self.TIKAM_B:
+                if self.ping: print("prompt player a and player b tikam. wait until finish tikam. go to seq")
+                self.game_phase = self.SEQUENTIAL_PHASE
+                action = self.WAIT
+            elif self.player_b_status == self.PROMPT_SOWING_B and self.player_a_status == self.TIKAM_A:
+                if self.ping: print("prompt player b and player a tikam. wait until finish tikam. go to seq")
+                self.game_phase = self.SEQUENTIAL_PHASE
+                action = self.WAIT
+
             elif self.player_a_status == self.CONTINUE_SOWING and self.player_b_status == self.CONTINUE_SOWING:
                 action = self.WAIT
             else:
@@ -600,6 +623,8 @@ class BoardModel:
         move_tuple = (player_a_move, player_b_move)
 
         self.moves_made.append(move_tuple)
+
+        if self.ping: print(self.moves_made)
 
     def available_moves(self, player):
         available_move = []
