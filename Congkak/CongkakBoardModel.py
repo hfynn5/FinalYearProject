@@ -103,11 +103,12 @@ class BoardModel:
     # sows once. has waiting
     def sow_once(self, hand):
 
-        hand = self.pick_up_all_counters(hand)
+        if hand.counter_count <= 0:
+            hand = self.pick_up_all_counters(hand)
 
-        if hand.counter_count == 0:
-            print("hand already empty...")
-            return hand
+            if hand.counter_count == 0:
+                print("hand already empty...")
+                return hand
 
         while hand.counter_count > 0:
 
@@ -225,19 +226,13 @@ class BoardModel:
                 hand.has_looped = True
             hand.hole_pos = 18
         elif hand.hole_pos < 20:
-            self.house_a_values[hand.hole_pos - 11] += 1
-            hand.drop_one_counter()
+            self.house_a_values[hand.hole_pos - 11] += hand.drop_one_counter()
         elif hand.hole_pos > 20:
-            self.house_b_values[hand.hole_pos - 21] += 1
-            hand.drop_one_counter()
-
+            self.house_b_values[hand.hole_pos - 21] += hand.drop_one_counter()
         return hand
 
     # tikam the hand (will not check if its possible to tikam or not). has waiting
     def tikam(self, hand):
-
-        # print("tikaming")
-        # # self.print_all_data()
 
         hand.is_tikaming = True
 
@@ -253,6 +248,9 @@ class BoardModel:
             self.player_a_hand.counter_count += 1
 
             self.wait_micromove()
+
+            while self.player_b_hand.hole_pos == opposite_hole + 21:
+                self.wait_micromove()
 
             self.player_a_hand.hole_pos = 21 + opposite_hole
 
@@ -291,6 +289,9 @@ class BoardModel:
             self.player_b_hand.counter_count += 1
 
             self.wait_micromove()
+
+            while self.player_a_hand.hole_pos == opposite_hole + 11:
+                self.wait_micromove()
 
             self.player_b_hand.hole_pos = 11 + opposite_hole
 
@@ -346,7 +347,7 @@ class BoardModel:
             self.wait_micromove()
 
             if self.player_a_hand.hole_pos == opposite_hole_b and \
-                self.player_b_hand.hole_pos == opposite_hole_a:
+                self.player_b_hand.hole_pos == opposite_hole_a + 11:
 
                 self.player_a_hand.hole_pos = 28
                 self.player_b_hand.hole_pos = 18
@@ -563,12 +564,13 @@ class BoardModel:
             print("error. status a: " + str(self.player_a_status) + ". status b: " + str(
                 self.player_b_status) + ". phase: " + str(self.game_phase))
 
+        if action == self.ERROR:
+            print("error")
+            self.print_all_data()
+
         return action
 
     # reset hands to empty and no position
-    # TODO: find vanishing counter.
-    # (17, 22)
-    # (11, '')
     def reset_hand(self, player):
 
         if player == 'a':
@@ -685,3 +687,6 @@ class BoardModel:
                 self.storeroom_b_value + self.player_a_hand.counter_count + self.player_b_hand.counter_count
 
         print("total: " + str(total))
+
+        print("moves made so far: " + str(self.moves_made))
+
