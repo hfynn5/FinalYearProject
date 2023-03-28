@@ -562,6 +562,7 @@ class GameManager:
 
         pass
 
+    # runs a round robin tournament
     def run_round_robin_tournament(self, no_of_games=None, participants=None):
 
         no_of_games = self.board_graphic.tournament_dialog_box.number_of_games
@@ -585,6 +586,7 @@ class GameManager:
         pass
 
     # consider moving it all in end game function.
+    # runs the next round of the round robin
     def next_round(self):
 
         agent_a_index = self.tournament_participants.index(self.player_a_agent)
