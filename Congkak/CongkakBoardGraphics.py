@@ -5,6 +5,7 @@ from PyQt6 import QtCore, QtGui, QtWidgets, uic
 from PyQt6.QtCore import QPoint, Qt
 from Congkak.Hand import Hand
 from Congkak.DialogueBoxes.MultipleGamesDialogBox import MultipleGamesDialogBox
+from Congkak.DialogueBoxes.TournamentDialogBox import TournamentDialogBox
 import sys
 
 
@@ -49,8 +50,10 @@ class BoardGraphic(QMainWindow):
         self.load_game_menu_button_action = QAction()
 
         self.run_multiple_games_menu_button_action = QAction()
+        self.run_tournament_menu_button_action = QAction()
 
         self.multiple_games_dialog_box = MultipleGamesDialogBox()
+        self.tournament_dialog_box = TournamentDialogBox()
 
         self.acceptDrops()
         # set the title
@@ -294,23 +297,16 @@ class BoardGraphic(QMainWindow):
         self.run_multiple_games_menu_button_action = QAction("Run Multiple Games...", self)
         self.run_multiple_games_menu_button_action.setStatusTip("Run Multiple Games")
         self.run_multiple_games_menu_button_action.triggered.connect(self.multiple_games_dialog_box.exec)
-
         game_menu.addAction(self.run_multiple_games_menu_button_action)
 
-        button_action = QAction("Run Round Robin Tournament...", self)
-        game_menu.addAction(button_action)
+        self.run_tournament_menu_button_action = QAction("Run Round Robin Tournament...", self)
+        self.run_tournament_menu_button_action.setStatusTip("Run Round Robin Tournament")
+        self.run_tournament_menu_button_action.triggered.connect(self.tournament_dialog_box.exec)
+        game_menu.addAction(self.run_tournament_menu_button_action)
 
         help_menu = self.menuBar().addMenu("Help")
 
         about_menu = self.menuBar().addMenu("About")
-
-    def create_dialog_boxes(self):
-        pass
-    #
-    # def open_multiple_games_dialog_box(self):
-    #     # self.multiple_games_dialog_box = MultipleGamesDialogBox()
-    #
-    #     self.multiple_games_dialog_box.exec()
 
     # updates the hand value label
     def update_hand_label(self):
