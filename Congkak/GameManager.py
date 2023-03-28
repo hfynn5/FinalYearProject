@@ -151,6 +151,7 @@ class GameManager:
         # for round robin
         self.round_robin_results = [[0 for x in range(len(self.LIST_OF_AGENTS)-1)]
                                     for x in range(len(self.LIST_OF_AGENTS)-1)]
+        self.tournament_participants = []
 
         # declare threadpool
         self.threadpool = QThreadPool()
@@ -168,6 +169,8 @@ class GameManager:
 
         # start constantly updating graphics
         self.start_worker_graphic_updater()
+
+        # self.run_round_robin_tournament(3)
 
         sys.exit(App.exec())
 
@@ -206,6 +209,8 @@ class GameManager:
                               currentIndex(): self.set_player_agent_index('b', index))
 
         self.board_graphic.multiple_games_dialog_box.buttonBox.accepted.connect(self.run_multiple_games)
+
+        self.board_graphic.tournament_dialog_box.buttonBox.accepted.connect(self.run_round_robin_tournament)
 
         # self.board_graphic.multiple_games_dialog_box. \
         #     buttonBox.accepted.connect(lambda
@@ -381,6 +386,7 @@ class GameManager:
 
                 self.game_results.append(result)
                 if self.no_of_games_left > 0:
+                    print(str(self.no_of_games_left) + " games left...")
                     self.no_of_games_left -= 1
                     self.new_game(False)
                     self.start_worker_simultaneous_sowing()
@@ -459,22 +465,33 @@ class GameManager:
     # TODO: make this a worker so that it doesnt freeze the GUI
     # prompt agent for move. returns  move
     def prompt_agent_for_input(self, player):
-        copied_board = copy.deepcopy(self.board_model)
+
         move = 0
+        while move not in self.board_model.available_moves(player):
+            copied_board = copy.deepcopy(self.board_model)
+            move = 0
+            if player == 'a':
+                if self.player_a_agent == self.AGENT_RANDOM:
+                    move = self.random_agent.choose_move(player, copied_board)
+                elif self.player_a_agent == self.AGENT_MAX:
+                    move = self.max_agent.choose_move(player, copied_board)
+                elif self.player_a_agent == self.AGENT_MINIMAX:
+                    move = self.minimax_agent.choose_move(player, copied_board)
+            elif player == 'b':
+                if self.player_b_agent == self.AGENT_RANDOM:
+                    move = self.random_agent.choose_move(player, copied_board)
+                elif self.player_b_agent == self.AGENT_MAX:
+                    move = self.max_agent.choose_move(player, copied_board)
+                elif self.player_b_agent == self.AGENT_MINIMAX:
+                    move = self.minimax_agent.choose_move(player, copied_board)
+
+            if move not in self.board_model.available_moves(player):
+                print("didnt find a valid move.")
+
         if player == 'a':
-            if self.player_a_agent == self.AGENT_RANDOM:
-                move = self.random_agent.choose_move(player, copied_board) + 10
-            elif self.player_a_agent == self.AGENT_MAX:
-                move = self.max_agent.choose_move(player, copied_board) + 10
-            elif self.player_a_agent == self.AGENT_MINIMAX:
-                move = self.minimax_agent.choose_move(player, copied_board) + 10
+            move += 10
         elif player == 'b':
-            if self.player_b_agent == self.AGENT_RANDOM:
-                move = self.random_agent.choose_move(player, copied_board) + 20
-            elif self.player_b_agent == self.AGENT_MAX:
-                move = self.max_agent.choose_move(player, copied_board) + 20
-            elif self.player_b_agent == self.AGENT_MINIMAX:
-                move = self.minimax_agent.choose_move(player, copied_board) + 20
+            move += 20
 
         return move
 
@@ -543,12 +560,18 @@ class GameManager:
 
         pass
 
-    def run_round_robin_tournament(self, no_of_games):
+    def run_round_robin_tournament(self, no_of_games=None, participants=None):
+
+        no_of_games = self.board_graphic.tournament_dialog_box.number_of_games
+        participants = self.board_graphic.tournament_dialog_box.tournament_participants
+
+        for index in participants:
+            self.tournament_participants.append(self.LIST_OF_AGENTS[index])
 
         self.current_mode = self.ROUND_ROBIN_MODE
 
-        self.player_a_agent = self.AGENT_RANDOM
-        self.player_b_agent = self.AGENT_RANDOM
+        self.player_a_agent = self.tournament_participants[0]
+        self.player_b_agent = self.tournament_participants[0]
 
         self.no_of_games_to_run = no_of_games
 
@@ -562,20 +585,21 @@ class GameManager:
     # consider moving it all in end game function.
     def next_round(self):
 
-        agent_a_index = self.LIST_OF_AGENTS.index(self.player_a_agent)
-        agent_b_index = self.LIST_OF_AGENTS.index(self.player_b_agent)
+        agent_a_index = self.tournament_participants.index(self.player_a_agent)
+        agent_b_index = self.tournament_participants.index(self.player_b_agent)
 
         agent_b_index += 1
 
-        if agent_b_index >= len(self.LIST_OF_AGENTS):
+        if agent_b_index >= len(self.tournament_participants):
             agent_a_index += 1
             agent_b_index = agent_a_index
 
-        if agent_a_index >= len(self.LIST_OF_AGENTS):
+        if agent_a_index >= len(self.tournament_participants):
             print("round robin over. results: ")
             print(self.round_robin_results)
 
-        self.run_multiple_games(self.no_of_games_to_run, self.LIST_OF_AGENTS[agent_a_index], self.LIST_OF_AGENTS[agent_b_index])
+        self.run_multiple_games(self.no_of_games_to_run, self.tournament_participants[agent_a_index],
+                                self.tournament_participants[agent_b_index])
 
         pass
 
