@@ -152,7 +152,6 @@ class GameManager:
         self.round_robin_results = [[0 for x in range(len(self.LIST_OF_AGENTS)-1)]
                                     for x in range(len(self.LIST_OF_AGENTS)-1)]
 
-
         # declare threadpool
         self.threadpool = QThreadPool()
         print("Multithreading with maximum %d threads" % self.threadpool.maxThreadCount())
@@ -260,11 +259,13 @@ class GameManager:
         worker_simul.signals.finished.connect(self.next_action)
         self.threadpool.start(worker_simul)
 
+    # makes worker to start tikam
     def start_worker_tikam(self, hand):
         worker_tikam = Worker(self.tikam, hand=hand)
         worker_tikam.signals.finished.connect(self.next_action)
         self.threadpool.start(worker_tikam)
 
+    # makes worker to start tikam both hands
     def start_worker_simul_tikam(self):
         worker_tikam = Worker(self.simul_tikam)
         worker_tikam.signals.finished.connect(self.next_action)
@@ -277,6 +278,7 @@ class GameManager:
 
         self.board_model.iterate_sowing(new_hand)
 
+    # iterate simul sowing in board model
     def simul_sow(self, hand_a, hand_b):
         self.board_graphic.set_enable_player_inputs('a', False)
         self.board_graphic.set_enable_player_inputs('b', False)
@@ -654,4 +656,3 @@ class GameManager:
     def close_program(self):
         self.kill_all_workers()
         sys.exit("Window closed")
-
