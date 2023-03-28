@@ -393,6 +393,8 @@ class GameManager:
                 else:
                     print(str(self.no_of_games_to_run) + " games have been run. Results: " + str(self.game_results))
 
+                    print("average score: " + str(sum(self.game_results)))
+
                 pass
             case self.ROUND_ROBIN_MODE:
 
