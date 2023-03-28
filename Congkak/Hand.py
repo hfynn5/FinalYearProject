@@ -9,6 +9,8 @@ class Hand:
         # 18 = storeroom B
         # 28 = storeroom A
         self.counter_count = counter_count
+        self.is_tikaming = False
+
         self.has_looped = False
         self.is_running = False
 

@@ -199,12 +199,12 @@ class GameManager:
         self.board_graphic.player_a_dropdown. \
             activated.connect(lambda
                               index=self.board_graphic.player_a_dropdown.
-                                    currentIndex(): self.set_player_agent_index('a', index))
+                              currentIndex(): self.set_player_agent_index('a', index))
 
         self.board_graphic.player_b_dropdown. \
             activated.connect(lambda
                               index=self.board_graphic.player_b_dropdown.
-                                    currentIndex(): self.set_player_agent_index('b', index))
+                              currentIndex(): self.set_player_agent_index('b', index))
 
         self.board_graphic.multiple_games_dialog_box.buttonBox.accepted.connect(self.run_multiple_games)
 
@@ -265,6 +265,11 @@ class GameManager:
         worker_tikam.signals.finished.connect(self.next_action)
         self.threadpool.start(worker_tikam)
 
+    def start_worker_simul_tikam(self):
+        worker_tikam = Worker(self.simul_tikam)
+        worker_tikam.signals.finished.connect(self.next_action)
+        self.threadpool.start(worker_tikam)
+
     # iterate sowing in board model
     def sow(self, new_hand):
         self.board_graphic.set_enable_player_inputs(new_hand.player, False)
@@ -284,6 +289,11 @@ class GameManager:
 
         self.board_model.tikam(hand=hand)
 
+    def simul_tikam(self):
+        self.update_sowing_speed(self.board_graphic.move_speed_slider.value())
+
+        self.board_model.simul_tikam()
+
     def next_action(self, action=None):
 
         update_board_graphics(board_graphic=self.board_graphic, board_model=self.board_model)
@@ -291,29 +301,30 @@ class GameManager:
         if action is None:
             action = self.board_model.action_to_take()
 
-        if self.board_model.player_a_status == BoardModel.TIKAM_A:
-            self.start_worker_tikam(hand=self.board_model.player_a_hand)
-
-        if self.board_model.player_b_status == BoardModel.TIKAM_B:
-            self.start_worker_tikam(hand=self.board_model.player_b_hand)
-
         if self.board_model.player_a_status == BoardModel.TIKAM_A and \
                 self.board_model.player_b_status == BoardModel.TIKAM_B:
+            self.start_worker_simul_tikam()
             return
+
+        elif self.board_model.player_a_status == BoardModel.TIKAM_A and not self.board_model.player_a_hand.is_tikaming:
+            self.start_worker_tikam(hand=self.board_model.player_a_hand)
+
+        elif self.board_model.player_b_status == BoardModel.TIKAM_B and not self.board_model.player_b_hand.is_tikaming:
+            self.start_worker_tikam(hand=self.board_model.player_b_hand)
 
         match action:
             case BoardModel.PROMPT_SOWING_A:
-                if self.loading_game:
+                if self.current_mode == self.LOADING_MODE:
                     self.do_next_move_from_loaded_moves(action)
                 else:
                     self.prompt_player('a')
             case BoardModel.PROMPT_SOWING_B:
-                if self.loading_game:
+                if self.current_mode == self.LOADING_MODE:
                     self.do_next_move_from_loaded_moves(action)
                 else:
                     self.prompt_player('b')
             case BoardModel.PROMPT_SOWING_BOTH:
-                if self.loading_game:
+                if self.current_mode == self.LOADING_MODE:
                     self.do_next_move_from_loaded_moves(action)
                 else:
                     if self.player_a_agent == self.AGENT_USER or self.player_b_agent == self.AGENT_USER:
@@ -397,7 +408,6 @@ class GameManager:
             case self.LOADING_MODE:
                 print("Game has loaded.")
                 pass
-
 
     # decides what action to take when the hole input is chosen
     def choosing_hole_action(self, player, hole):
@@ -515,7 +525,8 @@ class GameManager:
 
         print("running " + str(no_of_games) + " games. player a: " + str(agent_a) + ". player b: " + str(agent_b))
 
-        self.current_mode = self.MULTI_GAME_MODE
+        if not self.current_mode == self.ROUND_ROBIN_MODE:
+            self.current_mode = self.MULTI_GAME_MODE
 
         self.new_game(False)
 
@@ -549,8 +560,8 @@ class GameManager:
     # consider moving it all in end game function.
     def next_round(self):
 
-        agent_a_index = self.LIST_OF_AGENTS.index(self.player_a_agent) - 1
-        agent_b_index = self.LIST_OF_AGENTS.index(self.player_b_agent) - 1
+        agent_a_index = self.LIST_OF_AGENTS.index(self.player_a_agent)
+        agent_b_index = self.LIST_OF_AGENTS.index(self.player_b_agent)
 
         agent_b_index += 1
 
@@ -637,7 +648,8 @@ class GameManager:
         self.move_counter += 1
         if self.move_counter >= len(self.loaded_moves):
             print("Game Loaded")
-            self.loading_game = False
+            # self.loading_game = False
+            self.current_mode = self.NORMAL_MODE
 
     def close_program(self):
         self.kill_all_workers()

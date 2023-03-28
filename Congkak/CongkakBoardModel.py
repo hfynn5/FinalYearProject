@@ -235,6 +235,8 @@ class BoardModel:
         # print("tikaming")
         # # self.print_all_data()
 
+        hand.is_tikaming = True
+
         if hand.player == 'a' and hand.has_looped and hand.hole_pos < 20:
             self.player_a_hand = hand
 
@@ -243,7 +245,7 @@ class BoardModel:
             opposite_hole = 17 - self.player_a_hand.hole_pos
             current_hand_pos = self.player_a_hand.hole_pos
 
-            self.house_a_values[current_hand_pos - 11] = 0
+            self.house_a_values[current_hand_pos - 11] -= 1
             self.player_a_hand.counter_count += 1
 
             self.wait_micromove()
@@ -281,7 +283,7 @@ class BoardModel:
             opposite_hole = 27 - self.player_b_hand.hole_pos
             current_hand_pos = self.player_b_hand.hole_pos
 
-            self.house_b_values[current_hand_pos - 21] = 0
+            self.house_b_values[current_hand_pos - 21] -= 1
             self.player_b_hand.counter_count += 1
 
             self.wait_micromove()
@@ -315,6 +317,78 @@ class BoardModel:
             print("cannot tikam")
 
         # print("tikamed")
+
+    # tikam both hands at the same time. like literally only if they start tikam at the same time. not when theyre asynchronous
+    def simul_tikam(self):
+
+        if self.player_a_hand.has_looped and self.player_b_hand.has_looped and \
+                self.player_a_hand.hole_pos < 20 and self.player_b_hand.hole_pos > 20:
+
+            self.player_a_status = self.STOP_SOWING_A
+            self.player_b_status = self.STOP_SOWING_B
+
+            opposite_hole_a = 17 - self.player_a_hand.hole_pos
+            opposite_hole_b = 27 - self.player_b_hand.hole_pos
+
+            current_hand_a_pos = self.player_a_hand.hole_pos
+            current_hand_b_pos = self.player_b_hand.hole_pos
+
+            self.house_a_values[current_hand_a_pos - 11] -= 1
+            self.player_a_hand.counter_count += 1
+
+            self.house_b_values[current_hand_b_pos - 21] -= 1
+            self.player_b_hand.counter_count += 1
+
+            self.wait_micromove()
+
+            if self.player_a_hand.hole_pos == opposite_hole_b and \
+                self.player_b_hand.hole_pos == opposite_hole_a:
+
+                self.player_a_hand.hole_pos = 28
+                self.player_b_hand.hole_pos = 18
+
+                self.wait_micromove()
+
+                self.storeroom_a_value += self.player_a_hand.drop_all_counters()
+                self.storeroom_b_value += self.player_b_hand.drop_all_counters()
+
+                self.wait_micromove()
+
+            else:
+
+                self.player_b_hand.hole_pos = 11 + opposite_hole_b
+                self.player_a_hand.hole_pos = 21 + opposite_hole_a
+
+                self.wait_micromove()
+
+                self.player_a_hand.counter_count += self.house_b_values[opposite_hole_a]
+                self.house_b_values[opposite_hole_a] = 0
+
+                self.player_b_hand.counter_count += self.house_a_values[opposite_hole_b]
+                self.house_a_values[opposite_hole_b] = 0
+
+                self.wait_micromove()
+
+                self.player_a_hand.hole_pos = 28
+                self.player_b_hand.hole_pos = 18
+
+                self.wait_micromove()
+
+                self.storeroom_a_value += self.player_a_hand.drop_all_counters()
+                self.storeroom_b_value += self.player_b_hand.drop_all_counters()
+
+                self.wait_micromove()
+
+                self.reset_hand('a')
+                self.reset_hand('b')
+
+                self.player_a_status = self.STOP_SOWING_A
+                self.player_b_status = self.STOP_SOWING_B
+
+                self.active_players.remove('a')
+                self.active_players.remove('b')
+                if len(self.active_players) == 0:
+                    self.last_active_player = ''
 
     # check status of hand
     def check_hand_status(self, hand):
@@ -365,12 +439,12 @@ class BoardModel:
         if not self.running:
             return self.WAIT
 
-        if self.game_phase == self.SEQUENTIAL_PHASE:
+        if sum(self.house_a_values) == 0 and sum(self.house_b_values) == 0:
+            action = self.GAME_END
 
-            if sum(self.house_a_values) == 0 and sum(self.house_b_values) == 0:
-                action = self.GAME_END
+        elif self.game_phase == self.SEQUENTIAL_PHASE:
 
-            elif sum(self.house_a_values) == 0:
+            if sum(self.house_a_values) == 0:
                 action = self.PROMPT_SOWING_B
                 if self.ping: print("all of a houses empty. prompt player b")
             elif sum(self.house_b_values) == 0:
@@ -401,7 +475,7 @@ class BoardModel:
                 action = self.WAIT
             elif self.player_a_status == self.TIKAM_A and self.player_b_status == self.TIKAM_B:
                 if self.ping: print(
-                    "both tikam. prompting both. honestly, this should never be printed so you fucked up")
+                    "both tikam. wait until finish tikam first")
                 action = self.WAIT
                 pass
             else:
@@ -423,8 +497,8 @@ class BoardModel:
             # probably keep
             elif self.player_a_status == self.TIKAM_A and self.player_b_status == self.TIKAM_B:
                 if self.ping: print(
-                    "both tikam. prompting both. honestly, this should never be printed so you fucked up")
-                action = self.PROMPT_SOWING_BOTH
+                    "both tikam. prompting both.")
+                action = self.WAIT
 
             elif self.player_a_status == self.STOP_SOWING_A and self.player_b_status == self.CONTINUE_SOWING:
                 if self.ping: print("player a has stopped. player b has not. continue sowing b")
@@ -476,8 +550,10 @@ class BoardModel:
 
         if player == 'a':
             self.player_a_hand = Hand(player='a', hole_pos=-1, counter_count=0)
+            self.player_a_hand.is_tikaming = False
         elif player == 'b':
             self.player_b_hand = Hand(player='b', hole_pos=-1, counter_count=0)
+            self.player_b_hand.is_tikaming = False
 
     # update player hands given the current hand
     def update_player_hands_from_current_hand(self, current_hand):

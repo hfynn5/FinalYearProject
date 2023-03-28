@@ -1,4 +1,3 @@
-from graphics import *
 from PyQt6.QtWidgets import QApplication, QWidget
 from PyQt6.QtWidgets import *
 from PyQt6.QtGui import QPixmap, QPainter, QPen, QAction, QIcon, QPalette
