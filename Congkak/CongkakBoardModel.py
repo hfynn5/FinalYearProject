@@ -48,6 +48,7 @@ class BoardModel:
         self.sowing_speed = 0
 
         self.ping = False
+        self.debug = False
 
         self.moves_made = []
 
@@ -95,7 +96,8 @@ class BoardModel:
                     self.last_active_player = current_hand.player
 
         if status == self.ERROR:
-            print("bruh")
+            print("bruh. moves made")
+            print(self.moves_made)
 
         self.reset_hand(current_hand.player)
         return status
@@ -492,8 +494,9 @@ class BoardModel:
                 action = self.WAIT
                 pass
             else:
-                print("seq action error. status a: " + str(self.player_a_status) + ". status b: " +
-                      str(self.player_b_status) + ". active players: " + str(self.active_players))
+                if self.debug:
+                    print("seq action error. status a: " + str(self.player_a_status) + ". status b: " +
+                          str(self.player_b_status) + ". active players: " + str(self.active_players))
 
         elif self.game_phase == self.SIMULTANEOUS_PHASE:
 
@@ -556,15 +559,17 @@ class BoardModel:
             elif self.player_a_status == self.CONTINUE_SOWING and self.player_b_status == self.CONTINUE_SOWING:
                 action = self.WAIT
             else:
-                print("simul action error. status a: " + str(self.player_a_status) + ". status b: " + str(
-                    self.player_b_status))
+                if self.debug:
+                    print("simul action error. status a: " + str(self.player_a_status) + ". status b: " + str(
+                        self.player_b_status))
 
         else:
-            print("super weird bug. its neither seq nor simul")
-            print("error. status a: " + str(self.player_a_status) + ". status b: " + str(
-                self.player_b_status) + ". phase: " + str(self.game_phase))
+            if self.debug:
+                print("super weird bug. its neither seq nor simul")
+                print("error. status a: " + str(self.player_a_status) + ". status b: " + str(
+                    self.player_b_status) + ". phase: " + str(self.game_phase))
 
-        if action == self.ERROR:
+        if action == self.ERROR and self.debug:
             print("error")
             self.print_all_data()
 
@@ -633,11 +638,11 @@ class BoardModel:
 
         if player == 'a':
             for i, hole in enumerate(self.house_a_values):
-                if hole > 0:
+                if hole > 0 and not (self.player_b_hand.hole_pos == i+11 and self.player_b_hand.counter_count == 0):
                     available_move.append(i + 1)
         elif player == 'b':
             for i, hole in enumerate(self.house_b_values):
-                if hole > 0:
+                if hole > 0 and not (self.player_a_hand.hole_pos == i+21 and self.player_a_hand.counter_count == 0):
                     available_move.append(i + 1)
 
         return available_move
