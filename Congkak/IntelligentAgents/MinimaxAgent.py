@@ -85,6 +85,7 @@ class MinimaxAgent:
 
         return final_best_move
 
+    # TODO: add a check if error. or smth to workaround.
     def minimax(self, board_model, move, depth, self_depth, player, alpha, beta):
 
         self.node_count += 1

@@ -175,6 +175,7 @@ class GameManager:
 
         sys.exit(App.exec())
 
+    # connect the available input to its functions
     def connect_inputs_to_functions(self):
         # connect input with corresponding functions
         for i, button in enumerate(self.board_graphic.house_a_buttons):
@@ -292,17 +293,19 @@ class GameManager:
 
         self.board_model.iterated_sowing_simultaneous(hand_a, hand_b)
 
+    # perform tikam for a hand in board
     def tikam(self, hand):
         self.update_sowing_speed(self.board_graphic.move_speed_slider.value())
 
         self.board_model.tikam(hand=hand)
 
+    # perform tikam for both hands in board
     def simul_tikam(self):
         self.update_sowing_speed(self.board_graphic.move_speed_slider.value())
 
         self.board_model.simul_tikam()
 
-    # TODO: if error, just restart it. dont waste time.
+    # performs the next action based on given or the board model
     def next_action(self, action=None):
 
         update_board_graphics(board_graphic=self.board_graphic, board_model=self.board_model)
@@ -364,7 +367,7 @@ class GameManager:
                 else:
                     self.new_game(False)
 
-    # ends the game
+    # ends the game or performs next task
     def end_game(self):
 
         if self.game_has_ended:
@@ -418,12 +421,26 @@ class GameManager:
                     self.round_robin_results[agent_b_index][agent_a_index] += 1
 
                 if self.no_of_games_left > 0:
+                    print(str(self.no_of_games_left) + " games left...")
                     self.no_of_games_left -= 1
                     self.new_game(True)
-                    # self.start_worker_simultaneous_sowing()
                 else:
 
-                    self.next_round()
+                    agent_a_index = self.tournament_participants.index(self.player_a_agent)
+                    agent_b_index = self.tournament_participants.index(self.player_b_agent)
+
+                    agent_b_index += 1
+
+                    if agent_b_index >= len(self.tournament_participants):
+                        agent_a_index += 1
+                        agent_b_index = agent_a_index
+
+                    if agent_a_index >= len(self.tournament_participants):
+                        print("round robin over. results: ")
+                        print(self.round_robin_results)
+                    else:
+                        self.run_multiple_games(self.no_of_games_to_run, self.tournament_participants[agent_a_index],
+                                                self.tournament_participants[agent_b_index])
 
                 pass
             case self.LOADING_MODE:
@@ -618,8 +635,6 @@ class GameManager:
 
         self.run_multiple_games(self.no_of_games_to_run, self.tournament_participants[agent_a_index],
                                 self.tournament_participants[agent_b_index])
-
-        pass
 
     # Restarts a new game
     def new_game(self, autorun):

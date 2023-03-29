@@ -145,7 +145,7 @@ class BoardModel:
 
         return hand
 
-    # do repeated simultaneous sowing
+    # do repeated simultaneous sowing. has waiting
     def iterated_sowing_simultaneous(self, hand_a, hand_b):
 
         if 'a' not in self.active_players:
@@ -192,6 +192,7 @@ class BoardModel:
 
         pass
 
+    # sows both players once. has waiting
     def sow_once_simultaneous(self, hand_a, hand_b):
 
         # TODO: this process will take time. picking up counters is technically a micromove
@@ -430,8 +431,6 @@ class BoardModel:
             if len(self.active_players) == 0:
                 self.last_active_player = ''
 
-
-
     # check status of hand
     def check_hand_status(self, hand):
 
@@ -640,6 +639,7 @@ class BoardModel:
         elif player == 'b':
             self.player_b_hand.hole_pos = pos
 
+    # reset game to initial mode
     def reset_game(self):
 
         self.house_a_values = [7, 7, 7, 7, 7, 7, 7]
@@ -662,6 +662,7 @@ class BoardModel:
 
         self.running = True
 
+    # append a move to the list
     def append_move(self, player_a_move, player_b_move):
         if not (type(player_a_move) == int) or 1 <= player_a_move <= 7:
             player_a_move = 0
@@ -674,6 +675,7 @@ class BoardModel:
 
         # if self.ping: print(self.moves_made)
 
+    # check the available moves a player can do
     def available_moves(self, player):
         available_move = []
 
@@ -688,7 +690,8 @@ class BoardModel:
 
         return available_move
 
-    def do_holes_have_counter(self, player):
+    # check if player side have counter
+    def does_player_hole_have_counter(self, player):
 
         truth_list = []
 
@@ -707,6 +710,7 @@ class BoardModel:
 
         return truth_list
 
+    # wait a micromove if game is running
     def wait_micromove(self):
 
         start_time = time.time()
@@ -730,10 +734,10 @@ class BoardModel:
         self.player_a_hand.print_data()
         self.player_b_hand.print_data()
 
-        total = sum(self.house_a_values) + sum(self.house_b_values) + self.storeroom_a_value + \
-                self.storeroom_b_value + self.player_a_hand.counter_count + self.player_b_hand.counter_count
-
-        print("total: " + str(total))
+        # total = sum(self.house_a_values) + sum(self.house_b_values) + self.storeroom_a_value + \
+        #         self.storeroom_b_value + self.player_a_hand.counter_count + self.player_b_hand.counter_count
+        #
+        # print("total: " + str(total))
 
         print("moves made so far: " + str(self.moves_made))
 

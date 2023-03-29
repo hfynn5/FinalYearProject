@@ -11,7 +11,7 @@ class TournamentDialogBox(QDialog):
         super().__init__()
 
         self.tournament_participants = []
-        self.number_of_games = 0
+        self.number_of_games = 1
 
         self.setWindowTitle("Run Round Robin Tournament")
 
