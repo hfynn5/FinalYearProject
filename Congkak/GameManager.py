@@ -155,6 +155,7 @@ class GameManager:
 
         # declare threadpool
         self.threadpool = QThreadPool()
+        self.threadpool.setMaxThreadCount(3)
         print("Multithreading with maximum %d threads" % self.threadpool.maxThreadCount())
 
         # declare board model
@@ -301,12 +302,16 @@ class GameManager:
 
         self.board_model.simul_tikam()
 
+    # TODO: if error, just restart it. dont waste time.
     def next_action(self, action=None):
 
         update_board_graphics(board_graphic=self.board_graphic, board_model=self.board_model)
 
         if action is None:
             action = self.board_model.action_to_take()
+
+        if self.board_model.game_phase == BoardModel.SEQUENTIAL_PHASE and len(self.board_model.active_players) <= 0:
+            self.kill_all_workers()
 
         if self.board_model.player_a_status == BoardModel.TIKAM_A and \
                 self.board_model.player_b_status == BoardModel.TIKAM_B:
@@ -351,6 +356,8 @@ class GameManager:
             case BoardModel.GAME_END:
                 print("Game over")
                 self.end_game()
+            case BoardModel.ERROR:
+                print("next action is to error")
 
     # ends the game
     def end_game(self):
@@ -398,8 +405,8 @@ class GameManager:
                 pass
             case self.ROUND_ROBIN_MODE:
 
-                agent_a_index = self.LIST_OF_AGENTS.index(self.player_a_agent) - 1
-                agent_b_index = self.LIST_OF_AGENTS.index(self.player_b_agent) - 1
+                agent_a_index = self.tournament_participants.index(self.player_a_agent) - 1
+                agent_b_index = self.tournament_participants.index(self.player_b_agent) - 1
 
                 if result == self.PLAYER_A_WIN:
                     self.round_robin_results[agent_a_index][agent_b_index] += 1
@@ -573,6 +580,9 @@ class GameManager:
 
         self.current_mode = self.ROUND_ROBIN_MODE
 
+        self.round_robin_results = [[0 for x in range(len(self.tournament_participants) - 1)]
+                                    for x in range(len(self.tournament_participants) - 1)]
+
         self.player_a_agent = self.tournament_participants[0]
         self.player_b_agent = self.tournament_participants[0]
 
@@ -666,14 +676,30 @@ class GameManager:
 
         if self.move_counter < len(self.loaded_moves):
             current_move = self.loaded_moves[self.move_counter]
-            if BoardModel.PROMPT_SOWING_A and not current_move[0] == 0 and current_move[1] == 0:
-                self.start_worker_sowing('a', current_move[0])
-            elif BoardModel.PROMPT_SOWING_B and not current_move[1] == 0 and current_move[0] == 0:
-                self.start_worker_sowing('b', current_move[1])
-            elif BoardModel.PROMPT_SOWING_BOTH and not current_move[0] == 0 and not current_move[1] == 0:
-                self.start_worker_simultaneous_sowing(current_move[0], current_move[1])
-            else:
-                print("error with loading move. action: " + str(action) + " Move: " + str(current_move))
+
+            if self.board_model.game_phase == BoardModel.SEQUENTIAL_PHASE:
+                if BoardModel.PROMPT_SOWING_A and not current_move[0] == 0 and current_move[1] == 0:
+                    self.start_worker_sowing('a', current_move[0])
+                elif BoardModel.PROMPT_SOWING_B and not current_move[1] == 0 and current_move[0] == 0:
+                    self.start_worker_sowing('b', current_move[1])
+                elif BoardModel.PROMPT_SOWING_BOTH and not current_move[0] == 0 and not current_move[1] == 0:
+                    self.start_worker_simultaneous_sowing(current_move[0], current_move[1])
+                else:
+                    print("error with seq loading move. action: " + str(action) + " Move: " + str(current_move))
+
+            elif self.board_model.game_phase == BoardModel.SIMULTANEOUS_PHASE:
+                if BoardModel.PROMPT_SOWING_A and not current_move[0] == 0 and current_move[1] == 0:
+                    # self.start_worker_sowing('a', current_move[0])
+                    self.start_worker_simultaneous_sowing(hole_a=current_move[0], hand_b=self.board_model.player_b_hand)
+                elif BoardModel.PROMPT_SOWING_B and not current_move[1] == 0 and current_move[0] == 0:
+                    # self.start_worker_sowing('b', current_move[1])
+                    self.start_worker_simultaneous_sowing(hole_b=current_move[1], hand_a=self.board_model.player_a_hand)
+                elif BoardModel.PROMPT_SOWING_BOTH and not current_move[0] == 0 and not current_move[1] == 0:
+                    self.start_worker_simultaneous_sowing(hole_a=current_move[0], hole_b=current_move[1])
+                else:
+                    print("error with simul loading move. action: " + str(action) + " Move: " + str(current_move))
+
+
 
         self.move_counter += 1
         if self.move_counter >= len(self.loaded_moves):
