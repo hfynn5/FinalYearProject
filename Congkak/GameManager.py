@@ -601,16 +601,16 @@ class GameManager:
 
         self.current_mode = self.ROUND_ROBIN_MODE
 
-        self.round_robin_results = [[0 for x in range(len(self.tournament_participants) - 1)]
-                                    for x in range(len(self.tournament_participants) - 1)]
-
         self.player_a_agent = self.tournament_participants[0]
         self.player_b_agent = self.tournament_participants[0]
 
         self.no_of_games_to_run = no_of_games
 
-        self.round_robin_results = [[0 for x in range(len(self.LIST_OF_AGENTS) - 1)]
-                                    for x in range(len(self.LIST_OF_AGENTS) - 1)]
+        self.round_robin_results = [[0 for x in range(len(self.tournament_participants))]
+                                    for x in range(len(self.tournament_participants))]
+
+        print(self.tournament_participants)
+        print(self.round_robin_results)
 
         self.run_multiple_games(self.no_of_games_to_run, self.player_a_agent, self.player_b_agent)
 
