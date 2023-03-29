@@ -357,7 +357,12 @@ class GameManager:
                 print("Game over")
                 self.end_game()
             case BoardModel.ERROR:
-                print("next action is to error")
+                print("game has errored. restarting game")
+
+                if self.current_mode == self.MULTI_GAME_MODE or self.current_mode == self.ROUND_ROBIN_MODE:
+                    self.new_game(True)
+                else:
+                    self.new_game(False)
 
     # ends the game
     def end_game(self):
@@ -395,8 +400,7 @@ class GameManager:
                 if self.no_of_games_left > 0:
                     print(str(self.no_of_games_left) + " games left...")
                     self.no_of_games_left -= 1
-                    self.new_game(False)
-                    self.start_worker_simultaneous_sowing()
+                    self.new_game(True)
                 else:
                     print(str(self.no_of_games_to_run) + " games have been run. Results: " + str(self.game_results))
 
@@ -415,8 +419,8 @@ class GameManager:
 
                 if self.no_of_games_left > 0:
                     self.no_of_games_left -= 1
-                    self.new_game(False)
-                    self.start_worker_simultaneous_sowing()
+                    self.new_game(True)
+                    # self.start_worker_simultaneous_sowing()
                 else:
 
                     self.next_round()
