@@ -378,21 +378,26 @@ class GameManager:
         self.board_model.active_players.clear()
 
         result = self.DRAW
+        winner = "None"
 
         if self.board_model.storeroom_a_value == self.board_model.storeroom_b_value:
             print("Draw")
             result = self.DRAW
+            winner = "Draw"
         elif self.board_model.storeroom_a_value > self.board_model.storeroom_b_value:
             print("Player A wins")
             result = self.PLAYER_A_WIN
+            winner = "A"
         elif self.board_model.storeroom_b_value > self.board_model.storeroom_a_value:
             print("Player B wins")
             result = self.PLAYER_B_WIN
+            winner = "B"
 
         match self.current_mode:
             case self.NORMAL_MODE:
 
-                self.board_graphic.end_game_prompt()
+                self.board_graphic.end_game_prompt(winner, self.board_model.storeroom_a_value,
+                                                   self.board_model.storeroom_b_value)
                 print("Game has ended. Moves made: ")
                 for move in self.board_model.moves_made:
                     print(move)

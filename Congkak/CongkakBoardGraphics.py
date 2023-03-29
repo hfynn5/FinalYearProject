@@ -6,6 +6,7 @@ from PyQt6.QtCore import QPoint, Qt
 from Congkak.Hand import Hand
 from Congkak.DialogueBoxes.MultipleGamesDialogBox import MultipleGamesDialogBox
 from Congkak.DialogueBoxes.TournamentDialogBox import TournamentDialogBox
+from Congkak.DialogueBoxes.GameEndDialogBox import GameEndDialogBox
 import sys
 
 
@@ -52,6 +53,7 @@ class BoardGraphic(QMainWindow):
         self.run_multiple_games_menu_button_action = QAction()
         self.run_tournament_menu_button_action = QAction()
 
+        self.game_end_dialog_box = GameEndDialogBox()
         self.multiple_games_dialog_box = MultipleGamesDialogBox()
         self.tournament_dialog_box = TournamentDialogBox()
 
@@ -382,8 +384,12 @@ class BoardGraphic(QMainWindow):
         # self.player_b_hand_point.x = x_coord
         # self.player_b_hand_point.y = y_coord
 
-    def end_game_prompt(self):
-        print("game ended.")
+    # prompts end game
+    def end_game_prompt(self, winner, player_a_score, player_b_score):
+        self.game_end_dialog_box.winner_label.setText(str(winner))
+        self.game_end_dialog_box.player_a_score_label.setText(str(player_a_score))
+        self.game_end_dialog_box.player_b_score_label.setText(str(player_b_score))
+        self.game_end_dialog_box.exec()
         pass
 
     # enable or disable the inputs
