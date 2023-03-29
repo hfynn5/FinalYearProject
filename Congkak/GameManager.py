@@ -596,6 +596,8 @@ class GameManager:
         no_of_games = self.board_graphic.tournament_dialog_box.number_of_games
         participants = self.board_graphic.tournament_dialog_box.tournament_participants
 
+        participants.sort()
+
         for index in participants:
             self.tournament_participants.append(self.LIST_OF_AGENTS[index])
 
@@ -608,9 +610,6 @@ class GameManager:
 
         self.round_robin_results = [[0 for x in range(len(self.tournament_participants))]
                                     for x in range(len(self.tournament_participants))]
-
-        print(self.tournament_participants)
-        print(self.round_robin_results)
 
         self.run_multiple_games(self.no_of_games_to_run, self.player_a_agent, self.player_b_agent)
 
