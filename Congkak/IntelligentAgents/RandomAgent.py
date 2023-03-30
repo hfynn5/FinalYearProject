@@ -8,4 +8,5 @@ class RandomAgent:
     def choose_move(self, player, board_model):
         available_moves = board_model.available_moves(player)
         choice = random.choice(available_moves)
+
         return choice
