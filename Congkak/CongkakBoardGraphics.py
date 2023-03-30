@@ -8,6 +8,7 @@ from Congkak.DialogueBoxes.MultiGameDialogBox import MultiGameDialogBox
 from Congkak.DialogueBoxes.TournamentDialogBox import TournamentDialogBox
 from Congkak.DialogueBoxes.GameEndDialogBox import GameEndDialogBox
 from Congkak.DialogueBoxes.MultiGameEndDialogBox import MultiGameEndDialogBox
+from Congkak.DialogueBoxes.TournamentEndDialogBox import TournamentEndDialogBox
 import sys
 
 
@@ -55,9 +56,12 @@ class BoardGraphic(QMainWindow):
         self.run_tournament_menu_button_action = QAction()
 
         self.game_end_dialog_box = GameEndDialogBox()
+
         self.multiple_games_dialog_box = MultiGameDialogBox()
         self.multi_game_end_dialog_box = MultiGameEndDialogBox()
+
         self.tournament_dialog_box = TournamentDialogBox()
+        self.tournament_end_dialog_box = TournamentEndDialogBox()
 
         self.acceptDrops()
         # set the title
@@ -410,6 +414,14 @@ class BoardGraphic(QMainWindow):
         self.multi_game_end_dialog_box.game_score_list_label.setText(str(score_list))
 
         self.multi_game_end_dialog_box.exec()
+
+    def tournament_end_prompt(self, participants, no_of_games, results):
+
+        self.tournament_end_dialog_box.create_table(participants, results)
+
+        self.tournament_end_dialog_box.exec()
+
+        pass
 
     # enable or disable the inputs
     def set_enable_inputs(self, enable):
