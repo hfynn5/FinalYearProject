@@ -64,34 +64,33 @@ class BoardGraphic(QMainWindow):
         self.move_speed_slider = QSlider()
         self.play_button = QPushButton()
 
-        self.new_game_menu_button_action = QAction()
-        self.save_game_menu_button_action = QAction()
-        self.load_game_menu_button_action = QAction()
-
-        self.run_multiple_games_menu_button_action = QAction()
-        self.run_tournament_menu_button_action = QAction()
-
-        self.game_end_dialog_box = GameEndDialogBox()
-
-        self.multiple_games_dialog_box = MultiGameDialogBox()
-        self.multi_game_end_dialog_box = MultiGameEndDialogBox()
-
-        self.tournament_dialog_box = TournamentDialogBox()
-        self.tournament_end_dialog_box = TournamentEndDialogBox()
+        self.new_game_button_action = QAction()
+        self.save_game_button_action = QAction()
+        self.load_game_button_action = QAction()
 
         self.acceptDrops()
-        # set the title
-        self.setWindowTitle("Congkak")
-
-        # setting the geometry of window
-        self.setGeometry(100, 100, 800, 600)
-        self.setAutoFillBackground(True)
 
         self.generate_points()
 
         self.create_hole_labels()
         self.create_inputs()
         self.create_menus()
+
+        self.set_pictures()
+
+
+        # label = QLabel(self)
+        # label.resize(136, 267)
+        # pixmap = QPixmap('Assets/Sprites/Hand_sprite.png')
+        # label.move(QPoint(100, 120))
+        # label.setPixmap(pixmap)
+
+        # self.player_a_hand_img_label = QLabel(self)
+        # self.player_a_hand_img_label.resize(136, 267)
+        # pixmap = QPixmap('Assets/Sprites/Hand_sprite.png')
+        # self.player_a_hand_img_label.move(QPoint(300, 200))
+        # self.player_a_hand_img_label.setPixmap(pixmap)
+        # self.player_b_hand_img_label.show()
 
         # show all the widgets
         self.show()
@@ -435,35 +434,9 @@ class BoardGraphic(QMainWindow):
         # self.player_b_hand_point.x = x_coord
         # self.player_b_hand_point.y = y_coord
 
-    # prompts end game
-    def end_game_prompt(self, winner, player_a_score, player_b_score):
-        self.game_end_dialog_box.winner_label.setText(str(winner))
-        self.game_end_dialog_box.player_a_score_label.setText(str(player_a_score))
-        self.game_end_dialog_box.player_b_score_label.setText(str(player_b_score))
-        self.game_end_dialog_box.exec()
-        pass
-
-    def multi_end_game_prompt(self, score_list):
-        player_a_wins = score_list.count(1)
-        player_b_wins = score_list.count(-1)
-        draws = score_list.count(0)
-        games_played = len(score_list)
-
-        self.multi_game_end_dialog_box.no_games_played_label.setText(str(games_played))
-        self.multi_game_end_dialog_box.player_a_score_label.setText(str(player_a_wins))
-        self.multi_game_end_dialog_box.player_b_score_label.setText(str(player_b_wins))
-        self.multi_game_end_dialog_box.draws_label.setText(str(draws))
-
-        self.multi_game_end_dialog_box.game_score_list_label.setText(str(score_list))
-
-        self.multi_game_end_dialog_box.exec()
-
-    def tournament_end_prompt(self, participants, no_of_games, results):
-
-        self.tournament_end_dialog_box.create_table(participants, results)
-
-        self.tournament_end_dialog_box.exec()
-
+    # end game prompt
+    def end_game_prompt(self):
+        print("game ended.")
         pass
 
     # enable or disable the inputs
