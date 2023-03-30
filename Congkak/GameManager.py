@@ -171,7 +171,12 @@ class GameManager:
         # start constantly updating graphics
         self.start_worker_graphic_updater()
 
-        # self.run_round_robin_tournament(3)
+        # self.tournament_participants = [self.AGENT_RANDOM, self.AGENT_MAX, self.AGENT_MINIMAX]
+        # self.round_robin_results = [[1, 1, 1],
+        #                             [2, 2, 2],
+        #                             [3, 3, 3],]
+        # self.no_of_games_to_run = 4
+        # self.board_graphic.tournament_end_prompt(self.tournament_participants, self.no_of_games_to_run, self.round_robin_results)
 
         sys.exit(App.exec())
 
@@ -410,10 +415,6 @@ class GameManager:
                     self.no_of_games_left -= 1
                     self.new_game(True)
                 else:
-                    print(str(self.no_of_games_to_run) + " games have been run. Results: " + str(self.game_results))
-
-                    print("average score: " + str(sum(self.game_results)))
-
                     self.board_graphic.multi_end_game_prompt(self.game_results)
 
                     self.current_mode = self.NORMAL_MODE
@@ -421,8 +422,11 @@ class GameManager:
                 pass
             case self.ROUND_ROBIN_MODE:
 
-                agent_a_index = self.tournament_participants.index(self.player_a_agent) - 1
-                agent_b_index = self.tournament_participants.index(self.player_b_agent) - 1
+                agent_a_index = self.tournament_participants.index(self.player_a_agent)
+                agent_b_index = self.tournament_participants.index(self.player_b_agent)
+
+                print("agent a: " + str(self.player_a_agent) + "index: " + str(agent_a_index))
+                print("agent b: " + str(self.player_b_agent) + "index: " + str(agent_b_index))
 
                 if result == self.PLAYER_A_WIN:
                     self.round_robin_results[agent_a_index][agent_b_index] += 1
@@ -445,8 +449,8 @@ class GameManager:
                         agent_b_index = agent_a_index
 
                     if agent_a_index >= len(self.tournament_participants):
-                        print("round robin over. results: ")
-                        print(self.round_robin_results)
+                        self.board_graphic.tournament_end_prompt(self.tournament_participants,
+                                                                 self.no_of_games_to_run, self.round_robin_results)
                         self.current_mode = self.NORMAL_MODE
                     else:
                         self.run_multiple_games(self.no_of_games_to_run, self.tournament_participants[agent_a_index],
@@ -608,6 +612,8 @@ class GameManager:
         participants = self.board_graphic.tournament_dialog_box.tournament_participants
 
         participants.sort()
+
+        self.tournament_participants = []
 
         for index in participants:
             self.tournament_participants.append(self.LIST_OF_AGENTS[index])
