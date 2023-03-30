@@ -74,20 +74,6 @@ class BoardGraphic(QMainWindow):
 
         self.set_pictures()
 
-
-        # label = QLabel(self)
-        # label.resize(136, 267)
-        # pixmap = QPixmap('Assets/Sprites/Hand_sprite.png')
-        # label.move(QPoint(100, 120))
-        # label.setPixmap(pixmap)
-
-        # self.player_a_hand_img_label = QLabel(self)
-        # self.player_a_hand_img_label.resize(136, 267)
-        # pixmap = QPixmap('Assets/Sprites/Hand_sprite.png')
-        # self.player_a_hand_img_label.move(QPoint(300, 200))
-        # self.player_a_hand_img_label.setPixmap(pixmap)
-        # self.player_b_hand_img_label.show()
-
         # show all the widgets
         self.show()
 
@@ -144,6 +130,7 @@ class BoardGraphic(QMainWindow):
             house_x_pos -= house_x_pos_offset
         self.house_b_points.reverse()
 
+    # TODO: double check and remove.
     # Draws all the circles and hands and shapes
     def paintEvent(self, QPaintEvent):
 
@@ -194,6 +181,7 @@ class BoardGraphic(QMainWindow):
         # painter.end()
 
     # updates the hand value label
+    # TODO: label text colour
     def update_hand_label(self):
 
         offset = QPoint(22, -30)
