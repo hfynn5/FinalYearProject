@@ -49,13 +49,15 @@ class TournamentEndDialogBox(QDialog):
 
         for m, participant_a in enumerate(participants):
 
-            layout.addWidget(QLabel(participant_a), m + y_offset, x_offset)
-            layout.addWidget(QLabel(participant_a), y_offset, m + x_offset)
+            layout.addWidget(QLabel(participant_a), m + y_offset + 1, x_offset)
+            layout.addWidget(QLabel(participant_a), y_offset, m + x_offset + 1)
 
             for n, participant_b in enumerate(participants):
 
-                layout.addWidget(QLabel(str(results[m][n])), m + y_offset, n + x_offset)
+                layout.addWidget(QLabel(str(results[m][n])), m + y_offset + 1, n + x_offset + 1)
 
-        layout.addWidget(self.buttonBox, len(participants + y_offset + 1), 1)
+        layout.addWidget(self.buttonBox, len(participants) + y_offset + 1, 1)
+
+        self.setLayout(layout)
 
 
