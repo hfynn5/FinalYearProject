@@ -4,9 +4,10 @@ from PyQt6.QtGui import QPixmap, QPainter, QPen, QAction, QIcon, QPalette
 from PyQt6 import QtCore, QtGui, QtWidgets, uic
 from PyQt6.QtCore import QPoint, Qt
 from Congkak.Hand import Hand
-from Congkak.DialogueBoxes.MultipleGamesDialogBox import MultipleGamesDialogBox
+from Congkak.DialogueBoxes.MultiGameDialogBox import MultiGameDialogBox
 from Congkak.DialogueBoxes.TournamentDialogBox import TournamentDialogBox
 from Congkak.DialogueBoxes.GameEndDialogBox import GameEndDialogBox
+from Congkak.DialogueBoxes.MultiGameEndDialogBox import MultiGameEndDialogBox
 import sys
 
 
@@ -54,7 +55,8 @@ class BoardGraphic(QMainWindow):
         self.run_tournament_menu_button_action = QAction()
 
         self.game_end_dialog_box = GameEndDialogBox()
-        self.multiple_games_dialog_box = MultipleGamesDialogBox()
+        self.multiple_games_dialog_box = MultiGameDialogBox()
+        self.multi_game_end_dialog_box = MultiGameEndDialogBox()
         self.tournament_dialog_box = TournamentDialogBox()
 
         self.acceptDrops()
@@ -392,6 +394,23 @@ class BoardGraphic(QMainWindow):
         self.game_end_dialog_box.exec()
         pass
 
+    def multi_end_game_prompt(self, score_list):
+        player_a_wins = score_list.count(1)
+        player_b_wins = score_list.count(-1)
+        draws = score_list.count(0)
+        games_played = len(score_list)
+
+        self.multi_game_end_dialog_box.no_games_played_label.setText(str(games_played))
+        self.multi_game_end_dialog_box.player_a_score_label.setText(str(player_a_wins))
+        self.multi_game_end_dialog_box.player_b_score_label.setText(str(player_b_wins))
+        self.multi_game_end_dialog_box.draws_label.setText(str(draws))
+
+        # print(str(games_played))
+
+        self.multi_game_end_dialog_box.game_score_list_label.setText(str(score_list))
+
+        self.multi_game_end_dialog_box.exec()
+
     # enable or disable the inputs
     def set_enable_inputs(self, enable):
         self.set_enable_player_inputs('a',enable)
@@ -433,3 +452,4 @@ class BoardGraphic(QMainWindow):
             self.play_button.show()
         else:
             self.play_button.hide()
+

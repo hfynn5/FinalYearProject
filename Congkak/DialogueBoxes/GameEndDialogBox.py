@@ -36,9 +36,3 @@ class GameEndDialogBox(QDialog):
         layout.addWidget(self.buttonBox, 4, 1)
 
         self.setLayout(layout)
-
-    # def exec(self) -> int:
-    #
-    #
-    #
-    #     super().exec()

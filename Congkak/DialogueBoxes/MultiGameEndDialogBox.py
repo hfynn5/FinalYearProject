@@ -13,7 +13,7 @@ class MultiGameEndDialogBox(QDialog):
 
         self.setWindowTitle("End Multiple Game")
 
-        self.no_games_ran_label = QLabel("")
+        self.no_games_played_label = QLabel("")
         self.player_a_score_label = QLabel("")
         self.player_b_score_label = QLabel("")
         self.draws_label = QLabel("")
@@ -34,12 +34,14 @@ class MultiGameEndDialogBox(QDialog):
         layout.addWidget(QLabel("Draws: "), 4, 0)
         layout.addWidget(QLabel("Game results: "), 5, 0)
 
-        layout.addWidget(self.no_games_ran_label, 1, 1)
+        layout.addWidget(self.no_games_played_label, 1, 1)
         layout.addWidget(self.player_a_score_label, 2, 1)
         layout.addWidget(self.player_b_score_label, 3, 1)
         layout.addWidget(self.draws_label, 4, 1)
-        layout.addWidget(self.game_score_list_label, 6, 0, 0, 2)
+        layout.addWidget(self.game_score_list_label, 6, 0)
 
         layout.addWidget(self.buttonBox, 7, 1)
+
+        self.setLayout(layout)
 
 

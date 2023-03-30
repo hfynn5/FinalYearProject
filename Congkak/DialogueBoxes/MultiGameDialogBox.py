@@ -5,7 +5,7 @@ from PyQt6.QtWidgets import QDialog, QDialogButtonBox, QLabel,  QGridLayout, QCo
 from PyQt6 import QtGui
 
 
-class MultipleGamesDialogBox(QDialog):
+class MultiGameDialogBox(QDialog):
 
     def __init__(self):
 

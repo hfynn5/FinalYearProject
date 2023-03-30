@@ -414,6 +414,10 @@ class GameManager:
 
                     print("average score: " + str(sum(self.game_results)))
 
+                    self.board_graphic.multi_end_game_prompt(self.game_results)
+
+                    self.current_mode = self.NORMAL_MODE
+
                 pass
             case self.ROUND_ROBIN_MODE:
 
@@ -443,6 +447,7 @@ class GameManager:
                     if agent_a_index >= len(self.tournament_participants):
                         print("round robin over. results: ")
                         print(self.round_robin_results)
+                        self.current_mode = self.NORMAL_MODE
                     else:
                         self.run_multiple_games(self.no_of_games_to_run, self.tournament_participants[agent_a_index],
                                                 self.tournament_participants[agent_b_index])
@@ -450,6 +455,7 @@ class GameManager:
                 pass
             case self.LOADING_MODE:
                 print("Game has loaded.")
+                self.current_mode = self.NORMAL_MODE
                 pass
 
     # decides what action to take when the hole input is chosen
