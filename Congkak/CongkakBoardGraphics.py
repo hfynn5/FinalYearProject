@@ -429,7 +429,6 @@ class BoardGraphic(QMainWindow):
         # self.player_b_hand_point.y = y_coord
 
     # end game prompt
-    # TODO: add end game prompt
     def end_game_prompt(self):
         print("game ended.")
         pass
