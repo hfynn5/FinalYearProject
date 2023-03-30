@@ -6,25 +6,6 @@ from PyQt6.QtCore import Qt, QAbstractTableModel
 
 from PyQt6 import QtGui, QtCore
 
-
-# class TableView(QTableWidget):
-#     def __init__(self, data, labels, *args):
-#         QTableWidget.__init__(self, *args)
-#         self.data = data
-#         self.labels = labels
-#         self.setData()
-#         self.resizeColumnsToContents()
-#         self.resizeRowsToContents()
-#
-#     def setData(self):
-#         # horHeaders = []
-#         for n, key in enumerate(sorted(self.data.keys())):
-#             # horHeaders.append(key)
-#             for m, item in enumerate(self.data[key]):
-#                 newitem = QTableWidgetItem(item)
-#                 self.setItem(m, n, newitem)
-#         # self.setHorizontalHeaderLabels(horHeaders)
-
 class TournamentEndDialogBox(QDialog):
 
     def __init__(self):

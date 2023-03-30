@@ -96,7 +96,6 @@ class MinimaxAgent:
         optimal_board = BoardModel()
 
         if depth == 0 or self_depth == 0:
-            # print("depth reached")
             self.leaf_node_count += 1
             return self.evaluate_position(board_model, player), board_model
 
@@ -126,8 +125,6 @@ class MinimaxAgent:
 
                         if not self.checked_opponent:
                             depth += 1
-                        # else:
-                        #     self_depth += 1
 
                         eva, board = self.minimax(new_board, move, depth - 1, self_depth - 1, 'a', alpha, beta)
                         if eva > max_eva:

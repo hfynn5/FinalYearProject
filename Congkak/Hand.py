@@ -37,4 +37,3 @@ class Hand:
 
     def print_data(self):
         print("hand: player: " + self.player + " counter count: " + str(self.counter_count) + " pos: " + str(self.hole_pos))
-        #print()

@@ -40,8 +40,6 @@ class BoardGraphic(QMainWindow):
         self.player_a_hand_point = QPoint(0, 0)
         self.player_b_hand_point = QPoint(0, 0)
 
-        # self.player_b_hand_point.x()
-
         self.player_a_dropdown = QComboBox()
         self.player_b_dropdown = QComboBox()
 
@@ -80,19 +78,6 @@ class BoardGraphic(QMainWindow):
         # show all the widgets
         self.show()
 
-        # comment out afterwards
-        #
-        # msg = QMessageBox()
-        # msg.setWindowTitle("Round Robin Result")
-        # msg.setText("Results\n\n"
-        #             "Rounds: 100\n"
-        #             "Random: 2 wins"
-        #             "Minimax: 60 wins\n"
-        #             "MCTS: 40 wins\n"
-        #             "Q-Learning: 40 wins"
-        #             )
-        #
-        # x = msg.exec()
 
     # what to do if close window
     def closeEvent(self, a0: QtGui.QCloseEvent) -> None:
@@ -370,9 +355,6 @@ class BoardGraphic(QMainWindow):
             y_coord = -100
 
         self.player_a_hand_point = QPoint(x_coord, y_coord)
-        # self.player_a_hand_point.x = x_coord
-        # self.player_a_hand_point.y = y_coord
-
         if 10 < player_b_hand.hole_pos < 18:
             x_coord = self.house_a_points[player_b_hand.hole_pos - 11].x() - round(hand_diameter / 2) - 1
             y_coord = self.house_a_points[player_b_hand.hole_pos - 11].y() + 10
@@ -387,8 +369,6 @@ class BoardGraphic(QMainWindow):
             y_coord = -100
 
         self.player_b_hand_point = QPoint(x_coord, y_coord)
-        # self.player_b_hand_point.x = x_coord
-        # self.player_b_hand_point.y = y_coord
 
     # prompts end game
     def end_game_prompt(self, winner, player_a_score, player_b_score):
@@ -408,8 +388,6 @@ class BoardGraphic(QMainWindow):
         self.multi_game_end_dialog_box.player_a_score_label.setText(str(player_a_wins))
         self.multi_game_end_dialog_box.player_b_score_label.setText(str(player_b_wins))
         self.multi_game_end_dialog_box.draws_label.setText(str(draws))
-
-        # print(str(games_played))
 
         self.multi_game_end_dialog_box.game_score_list_label.setText(str(score_list))
 

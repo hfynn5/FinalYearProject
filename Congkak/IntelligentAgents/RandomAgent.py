@@ -9,6 +9,4 @@ class RandomAgent:
         available_moves = board_model.available_moves(player)
         choice = random.choice(available_moves)
 
-        # print("player: " + str(player) + " available moves: " + str(available_moves) + " choice: " + str(choice))
-
         return choice

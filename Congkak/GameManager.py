@@ -171,18 +171,10 @@ class GameManager:
         # start constantly updating graphics
         self.start_worker_graphic_updater()
 
-        # self.tournament_participants = [self.AGENT_RANDOM, self.AGENT_MAX, self.AGENT_MINIMAX]
-        # self.round_robin_results = [[1, 1, 1],
-        #                             [2, 2, 2],
-        #                             [3, 3, 3],]
-        # self.no_of_games_to_run = 4
-        # self.board_graphic.tournament_end_prompt(self.tournament_participants, self.no_of_games_to_run, self.round_robin_results)
-
         sys.exit(App.exec())
 
     # connect the available input to its functions
     def connect_inputs_to_functions(self):
-        # connect input with corresponding functions
         for i, button in enumerate(self.board_graphic.house_a_buttons):
             button.clicked.connect(lambda checked, value=i + 11: self.choosing_hole_action('a', value))
 
@@ -202,8 +194,6 @@ class GameManager:
         self.board_graphic.save_game_menu_button_action.triggered.connect(lambda checked: self.save_moves())
         self.board_graphic.load_game_menu_button_action.triggered.connect(lambda checked: self.load_moves())
         self.board_graphic.new_game_menu_button_action.triggered.connect(lambda checked: self.new_game(False))
-        # self.board_graphic.run_multiple_games_menu_button_action.\
-        #     triggered.connect(lambda checked: self.run_multiple_games(3, self.AGENT_RANDOM, self.AGENT_RANDOM))
 
         self.board_graphic.player_a_dropdown. \
             activated.connect(lambda
@@ -218,16 +208,6 @@ class GameManager:
         self.board_graphic.multiple_games_dialog_box.buttonBox.accepted.connect(self.run_multiple_games)
 
         self.board_graphic.tournament_dialog_box.buttonBox.accepted.connect(self.run_round_robin_tournament)
-
-        # self.board_graphic.multiple_games_dialog_box. \
-        #     buttonBox.accepted.connect(lambda
-        #                                agent_a=self.LIST_OF_AGENTS[
-        #                                    self.board_graphic.multiple_games_dialog_box.player_a_agent],
-        #                                agent_b=self.LIST_OF_AGENTS[
-        #                                    self.board_graphic.multiple_games_dialog_box.player_b_agent],
-        #                                game_count=self.board_graphic.multiple_games_dialog_box.number_of_games:
-        #                                self.run_multiple_games(no_of_games=game_count, agent_a=agent_a, agent_b=agent_b)
-        #                                )
 
     # makes worker constantly update graphics
     def start_worker_graphic_updater(self):
@@ -425,9 +405,6 @@ class GameManager:
                 agent_a_index = self.tournament_participants.index(self.player_a_agent)
                 agent_b_index = self.tournament_participants.index(self.player_b_agent)
 
-                print("agent a: " + str(self.player_a_agent) + "index: " + str(agent_a_index))
-                print("agent b: " + str(self.player_b_agent) + "index: " + str(agent_b_index))
-
                 if result == self.PLAYER_A_WIN:
                     self.round_robin_results[agent_a_index][agent_b_index] += 1
                 elif result == self.PLAYER_B_WIN:
@@ -466,14 +443,12 @@ class GameManager:
     def choosing_hole_action(self, player, hole):
         if self.autoplay_hands:
             if self.board_model.game_phase == BoardModel.SIMULTANEOUS_PHASE:
-                # print("simul")
                 if player == 'a':
                     self.start_worker_simultaneous_sowing(hole_a=hole, hand_b=self.board_model.player_b_hand)
                 elif player == 'b':
                     self.start_worker_simultaneous_sowing(hole_b=hole, hand_a=self.board_model.player_a_hand)
 
             elif self.board_model.game_phase == BoardModel.SEQUENTIAL_PHASE:
-                # print("seq")
                 self.start_worker_sowing(player=player, hole=hole)
         else:
             self.set_hand_pos(player, hole)
@@ -724,22 +699,17 @@ class GameManager:
 
             elif self.board_model.game_phase == BoardModel.SIMULTANEOUS_PHASE:
                 if BoardModel.PROMPT_SOWING_A and not current_move[0] == 0 and current_move[1] == 0:
-                    # self.start_worker_sowing('a', current_move[0])
                     self.start_worker_simultaneous_sowing(hole_a=current_move[0], hand_b=self.board_model.player_b_hand)
                 elif BoardModel.PROMPT_SOWING_B and not current_move[1] == 0 and current_move[0] == 0:
-                    # self.start_worker_sowing('b', current_move[1])
                     self.start_worker_simultaneous_sowing(hole_b=current_move[1], hand_a=self.board_model.player_a_hand)
                 elif BoardModel.PROMPT_SOWING_BOTH and not current_move[0] == 0 and not current_move[1] == 0:
                     self.start_worker_simultaneous_sowing(hole_a=current_move[0], hole_b=current_move[1])
                 else:
                     print("error with simul loading move. action: " + str(action) + " Move: " + str(current_move))
 
-
-
         self.move_counter += 1
         if self.move_counter >= len(self.loaded_moves):
             print("Game Loaded")
-            # self.loading_game = False
             self.current_mode = self.NORMAL_MODE
 
     def close_program(self):

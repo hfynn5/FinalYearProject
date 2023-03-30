@@ -83,38 +83,31 @@ class BoardModel:
         if status == self.TIKAM_A:
             self.tikam(self.player_a_hand)
             self.player_a_status = self.STOP_SOWING_A
-            # status = self.STOP_SOWING_A
 
             if current_hand.player in self.active_players:
                 self.active_players.remove(current_hand.player)
-                # if len(self.active_players) == 0:
                 self.last_active_player = current_hand.player
 
         elif status == self.TIKAM_B:
             self.tikam(self.player_b_hand)
             self.player_b_status = self.STOP_SOWING_B
-            # status = self.STOP_SOWING_B
 
             if current_hand.player in self.active_players:
                 self.active_players.remove(current_hand.player)
-            # if len(self.active_players) == 0:
                 self.last_active_player = current_hand.player
 
         if status == self.STOP_SOWING_A or status == self.STOP_SOWING_B:
             if current_hand.player in self.active_players:
                 self.active_players.remove(current_hand.player)
-                # if len(self.active_players) == 0:
                 self.last_active_player = current_hand.player
 
         if current_hand.player in self.active_players:
             self.active_players.remove(current_hand.player)
-            # if len(self.active_players) == 0:
             self.last_active_player = current_hand.player
 
         if status == self.ERROR:
             print("bruh. moves made")
             print(self.moves_made)
-            # print(self.print_all_data())
 
         self.reset_hand(current_hand.player)
 
@@ -350,8 +343,6 @@ class BoardModel:
         else:
             print("cannot tikam")
 
-        # print("tikamed")
-
     # tikam both hands at the same time. only if they start tikam at the same time. not when theyre asynchronous
     def simul_tikam(self):
 
@@ -562,11 +553,9 @@ class BoardModel:
             elif self.player_a_status == self.TIKAM_A and self.player_b_status == self.CONTINUE_SOWING:
                 if self.ping: print("player a has tikam. player b has not. continue sowing b")
                 action = self.CONTINUE_SOWING_B
-                # self.game_phase = self.SEQUENTIAL_PHASE
             elif self.player_b_status == self.TIKAM_B and self.player_a_status == self.CONTINUE_SOWING:
                 if self.ping: print("player b has tikam. player a has not. continue sowing a")
                 action = self.CONTINUE_SOWING_A
-                # self.game_phase = self.SEQUENTIAL_PHASE
 
             elif self.player_a_status == self.PROMPT_SOWING_A and self.player_b_status == self.CONTINUE_SOWING:
                 if self.ping: print("prompt player a. continue player b")
@@ -586,11 +575,9 @@ class BoardModel:
 
             elif self.player_a_status == self.PROMPT_SOWING_A and self.player_b_status == self.TIKAM_B:
                 if self.ping: print("prompt player a and player b tikam. wait until finish tikam. go to seq")
-                # self.game_phase = self.SEQUENTIAL_PHASE
                 action = self.WAIT
             elif self.player_b_status == self.PROMPT_SOWING_B and self.player_a_status == self.TIKAM_A:
                 if self.ping: print("prompt player b and player a tikam. wait until finish tikam. go to seq")
-                # self.game_phase = self.SEQUENTIAL_PHASE
                 action = self.WAIT
 
             elif self.player_a_status == self.CONTINUE_SOWING and self.player_b_status == self.CONTINUE_SOWING:
@@ -673,8 +660,6 @@ class BoardModel:
 
         self.moves_made.append(move_tuple)
 
-        # if self.ping: print(self.moves_made)
-
     # check the available moves a player can do
     def available_moves(self, player):
         available_move = []
@@ -716,14 +701,11 @@ class BoardModel:
         start_time = time.time()
 
         while self.running and time.time() - start_time < self.sowing_speed:
-            # time.sleep(0.00001)
             pass
 
         if not self.running:
             raise Exception("Running the game is disabled.")
             self.print_all_data()
-
-        # self.print_all_data()
 
     # print holes
     def print_all_data(self):
