@@ -34,6 +34,7 @@ class BoardGraphic(QMainWindow):
         self.storeroom_a_point = QPoint(0, 0)
         self.storeroom_b_point = QPoint(0, 0)
 
+        self.board_img_label = QLabel(self)
         self.player_a_hand_img_label = QLabel(self)
         self.player_b_hand_img_label = QLabel(self)
 
@@ -72,6 +73,7 @@ class BoardGraphic(QMainWindow):
         self.create_menus()
 
         self.set_pictures()
+
 
         # label = QLabel(self)
         # label.resize(136, 267)
@@ -145,36 +147,36 @@ class BoardGraphic(QMainWindow):
     # Draws all the circles and hands and shapes
     def paintEvent(self, QPaintEvent):
 
-        storeroom_diameter = 45
-
-        house_diameter = 25
-
-        hand_diameter = 50
-
-        painter = QPainter(self)
-        pen = QtGui.QPen()
-        pen.setWidth(5)
-        pen.setColor(QtGui.QColor('white'))
-        painter.setPen(pen)
-
-        # painter.fillRect(0, 0, 800, 600, QtGui.QBrush((QtGui.QColor(255, 255, 255, 255))))
-
-        pen.setColor(QtGui.QColor('brown'))
-        painter.setPen(pen)
-
-        # storeroom A
-        painter.drawEllipse(self.storeroom_a_point, storeroom_diameter, storeroom_diameter)
-
-        # house A
-        for i, pos in enumerate(self.house_a_points):
-            painter.drawEllipse(pos, house_diameter, house_diameter)
-
-        # storeroom B
-        painter.drawEllipse(self.storeroom_b_point, storeroom_diameter, storeroom_diameter)
-
-        # house B
-        for i, pos in enumerate(self.house_b_points):
-            painter.drawEllipse(pos, house_diameter, house_diameter)
+        # storeroom_diameter = 45
+        #
+        # house_diameter = 25
+        #
+        # hand_diameter = 50
+        #
+        # painter = QPainter(self)
+        # pen = QtGui.QPen()
+        # pen.setWidth(5)
+        # pen.setColor(QtGui.QColor('white'))
+        # painter.setPen(pen)
+        #
+        # # painter.fillRect(0, 0, 800, 600, QtGui.QBrush((QtGui.QColor(255, 255, 255, 255))))
+        #
+        # pen.setColor(QtGui.QColor('brown'))
+        # painter.setPen(pen)
+        #
+        # # storeroom A
+        # painter.drawEllipse(self.storeroom_a_point, storeroom_diameter, storeroom_diameter)
+        #
+        # # house A
+        # for i, pos in enumerate(self.house_a_points):
+        #     painter.drawEllipse(pos, house_diameter, house_diameter)
+        #
+        # # storeroom B
+        # painter.drawEllipse(self.storeroom_b_point, storeroom_diameter, storeroom_diameter)
+        #
+        # # house B
+        # for i, pos in enumerate(self.house_b_points):
+        #     painter.drawEllipse(pos, house_diameter, house_diameter)
 
         self.update_hand_positions()
 
@@ -189,7 +191,7 @@ class BoardGraphic(QMainWindow):
         # painter.drawArc(round(self.player_b_hand_point.x()), round(self.player_b_hand_point.y()), hand_diameter,
         #                 hand_diameter, 180 * 16, 180 * 16)
 
-        painter.end()
+        # painter.end()
 
     # updates the hand value label
     def update_hand_label(self):
@@ -229,6 +231,14 @@ class BoardGraphic(QMainWindow):
         # self.player_b_hand_img_label = QLabel(self)
         self.player_b_hand_img_label.resize(45, 89)
         self.player_b_hand_img_label.setPixmap(pixmap_b)
+
+        pixmap = QPixmap('Congkak/Assets/Sprites/Congkak_Board_1.png')
+        # pixmap = pixmap.scaled(950, 223)
+        # pixmap = pixmap.scaled(600, 188, QtCore.Qt.KeepAspectRatio)
+        pixmap = pixmap.scaledToWidth(732)
+        self.board_img_label.resize(800, 300)
+        self.board_img_label.setPixmap(pixmap)
+        self.board_img_label.move(QPoint(29, 103))
 
         self.update_images()
 
