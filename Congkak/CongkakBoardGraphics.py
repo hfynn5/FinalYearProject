@@ -164,7 +164,7 @@ class BoardGraphic(QMainWindow):
         pen.setColor(QtGui.QColor('white'))
         painter.setPen(pen)
 
-        painter.fillRect(0, 0, 800, 600, QtGui.QBrush((QtGui.QColor(255, 255, 255, 255))))
+        # painter.fillRect(0, 0, 800, 600, QtGui.QBrush((QtGui.QColor(255, 255, 255, 255))))
 
         pen.setColor(QtGui.QColor('brown'))
         painter.setPen(pen)
@@ -185,16 +185,16 @@ class BoardGraphic(QMainWindow):
 
         self.update_hand_positions()
 
-        # player hand a
-        pen.setColor(QtGui.QColor('blue'))
-        painter.setPen(pen)
-        painter.drawArc(round(self.player_a_hand_point.x()), round(self.player_a_hand_point.y()), hand_diameter,
-                        hand_diameter, 0 * 16, 180 * 16)
-        # player hand b
-        pen.setColor(QtGui.QColor('red'))
-        painter.setPen(pen)
-        painter.drawArc(round(self.player_b_hand_point.x()), round(self.player_b_hand_point.y()), hand_diameter,
-                        hand_diameter, 180 * 16, 180 * 16)
+        # # player hand a
+        # pen.setColor(QtGui.QColor('blue'))
+        # painter.setPen(pen)
+        # painter.drawArc(round(self.player_a_hand_point.x()), round(self.player_a_hand_point.y()), hand_diameter,
+        #                 hand_diameter, 0 * 16, 180 * 16)
+        # # player hand b
+        # pen.setColor(QtGui.QColor('red'))
+        # painter.setPen(pen)
+        # painter.drawArc(round(self.player_b_hand_point.x()), round(self.player_b_hand_point.y()), hand_diameter,
+        #                 hand_diameter, 180 * 16, 180 * 16)
 
         painter.end()
 
@@ -327,9 +327,9 @@ class BoardGraphic(QMainWindow):
         self.save_game_button_action.setStatusTip("Save the game to a text file")
         file_menu.addAction(self.save_game_button_action)
 
-        self.load_game_menu_button_action = QAction("Load Game", self)
-        self.load_game_menu_button_action.setStatusTip("Load a game from a text file")
-        file_menu.addAction(self.load_game_menu_button_action)
+        self.load_game_button_action = QAction("Load Game", self)
+        self.load_game_button_action.setStatusTip("Load a game from a text file")
+        file_menu.addAction(self.load_game_button_action)
 
         # edit games?
         edit_menu = self.menuBar().addMenu("Edit")
@@ -415,6 +415,9 @@ class BoardGraphic(QMainWindow):
             y_coord = -100
 
         self.player_a_hand_point = QPoint(x_coord, y_coord)
+        # self.player_a_hand_point.x = x_coord
+        # self.player_a_hand_point.y = y_coord
+
         if 10 < player_b_hand.hole_pos < 18:
             x_coord = self.house_a_points[player_b_hand.hole_pos - 11].x() - round(hand_diameter / 2) - 1
             y_coord = self.house_a_points[player_b_hand.hole_pos - 11].y() + 10
@@ -429,6 +432,8 @@ class BoardGraphic(QMainWindow):
             y_coord = -100
 
         self.player_b_hand_point = QPoint(x_coord, y_coord)
+        # self.player_b_hand_point.x = x_coord
+        # self.player_b_hand_point.y = y_coord
 
     # prompts end game
     def end_game_prompt(self, winner, player_a_score, player_b_score):
@@ -494,6 +499,7 @@ class BoardGraphic(QMainWindow):
                     button.setEnabled(False)
                     button.hide()
 
+    # enable or disable play button
     def set_enable_play_button(self, enable):
 
         self.play_button.setEnabled(enable)
