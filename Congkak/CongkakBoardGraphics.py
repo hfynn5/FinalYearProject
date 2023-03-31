@@ -1,17 +1,12 @@
-from graphics import *
-from PyQt6.QtWidgets import QApplication, QWidget
-from PyQt6.QtWidgets import *
 from PyQt6.QtGui import QPixmap, QPainter, QPen, QAction, QIcon, QPalette
 from PyQt6 import QtCore, QtGui, QtWidgets, uic
 from PyQt6.QtCore import QPoint, Qt
 from Congkak.Hand import Hand
-import sys
 
 from PyQt6.QtWidgets import QApplication, QWidget, QLabel, QMainWindow
 from PyQt6.QtWidgets import *
 from PyQt6.QtGui import QIcon, QFont, QPixmap, QMovie, QRegion
 from PyQt6.QtCore import Qt, QPoint
-import sys
 
 
 # TODO: Better Graphics
@@ -79,20 +74,6 @@ class BoardGraphic(QMainWindow):
         # show all the widgets
         self.show()
 
-        # comment out afterwards
-
-        # msg = QMessageBox()
-        # msg.setWindowTitle("Round Robin Result")
-        # msg.setText("Results\n\n"
-        #             "Rounds: 100\n"
-        #             "Random: 2 wins"
-        #             "Minimax: 60 wins\n"
-        #             "MCTS: 40 wins\n"
-        #             "Q-Learning: 40 wins"
-        #             )
-        #
-        # x = msg.exec()
-
     # what to do if close window
     def closeEvent(self, a0: QtGui.QCloseEvent) -> None:
         self.active = False
@@ -132,58 +113,7 @@ class BoardGraphic(QMainWindow):
             house_x_pos -= house_x_pos_offset
         self.house_b_points.reverse()
 
-    # TODO: double check and remove.
-    # Draws all the circles and hands and shapes
-    def paintEvent(self, QPaintEvent):
-
-        # storeroom_diameter = 45
-        #
-        # house_diameter = 25
-        #
-        # hand_diameter = 50
-        #
-        # painter = QPainter(self)
-        # pen = QtGui.QPen()
-        # pen.setWidth(5)
-        # pen.setColor(QtGui.QColor('white'))
-        # painter.setPen(pen)
-        #
-        # # painter.fillRect(0, 0, 800, 600, QtGui.QBrush((QtGui.QColor(255, 255, 255, 255))))
-        #
-        # pen.setColor(QtGui.QColor('brown'))
-        # painter.setPen(pen)
-        #
-        # # storeroom A
-        # painter.drawEllipse(self.storeroom_a_point, storeroom_diameter, storeroom_diameter)
-        #
-        # # house A
-        # for i, pos in enumerate(self.house_a_points):
-        #     painter.drawEllipse(pos, house_diameter, house_diameter)
-        #
-        # # storeroom B
-        # painter.drawEllipse(self.storeroom_b_point, storeroom_diameter, storeroom_diameter)
-        #
-        # # house B
-        # for i, pos in enumerate(self.house_b_points):
-        #     painter.drawEllipse(pos, house_diameter, house_diameter)
-
-        self.update_hand_positions()
-
-        # # player hand a
-        # pen.setColor(QtGui.QColor('blue'))
-        # painter.setPen(pen)
-        # painter.drawArc(round(self.player_a_hand_point.x()), round(self.player_a_hand_point.y()), hand_diameter,
-        #                 hand_diameter, 0 * 16, 180 * 16)
-        # # player hand b
-        # pen.setColor(QtGui.QColor('red'))
-        # painter.setPen(pen)
-        # painter.drawArc(round(self.player_b_hand_point.x()), round(self.player_b_hand_point.y()), hand_diameter,
-        #                 hand_diameter, 180 * 16, 180 * 16)
-
-        # painter.end()
-
     # updates the hand value label
-    # TODO: label text colour
     def update_hand_label(self):
 
         offset = QPoint(20, -30)
@@ -212,17 +142,13 @@ class BoardGraphic(QMainWindow):
         pixmap_b = pixmap.scaled(45, 89)
         pixmap_a = pixmap_b.transformed(QtGui.QTransform().rotate(180))
 
-        # self.player_a_hand_img_label = QLabel(self)
         self.player_a_hand_img_label.resize(45, 89)
         self.player_a_hand_img_label.setPixmap(pixmap_a)
 
-        # self.player_b_hand_img_label = QLabel(self)
         self.player_b_hand_img_label.resize(45, 89)
         self.player_b_hand_img_label.setPixmap(pixmap_b)
 
         pixmap = QPixmap('Congkak/Assets/Sprites/Congkak_Board_1.png')
-        # pixmap = pixmap.scaled(950, 223)
-        # pixmap = pixmap.scaled(600, 188, QtCore.Qt.KeepAspectRatio)
         pixmap = pixmap.scaledToWidth(732)
         self.board_img_label.resize(800, 300)
         self.board_img_label.setPixmap(pixmap)
@@ -250,19 +176,13 @@ class BoardGraphic(QMainWindow):
             label.setText("7")
             self.house_b_text_labels.append(label)
 
-        # self.storeroom_a_text_label = QLabel(self)
         self.storeroom_a_text_label.move(self.storeroom_a_point + offset)
         self.storeroom_a_text_label.setStyleSheet("color: #FFEB22; font: bold 15px")
         self.storeroom_a_text_label.setText("0")
 
-        # self.storeroom_b_text_label = QLabel(self)
         self.storeroom_b_text_label.move(self.storeroom_b_point + offset)
         self.storeroom_b_text_label.setStyleSheet("color: #FFEB22; font: bold 15px")
         self.storeroom_b_text_label.setText("0")
-        #
-        # self.player_a_hand_text_label = QLabel(self)
-        #
-        # self.player_b_hand_text_label = QLabel(self)
 
     # creates the UI.
     def create_inputs(self):
@@ -410,8 +330,6 @@ class BoardGraphic(QMainWindow):
             y_coord = -100
 
         self.player_a_hand_point = QPoint(x_coord, y_coord)
-        # self.player_a_hand_point.x = x_coord
-        # self.player_a_hand_point.y = y_coord
 
         if 10 < player_b_hand.hole_pos < 18:
             x_coord = self.house_a_points[player_b_hand.hole_pos - 11].x() - round(hand_diameter / 2) - 1
@@ -427,8 +345,6 @@ class BoardGraphic(QMainWindow):
             y_coord = -100
 
         self.player_b_hand_point = QPoint(x_coord, y_coord)
-        # self.player_b_hand_point.x = x_coord
-        # self.player_b_hand_point.y = y_coord
 
     # end game prompt
     def end_game_prompt(self):
