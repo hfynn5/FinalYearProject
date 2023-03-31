@@ -64,9 +64,20 @@ class BoardGraphic(QMainWindow):
         self.move_speed_slider = QSlider()
         self.play_button = QPushButton()
 
-        self.new_game_button_action = QAction()
-        self.save_game_button_action = QAction()
-        self.load_game_button_action = QAction()
+        self.new_game_menu_button_action = QAction()
+        self.save_game_menu_button_action = QAction()
+        self.load_game_menu_button_action = QAction()
+
+        self.run_multiple_games_menu_button_action = QAction()
+        self.run_tournament_menu_button_action = QAction()
+
+        self.game_end_dialog_box = GameEndDialogBox()
+
+        self.multiple_games_dialog_box = MultiGameDialogBox()
+        self.multi_game_end_dialog_box = MultiGameEndDialogBox()
+
+        self.tournament_dialog_box = TournamentDialogBox()
+        self.tournament_end_dialog_box = TournamentEndDialogBox()
 
         self.acceptDrops()
 
