@@ -43,7 +43,9 @@ class BoardGraphic(QMainWindow):
         self.storeroom_a_text_label = QLabel(self)
         self.storeroom_b_text_label = QLabel(self)
         self.player_a_hand_text_label = QLabel(self)
+        self.player_a_hand_text_label.setStyleSheet("font: bold 15px")
         self.player_b_hand_text_label = QLabel(self)
+        self.player_b_hand_text_label.setStyleSheet("font: bold 15px")
 
         self.house_a_buttons = []
         self.house_b_buttons = []
@@ -184,12 +186,12 @@ class BoardGraphic(QMainWindow):
     # TODO: label text colour
     def update_hand_label(self):
 
-        offset = QPoint(22, -30)
+        offset = QPoint(20, -30)
 
         self.player_a_hand_text_label.move(self.player_a_hand_point + offset)
         self.player_a_hand_text_label.setText(str(self.player_a_hand.counter_count))
 
-        offset = QPoint(22, 50)
+        offset = QPoint(20, 50)
 
         self.player_b_hand_text_label.move(self.player_b_hand_point + offset)
         self.player_b_hand_text_label.setText(str(self.player_b_hand.counter_count))
@@ -199,11 +201,9 @@ class BoardGraphic(QMainWindow):
 
         offset = QPoint(5, -50)
         self.player_a_hand_img_label.move(self.player_a_hand_point + offset)
-        # self.player_a_hand_img_label.setText(str(self.player_a_hand.counter_count))
 
         offset = QPoint(0, 15)
         self.player_b_hand_img_label.move(self.player_b_hand_point + offset)
-        # self.player_b_hand_img_label.setText(str(self.player_b_hand.counter_count))
 
     # set pictures
     def set_pictures(self):
@@ -238,22 +238,26 @@ class BoardGraphic(QMainWindow):
         # creating text label for all the holes.
         for pos in self.house_a_points:
             label = QLabel(self)
+            label.setStyleSheet("color: #FFEB22; font: bold 15px")
             label.move(pos + offset)
             label.setText("7")
             self.house_a_text_labels.append(label)
 
         for pos in self.house_b_points:
             label = QLabel(self)
+            label.setStyleSheet("color: #FFEB22; font: bold 15px")
             label.move(pos + offset)
             label.setText("7")
             self.house_b_text_labels.append(label)
 
         # self.storeroom_a_text_label = QLabel(self)
         self.storeroom_a_text_label.move(self.storeroom_a_point + offset)
+        self.storeroom_a_text_label.setStyleSheet("color: #FFEB22; font: bold 15px")
         self.storeroom_a_text_label.setText("0")
 
         # self.storeroom_b_text_label = QLabel(self)
         self.storeroom_b_text_label.move(self.storeroom_b_point + offset)
+        self.storeroom_b_text_label.setStyleSheet("color: #FFEB22; font: bold 15px")
         self.storeroom_b_text_label.setText("0")
         #
         # self.player_a_hand_text_label = QLabel(self)
