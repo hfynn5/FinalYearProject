@@ -367,6 +367,8 @@ class BoardGraphic(QMainWindow):
                       storeroom_a_value, storeroom_b_value,
                       player_a_hand, player_b_hand):
 
+        self.update_hand_positions()
+
         self.update_labels(house_a_values, house_b_values, storeroom_a_value, storeroom_b_value)
 
         self.player_a_hand = player_a_hand
