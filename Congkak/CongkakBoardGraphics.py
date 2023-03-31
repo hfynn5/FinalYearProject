@@ -433,7 +433,7 @@ class BoardGraphic(QMainWindow):
 
         if 10 < player_b_hand.hole_pos < 18:
             x_coord = self.house_a_points[player_b_hand.hole_pos - 11].x() - round(hand_diameter / 2) - 1
-            y_coord = self.house_a_points[player_b_hand.hole_pos - 11].y() + 10
+            y_coord = self.house_a_points[player_b_hand.hole_pos - 21].y() + 10
         elif 20 < player_b_hand.hole_pos < 28:
             x_coord = self.house_b_points[player_b_hand.hole_pos - 21].x() - round(hand_diameter / 2) - 1
             y_coord = self.house_b_points[player_b_hand.hole_pos - 21].y() + 10
