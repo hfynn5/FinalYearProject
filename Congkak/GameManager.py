@@ -166,7 +166,6 @@ class GameManager:
         app = QApplication(sys.argv)
         self.board_graphic = BoardGraphic()
         self.board_graphic.show()
-
         self.connect_inputs_to_functions()
 
         # start constantly updating graphics
