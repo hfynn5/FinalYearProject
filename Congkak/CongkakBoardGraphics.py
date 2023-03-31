@@ -16,7 +16,6 @@ from PyQt6.QtCore import Qt, QPoint
 import sys
 
 
-# TODO: Better Graphics
 class BoardGraphic(QMainWindow):
 
     def __init__(self):
@@ -146,7 +145,6 @@ class BoardGraphic(QMainWindow):
         self.house_b_points.reverse()
 
     # updates the hand value label
-    # TODO: label text colour
     def update_hand_label(self):
 
         offset = QPoint(20, -30)

@@ -185,6 +185,7 @@ class BoardModel:
 
         pass
 
+    # TODO: Seriously consider removing any sort of concurrency.
     # sows both players once. has waiting
     def sow_once_simultaneous(self, hand_a, hand_b):
 

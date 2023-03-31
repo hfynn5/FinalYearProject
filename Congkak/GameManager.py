@@ -649,7 +649,7 @@ class GameManager:
         self.board_model.running = False
         self.threadpool.clear()
 
-        time.sleep(0.01)
+        time.sleep(0.00001)
 
         self.board_model.running = True
 
