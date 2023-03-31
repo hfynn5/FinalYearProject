@@ -361,14 +361,19 @@ class BoardGraphic(QMainWindow):
 
         button_action = QAction("idk", self)
         view_menu.addAction(button_action)
-        #
+
+        # Game Menu
         game_menu = self.menuBar().addMenu("Game")
 
-        button_action = QAction("Run Multiple Games...", self)
-        game_menu.addAction(button_action)
+        self.run_multiple_games_menu_button_action = QAction("Run Multiple Games...", self)
+        self.run_multiple_games_menu_button_action.setStatusTip("Run Multiple Games")
+        self.run_multiple_games_menu_button_action.triggered.connect(self.multiple_games_dialog_box.exec)
+        game_menu.addAction(self.run_multiple_games_menu_button_action)
 
-        button_action = QAction("Run Round Robin Tournament...", self)
-        game_menu.addAction(button_action)
+        self.run_tournament_menu_button_action = QAction("Run Round Robin Tournament...", self)
+        self.run_tournament_menu_button_action.setStatusTip("Run Round Robin Tournament")
+        self.run_tournament_menu_button_action.triggered.connect(self.tournament_dialog_box.exec)
+        game_menu.addAction(self.run_tournament_menu_button_action)
 
         help_menu = self.menuBar().addMenu("Help")
 
@@ -440,12 +445,37 @@ class BoardGraphic(QMainWindow):
             y_coord = -100
 
         self.player_b_hand_point = QPoint(x_coord, y_coord)
-        # self.player_b_hand_point.x = x_coord
-        # self.player_b_hand_point.y = y_coord
 
-    # end game prompt
-    def end_game_prompt(self):
-        print("game ended.")
+    # prompts end game
+    def end_game_prompt(self, winner, player_a_score, player_b_score):
+        self.game_end_dialog_box.winner_label.setText(str(winner))
+        self.game_end_dialog_box.player_a_score_label.setText(str(player_a_score))
+        self.game_end_dialog_box.player_b_score_label.setText(str(player_b_score))
+        self.game_end_dialog_box.exec()
+        pass
+
+    def multi_end_game_prompt(self, score_list):
+
+        player_a_wins = score_list.count(1)
+        player_b_wins = score_list.count(-1)
+        draws = score_list.count(0)
+        games_played = len(score_list)
+
+        self.multi_game_end_dialog_box.no_games_played_label.setText(str(games_played))
+        self.multi_game_end_dialog_box.player_a_score_label.setText(str(player_a_wins))
+        self.multi_game_end_dialog_box.player_b_score_label.setText(str(player_b_wins))
+        self.multi_game_end_dialog_box.draws_label.setText(str(draws))
+
+        self.multi_game_end_dialog_box.game_score_list_label.setText(str(score_list))
+
+        self.multi_game_end_dialog_box.exec()
+
+    def tournament_end_prompt(self, participants, no_of_games, results):
+
+        self.tournament_end_dialog_box.create_table(participants, results)
+
+        self.tournament_end_dialog_box.exec()
+
         pass
 
     # enable or disable the inputs
