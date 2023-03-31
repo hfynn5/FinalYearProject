@@ -145,56 +145,6 @@ class BoardGraphic(QMainWindow):
             house_x_pos -= house_x_pos_offset
         self.house_b_points.reverse()
 
-    # TODO: double check and remove.
-    # Draws all the circles and hands and shapes
-    def paintEvent(self, QPaintEvent):
-
-        # storeroom_diameter = 45
-        #
-        # house_diameter = 25
-        #
-        # hand_diameter = 50
-        #
-        # painter = QPainter(self)
-        # pen = QtGui.QPen()
-        # pen.setWidth(5)
-        # pen.setColor(QtGui.QColor('white'))
-        # painter.setPen(pen)
-        #
-        # # painter.fillRect(0, 0, 800, 600, QtGui.QBrush((QtGui.QColor(255, 255, 255, 255))))
-        #
-        # pen.setColor(QtGui.QColor('brown'))
-        # painter.setPen(pen)
-        #
-        # # storeroom A
-        # painter.drawEllipse(self.storeroom_a_point, storeroom_diameter, storeroom_diameter)
-        #
-        # # house A
-        # for i, pos in enumerate(self.house_a_points):
-        #     painter.drawEllipse(pos, house_diameter, house_diameter)
-        #
-        # # storeroom B
-        # painter.drawEllipse(self.storeroom_b_point, storeroom_diameter, storeroom_diameter)
-        #
-        # # house B
-        # for i, pos in enumerate(self.house_b_points):
-        #     painter.drawEllipse(pos, house_diameter, house_diameter)
-
-        self.update_hand_positions()
-
-        # # player hand a
-        # pen.setColor(QtGui.QColor('blue'))
-        # painter.setPen(pen)
-        # painter.drawArc(round(self.player_a_hand_point.x()), round(self.player_a_hand_point.y()), hand_diameter,
-        #                 hand_diameter, 0 * 16, 180 * 16)
-        # # player hand b
-        # pen.setColor(QtGui.QColor('red'))
-        # painter.setPen(pen)
-        # painter.drawArc(round(self.player_b_hand_point.x()), round(self.player_b_hand_point.y()), hand_diameter,
-        #                 hand_diameter, 180 * 16, 180 * 16)
-
-        # painter.end()
-
     # updates the hand value label
     # TODO: label text colour
     def update_hand_label(self):
@@ -428,12 +378,10 @@ class BoardGraphic(QMainWindow):
             y_coord = -100
 
         self.player_a_hand_point = QPoint(x_coord, y_coord)
-        # self.player_a_hand_point.x = x_coord
-        # self.player_a_hand_point.y = y_coord
 
         if 10 < player_b_hand.hole_pos < 18:
             x_coord = self.house_a_points[player_b_hand.hole_pos - 11].x() - round(hand_diameter / 2) - 1
-            y_coord = self.house_a_points[player_b_hand.hole_pos - 21].y() + 10
+            y_coord = self.house_a_points[player_b_hand.hole_pos - 11].y() + 10
         elif 20 < player_b_hand.hole_pos < 28:
             x_coord = self.house_b_points[player_b_hand.hole_pos - 21].x() - round(hand_diameter / 2) - 1
             y_coord = self.house_b_points[player_b_hand.hole_pos - 21].y() + 10
