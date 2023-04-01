@@ -244,31 +244,23 @@ class GameManager:
 
         if hand_a is None:
             hand_a = Hand(player='a', hole_pos=hole_a, counter_count=0)
+
         if hand_b is None:
             hand_b = Hand(player='b', hole_pos=hole_b, counter_count=0)
+
+        hand_a.current_state = Hand.PICKUP_STATE
+        hand_b.current_state = Hand.PICKUP_STATE
 
         worker_simul = Worker(self.simul_sow, hand_a=hand_a, hand_b=hand_b)
         worker_simul.signals.finished.connect(self.next_action)
         self.threadpool.start(worker_simul)
-
-    # makes worker to start tikam
-    def start_worker_tikam(self, hand):
-        worker_tikam = Worker(self.tikam, hand=hand)
-        worker_tikam.signals.finished.connect(self.next_action)
-        self.threadpool.start(worker_tikam)
-
-    # makes worker to start tikam both hands
-    def start_worker_simul_tikam(self):
-        worker_tikam = Worker(self.simul_tikam)
-        worker_tikam.signals.finished.connect(self.next_action)
-        self.threadpool.start(worker_tikam)
 
     # iterate sowing in board model
     def sow(self, new_hand):
         self.board_graphic.set_enable_player_inputs(new_hand.player, False)
         self.update_sowing_speed(self.board_graphic.move_speed_slider.value())
 
-        self.board_model.iterate_sowing(new_hand)
+        self.board_model.iterate_progress_player(hand=new_hand)
 
     # iterate simul sowing in board model
     def simul_sow(self, hand_a, hand_b):
@@ -276,19 +268,7 @@ class GameManager:
         self.board_graphic.set_enable_player_inputs('b', False)
         self.update_sowing_speed(self.board_graphic.move_speed_slider.value())
 
-        self.board_model.iterated_sowing_simultaneous(hand_a, hand_b)
-
-    # perform tikam for a hand in board
-    def tikam(self, hand):
-        self.update_sowing_speed(self.board_graphic.move_speed_slider.value())
-
-        self.board_model.tikam(hand=hand)
-
-    # perform tikam for both hands in board
-    def simul_tikam(self):
-        self.update_sowing_speed(self.board_graphic.move_speed_slider.value())
-
-        self.board_model.simul_tikam()
+        self.board_model.iterate_progress_both_players(hand_a=hand_a, hand_b=hand_b)
 
     # performs the next action based on given or the board model
     def next_action(self, action=None):
@@ -296,21 +276,7 @@ class GameManager:
         update_board_graphics(board_graphic=self.board_graphic, board_model=self.board_model)
 
         if action is None:
-            action = self.board_model.action_to_take()
-
-        if self.board_model.game_phase == BoardModel.SEQUENTIAL_PHASE and len(self.board_model.active_players) <= 0:
-            self.kill_all_workers()
-
-        if self.board_model.player_a_status == BoardModel.TIKAM_A and \
-                self.board_model.player_b_status == BoardModel.TIKAM_B:
-            self.start_worker_simul_tikam()
-            return
-
-        elif self.board_model.player_a_status == BoardModel.TIKAM_A and not self.board_model.player_a_hand.is_tikaming:
-            self.start_worker_tikam(hand=self.board_model.player_a_hand)
-
-        elif self.board_model.player_b_status == BoardModel.TIKAM_B and not self.board_model.player_b_hand.is_tikaming:
-            self.start_worker_tikam(hand=self.board_model.player_b_hand)
+            action = self.board_model.get_next_action()
 
         match action:
             case BoardModel.PROMPT_SOWING_A:
@@ -335,12 +301,6 @@ class GameManager:
                     else:
                         self.start_worker_simultaneous_sowing()
 
-            case BoardModel.CONTINUE_SOWING_A:
-                self.start_worker_sowing(new_hand=self.board_model.player_a_hand)
-                pass
-            case BoardModel.CONTINUE_SOWING_B:
-                self.start_worker_sowing(new_hand=self.board_model.player_b_hand)
-                pass
             case BoardModel.GAME_END:
                 print("Game over")
                 self.end_game()
@@ -534,9 +494,11 @@ class GameManager:
 
     # updates board graphics constantly
     def update_board_graphics_constantly(self):
-        while self.board_graphic.active:
-            update_board_graphics(board_graphic=self.board_graphic, board_model=self.board_model)
-        self.close_program()
+        pass
+        # while self.board_graphic.active:
+        #     # time.sleep(0.05)
+        #     update_board_graphics(board_graphic=self.board_graphic, board_model=self.board_model)
+        # self.close_program()
 
     # updates the sowing speed
     def update_sowing_speed(self, move_per_second):
