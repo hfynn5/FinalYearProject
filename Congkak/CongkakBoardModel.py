@@ -329,7 +329,6 @@ class BoardModel:
                 pass
             case Hand.PICKUP_STATE:
                 hand = self.pick_up_all_counters(hand)
-                # hand.move_one_pos()
                 pass
             case Hand.PROMPTING_STATE:
                 pass
@@ -406,9 +405,9 @@ class BoardModel:
         elif pos == 20:
             value = self.storeroom_b_value
         elif 10 < pos < 18:
-            value = self.house_a_values[pos - 17]
+            value = self.house_a_values[pos - 11]
         elif 20 < pos < 28:
-            value = self.house_b_values[pos - 27]
+            value = self.house_b_values[pos - 21]
         else:
             print("invalid pos: " + str(pos))
 
@@ -420,9 +419,9 @@ class BoardModel:
         elif pos == 20:
             self.storeroom_b_value += 1
         elif 10 < pos < 18:
-            self.house_a_values[pos - 17] += 1
+            self.house_a_values[pos - 11] += 1
         elif 20 < pos < 28:
-            self.house_b_values[pos - 27] += 1
+            self.house_b_values[pos - 21] += 1
         else:
             print("invalid pos: " + str(pos))
 
@@ -433,9 +432,9 @@ class BoardModel:
         elif pos == 20:
             self.storeroom_b_value = value
         elif 10 < pos < 18:
-            self.house_a_values[pos - 17] = value
+            self.house_a_values[pos - 11] = value
         elif 20 < pos < 28:
-            self.house_b_values[pos - 27] = value
+            self.house_b_values[pos - 21] = value
         else:
             print("invalid pos: " + str(pos))
 
