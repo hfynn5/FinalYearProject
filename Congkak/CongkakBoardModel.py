@@ -234,7 +234,7 @@ class BoardModel:
 
         self.update_player_hands_from_current_hand(hand)
 
-        while not hand.current_state == Hand.IDLE_STATE or not hand.current_state == Hand.PROMPTING_STATE:
+        while not hand.current_state == Hand.IDLE_STATE and not hand.current_state == Hand.PROMPTING_STATE:
             self.wait_micromove()
             hand = self.progress_hand(hand)
             self.update_player_hands_from_current_hand(hand)
@@ -244,6 +244,7 @@ class BoardModel:
             self.last_active_player = hand.player
         elif hand.current_state == Hand.PROMPTING_STATE:
             self.last_active_player = hand.opponent()
+            self.reset_hand(hand.player)
 
         action = self.get_next_action()
 
@@ -262,39 +263,53 @@ class BoardModel:
         if self.player_b_hand.player not in self.active_players:
             self.active_players.append(self.player_b_hand.player)
 
-        while not self.player_a_hand.current_state == Hand.IDLE_STATE or \
-                not self.player_a_hand.current_state == Hand.PROMPTING_STATE or \
-                not self.player_b_hand.current_state == Hand.IDLE_STATE or \
+        while not self.player_a_hand.current_state == Hand.IDLE_STATE and \
+                not self.player_a_hand.current_state == Hand.PROMPTING_STATE and \
+                not self.player_b_hand.current_state == Hand.IDLE_STATE and \
                 not self.player_b_hand.current_state == Hand.PROMPTING_STATE:
             self.wait_micromove()
             self.player_a_hand = self.progress_hand(self.player_a_hand)
             self.player_b_hand = self.progress_hand(self.player_b_hand)
+            # self.print_all_data()
+
             pass
 
-        if self.player_a_hand.current_state == Hand.IDLE_STATE and self.player_b_hand.current_stat == Hand.IDLE_STATE:
+        print("wahoo")
+
+        if self.player_a_hand.current_state == Hand.IDLE_STATE and self.player_b_hand.current_state == Hand.IDLE_STATE:
             self.active_players.remove(self.player_a_hand.player)
             self.active_players.remove(self.player_b_hand.player)
             self.last_active_player = ''
-        elif self.player_a_hand.current_stat == Hand.PROMPTING_STATE and \
-                self.player_b_hand.current_stat == Hand.PROMPTING_STATE:
+            self.reset_hand('a')
+            self.reset_hand('b')
+        elif self.player_a_hand.current_state == Hand.PROMPTING_STATE and \
+                self.player_b_hand.current_state == Hand.PROMPTING_STATE:
             self.last_active_player = ''
+            self.reset_hand('a')
+            self.reset_hand('b')
 
-        elif self.player_a_hand.current_stat == Hand.IDLE_STATE and \
-                self.player_b_hand.current_stat == Hand.PROMPTING_STATE:
+        elif self.player_a_hand.current_state == Hand.IDLE_STATE and \
+                self.player_b_hand.current_state == Hand.PROMPTING_STATE:
             self.active_players.remove(self.player_a_hand.player)
             self.last_active_player = 'a'
-        elif self.player_b_hand.current_stat == Hand.IDLE_STATE and \
-                self.player_a_hand.current_stat == Hand.PROMPTING_STATE:
+            self.reset_hand('a')
+            self.reset_hand('b')
+        elif self.player_b_hand.current_state == Hand.IDLE_STATE and \
+                self.player_a_hand.current_state == Hand.PROMPTING_STATE:
             self.active_players.remove(self.player_b_hand.player)
             self.last_active_player = 'b'
+            self.reset_hand('a')
+            self.reset_hand('b')
 
-        elif self.player_a_hand.current_stat == Hand.IDLE_STATE:
+        elif self.player_a_hand.current_state == Hand.IDLE_STATE:
             self.active_players.remove(self.player_a_hand.player)
             self.last_active_player = 'a'
+            self.reset_hand('a')
             self.iterate_progress_player(hand=self.player_b_hand)
-        elif self.player_b_hand.current_stat == Hand.IDLE_STATE:
+        elif self.player_b_hand.current_state == Hand.IDLE_STATE:
             self.active_players.remove(self.player_b_hand.player)
             self.last_active_player = 'b'
+            self.reset_hand('b')
             self.iterate_progress_player(hand=self.player_a_hand)
 
         action = self.get_next_action()
@@ -304,6 +319,8 @@ class BoardModel:
     # progress the hand one micromove
     def progress_hand(self, hand):
 
+        # hand.print_data()
+
         match hand.current_state:
             case Hand.IDLE_STATE:
                 pass
@@ -312,6 +329,7 @@ class BoardModel:
                 pass
             case Hand.PICKUP_STATE:
                 hand = self.pick_up_all_counters(hand)
+                # hand.move_one_pos()
                 pass
             case Hand.PROMPTING_STATE:
                 pass
@@ -331,51 +349,28 @@ class BoardModel:
 
     # picks up all counters at the hand position
     def pick_up_all_counters(self, hand):
-        if 10 <= hand.hole_pos < 18:
-            hand.counter_count = self.house_a_values[hand.hole_pos - 11]
-            self.house_a_values[hand.hole_pos - 11] = 0
-        elif 20 <= hand.hole_pos < 28:
-            hand.counter_count = self.house_b_values[hand.hole_pos - 21]
-            self.house_b_values[hand.hole_pos - 21] = 0
-        else:
+
+        if hand.hole_pos == 10 or hand.hole_pos == 20:
             print(hand.hole_pos)
             print("player " + hand.player + " at storeroom. cant pick up")
+        else:
+            hand.counter_count += self.get_value_at_position(hand.hole_pos)
+            self.set_value_at_position(hand.hole_pos, 0)
+
         return hand
 
     # drops a counter at the hand position
     def hand_drop_one_counter(self, hand):
-        if hand.hole_pos == 10:
-            if hand.player == 'a':
-                self.storeroom_a_value += hand.remove_one_counter()
-                hand.has_looped = True
-            hand.hole_pos = 28
-        elif hand.hole_pos == 20:
-            if hand.player == 'b':
-                self.storeroom_b_value += hand.remove_one_counter()
-                hand.has_looped = True
-            hand.hole_pos = 18
-        elif hand.hole_pos < 20:
-            self.house_a_values[hand.hole_pos - 11] += hand.remove_one_counter()
-        elif hand.hole_pos > 20:
-            self.house_b_values[hand.hole_pos - 21] += hand.remove_one_counter()
+
+        self.increment_value_at_position(hand.hole_pos)
+
         return hand
 
     # drops all counters at the hand position
     def hand_drop_all_counters(self, hand):
-        if hand.hole_pos == 10:
-            if hand.player == 'a':
-                self.storeroom_a_value += hand.remove_all_counters()
-                hand.has_looped = True
-            hand.hole_pos = 28
-        elif hand.hole_pos == 20:
-            if hand.player == 'b':
-                self.storeroom_b_value += hand.remove_all_counters()
-                hand.has_looped = True
-            hand.hole_pos = 18
-        elif hand.hole_pos < 20:
-            self.house_a_values[hand.hole_pos - 11] += hand.remove_all_counters()
-        elif hand.hole_pos > 20:
-            self.house_b_values[hand.hole_pos - 21] += hand.remove_all_counters()
+
+        self.set_value_at_position(hand.hole_pos, hand.remove_all_counters())
+
         return hand
 
     def sow_once(self, hand):
@@ -404,18 +399,45 @@ class BoardModel:
     def get_value_at_position(self, pos):
         value = -1
 
-        if pos == 18:
-            value = self.storeroom_b_value
-        elif pos == 28:
+        print(pos)
+
+        if pos == 10:
             value = self.storeroom_a_value
+        elif pos == 20:
+            value = self.storeroom_b_value
         elif 10 < pos < 18:
             value = self.house_a_values[pos - 17]
         elif 20 < pos < 28:
-            value = self.house_a_values[pos - 27]
+            value = self.house_b_values[pos - 27]
         else:
             print("invalid pos: " + str(pos))
 
         return value
+
+    def increment_value_at_position(self, pos):
+        if pos == 10:
+            self.storeroom_a_value += 1
+        elif pos == 20:
+            self.storeroom_b_value += 1
+        elif 10 < pos < 18:
+            self.house_a_values[pos - 17] += 1
+        elif 20 < pos < 28:
+            self.house_b_values[pos - 27] += 1
+        else:
+            print("invalid pos: " + str(pos))
+
+    # sets the number of counters at a position
+    def set_value_at_position(self, pos, value):
+        if pos == 10:
+            self.storeroom_a_value = value
+        elif pos == 20:
+            self.storeroom_b_value = value
+        elif 10 < pos < 18:
+            self.house_a_values[pos - 17] = value
+        elif 20 < pos < 28:
+            self.house_b_values[pos - 27] = value
+        else:
+            print("invalid pos: " + str(pos))
 
     # updates the hand status based on all the data available
     def update_hand_status(self, hand):
@@ -867,7 +889,7 @@ class BoardModel:
             return self.player_b_hand
         return None
 
-    # update player hand pos (10-28)
+    # update player hand pos (10-27)
     def update_player_hand_pos(self, player, pos):
         if player == 'a':
             self.player_a_hand.hole_pos = pos

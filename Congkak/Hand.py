@@ -12,8 +12,8 @@ class Hand:
     def __init__(self, player, hole_pos, counter_count):
         self.player = player
         self.hole_pos = hole_pos
-        # 18 = storeroom B
-        # 28 = storeroom A
+        # 20 = storeroom B
+        # 10 = storeroom A
         self.counter_count = counter_count
         self.is_tikaming = False
 
@@ -33,9 +33,9 @@ class Hand:
     def move_one_pos(self):
         self.hole_pos -= 1
 
-        if self.hole_pos == 10 and self.player == 'b':
+        if (self.hole_pos == 10 and self.player == 'b') or self.hole_pos == 9:
             self.hole_pos = 27
-        elif self.hole_pos == 20 and self.player == 'a':
+        elif (self.hole_pos == 20 and self.player == 'a') or self.hole_pos == 19:
             self.hole_pos = 17
 
     def move_to_opposite_hole(self):
@@ -51,9 +51,9 @@ class Hand:
 
     def move_to_storeroom(self):
         if self.player == 'a':
-            self.hole_pos = 28
+            self.hole_pos = 10
         elif self.player == 'b':
-            self.hole_pos = 28
+            self.hole_pos = 20
 
     def move_n_pos(self, n):
         for x in n:
@@ -85,4 +85,8 @@ class Hand:
 
 
     def print_data(self):
-        print("hand: player: " + self.player + " counter count: " + str(self.counter_count) + " pos: " + str(self.hole_pos))
+        print("hand: player: " + self.player +
+              " counter count: " + str(self.counter_count) +
+              " pos: " + str(self.hole_pos) +
+              " state: " + str(self.current_state)
+              )
