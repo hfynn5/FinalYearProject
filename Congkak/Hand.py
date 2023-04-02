@@ -15,7 +15,6 @@ class Hand:
         # 20 = storeroom B
         # 10 = storeroom A
         self.counter_count = counter_count
-        self.is_tikaming = False
 
         self.current_state = self.IDLE_STATE
 
@@ -34,8 +33,10 @@ class Hand:
         self.hole_pos -= 1
 
         if (self.hole_pos == 10 and self.player == 'b') or self.hole_pos == 9:
+            self.has_looped = True
             self.hole_pos = 27
         elif (self.hole_pos == 20 and self.player == 'a') or self.hole_pos == 19:
+            self.has_looped = True
             self.hole_pos = 17
 
     def move_to_opposite_hole(self):
@@ -82,6 +83,12 @@ class Hand:
             return 'a'
         else:
             return ''
+
+    def reset_hand(self):
+        self.current_state = self.IDLE_STATE
+        self.hole_pos = -1
+        self.counter_count = 0
+        self.has_looped = False
 
 
     def print_data(self):
