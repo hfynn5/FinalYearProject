@@ -91,12 +91,21 @@ class WorkerSignals(QObject):
 
 # updates board graphic
 def update_board_graphics(board_graphic: BoardGraphic, board_model: BoardModel):
-    board_graphic.update_values(house_a_values=board_model.house_a_values,
-                                house_b_values=board_model.house_b_values,
-                                storeroom_a_value=board_model.storeroom_a_value,
-                                storeroom_b_value=board_model.storeroom_b_value,
-                                player_a_hand=board_model.player_a_hand,
-                                player_b_hand=board_model.player_b_hand)
+
+    copied_board_model = copy.deepcopy(board_model)
+
+    board_graphic.update_values(house_a_values=copied_board_model.house_a_values,
+                                house_b_values=copied_board_model.house_b_values,
+                                storeroom_a_value=copied_board_model.storeroom_a_value,
+                                storeroom_b_value=copied_board_model.storeroom_b_value,
+                                player_a_hand=copied_board_model.player_a_hand,
+                                player_b_hand=copied_board_model.player_b_hand)
+
+
+def error_handler(etype, value, tb):
+    error_msg = ''.join(traceback.format_exception(etype, value, tb))
+    # do something with the error message, for example print it
+    print(error_msg)
 
 
 class GameManager:
@@ -118,6 +127,8 @@ class GameManager:
     LOADING_MODE = 3
 
     def __init__(self):
+
+        sys.excepthook = error_handler
 
         self.player_a_hand_pos = -1
         self.player_b_hand_pos = -1
@@ -225,6 +236,8 @@ class GameManager:
         if new_hand is None:
             new_hand = Hand(player=player, hole_pos=hole, counter_count=0)
 
+        new_hand.current_state = Hand.PICKUP_STATE
+
         worker = Worker(self.sow, new_hand=new_hand)
         worker.signals.finished.connect(self.next_action)
         self.threadpool.start(worker)
@@ -277,6 +290,8 @@ class GameManager:
 
         if action is None:
             action = self.board_model.get_next_action()
+
+        print(action)
 
         match action:
             case BoardModel.PROMPT_SOWING_A:
@@ -495,10 +510,10 @@ class GameManager:
     # updates board graphics constantly
     def update_board_graphics_constantly(self):
         pass
-        # while self.board_graphic.active:
-        #     # time.sleep(0.05)
-        #     update_board_graphics(board_graphic=self.board_graphic, board_model=self.board_model)
-        # self.close_program()
+        while self.board_graphic.active:
+            time.sleep(0.05)
+            update_board_graphics(board_graphic=self.board_graphic, board_model=self.board_model)
+        self.close_program()
 
     # updates the sowing speed
     def update_sowing_speed(self, move_per_second):

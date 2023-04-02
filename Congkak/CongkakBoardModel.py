@@ -361,6 +361,7 @@ class BoardModel:
     # drops a counter at the hand position
     def hand_drop_one_counter(self, hand):
 
+        hand.remove_one_counter()
         self.increment_value_at_position(hand.hole_pos)
 
         return hand
@@ -397,8 +398,6 @@ class BoardModel:
     # gets the number of counters at a position
     def get_value_at_position(self, pos):
         value = -1
-
-        print(pos)
 
         if pos == 10:
             value = self.storeroom_a_value
