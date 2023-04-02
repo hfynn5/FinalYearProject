@@ -91,12 +91,15 @@ class WorkerSignals(QObject):
 
 # updates board graphic
 def update_board_graphics(board_graphic: BoardGraphic, board_model: BoardModel):
-    board_graphic.update_values(house_a_values=board_model.house_a_values,
-                                house_b_values=board_model.house_b_values,
-                                storeroom_a_value=board_model.storeroom_a_value,
-                                storeroom_b_value=board_model.storeroom_b_value,
-                                player_a_hand=board_model.player_a_hand,
-                                player_b_hand=board_model.player_b_hand)
+
+    copied_board_model = copy.deepcopy(board_model)
+
+    board_graphic.update_values(house_a_values=copied_board_model.house_a_values,
+                                house_b_values=copied_board_model.house_b_values,
+                                storeroom_a_value=copied_board_model.storeroom_a_value,
+                                storeroom_b_value=copied_board_model.storeroom_b_value,
+                                player_a_hand=copied_board_model.player_a_hand,
+                                player_b_hand=copied_board_model.player_b_hand)
 
 
 class GameManager:
