@@ -364,11 +364,13 @@ class BoardGraphic(QMainWindow):
 
         if 10 < player_a_hand.hole_pos < 18:
             x_coord = round(self.house_a_points[player_a_hand.hole_pos - 11].x() - round(hand_diameter / 2) - 1)
+            if not 10 < player_a_hand.hole_pos < 18:
+                print("the weirdest fucking anomaly")
             y_coord = round(self.house_a_points[player_a_hand.hole_pos - 11].y() - hand_diameter - 10)
         elif 20 < player_a_hand.hole_pos < 28:
             x_coord = round(self.house_b_points[player_a_hand.hole_pos - 21].x() - round(hand_diameter / 2) - 1)
             y_coord = round(self.house_b_points[player_a_hand.hole_pos - 21].y() - hand_diameter - 10)
-        elif player_a_hand.hole_pos == 28:
+        elif player_a_hand.hole_pos == 10:
             x_coord = self.storeroom_a_point.x() - round(hand_diameter / 2) - 1
             y_coord = self.storeroom_a_point.y() - 80
         else:
@@ -383,7 +385,7 @@ class BoardGraphic(QMainWindow):
         elif 20 < player_b_hand.hole_pos < 28:
             x_coord = self.house_b_points[player_b_hand.hole_pos - 21].x() - round(hand_diameter / 2) - 1
             y_coord = self.house_b_points[player_b_hand.hole_pos - 21].y() + 10
-        elif player_b_hand.hole_pos == 18:
+        elif player_b_hand.hole_pos == 20:
             x_coord = self.storeroom_b_point.x() - round(hand_diameter / 2) - 1
             y_coord = self.storeroom_b_point.y() + 40
         else:
