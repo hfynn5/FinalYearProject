@@ -92,14 +92,14 @@ class WorkerSignals(QObject):
 # updates board graphic
 def update_board_graphics(board_graphic: BoardGraphic, board_model: BoardModel):
 
-    copied_board_model = copy.deepcopy(board_model)
+    # copied_board_model = copy.deepcopy(board_model)
 
-    board_graphic.update_values(house_a_values=copied_board_model.house_a_values,
-                                house_b_values=copied_board_model.house_b_values,
-                                storeroom_a_value=copied_board_model.storeroom_a_value,
-                                storeroom_b_value=copied_board_model.storeroom_b_value,
-                                player_a_hand=copied_board_model.player_a_hand,
-                                player_b_hand=copied_board_model.player_b_hand)
+    board_graphic.update_values(house_a_values=board_model.house_a_values,
+                                house_b_values=board_model.house_b_values,
+                                storeroom_a_value=board_model.storeroom_a_value,
+                                storeroom_b_value=board_model.storeroom_b_value,
+                                player_a_hand=board_model.player_a_hand,
+                                player_b_hand=board_model.player_b_hand)
 
 
 def error_handler(etype, value, tb):
@@ -171,7 +171,7 @@ class GameManager:
 
         # declare board model
         self.board_model = BoardModel()
-        self.board_model.ping = False
+        self.board_model.ping = True
 
         # declare graphics
         app = QApplication(sys.argv)
@@ -286,7 +286,7 @@ class GameManager:
     # performs the next action based on given or the board model
     def next_action(self, action=None):
 
-        update_board_graphics(board_graphic=self.board_graphic, board_model=self.board_model)
+        # update_board_graphics(board_graphic=self.board_graphic, board_model=self.board_model)
 
         if action is None:
             action = self.board_model.get_next_action()
@@ -512,7 +512,8 @@ class GameManager:
         pass
         while self.board_graphic.active:
             time.sleep(0.05)
-            update_board_graphics(board_graphic=self.board_graphic, board_model=self.board_model)
+            copied_board_model = copy.deepcopy(self.board_model)
+            update_board_graphics(board_graphic=self.board_graphic, board_model=copied_board_model)
         self.close_program()
 
     # updates the sowing speed
