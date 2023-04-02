@@ -68,9 +68,9 @@ class Hand:
             return False
 
     def is_on_storeroom(self):
-        if self.hole_pos == 18 and self.player == 'a':
+        if self.hole_pos == 10 and self.player == 'a':
             return True
-        elif self.hole_pos == 28 and self.player == 'b':
+        elif self.hole_pos == 20 and self.player == 'b':
             return True
         else:
             return False
