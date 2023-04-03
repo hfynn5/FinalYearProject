@@ -46,10 +46,8 @@ class MinimaxAgent:
         board_model.game_phase = BoardModel.SEQUENTIAL_PHASE
         board_model.ping = False
 
-        board_model.reset_hand('a')
-        board_model.reset_hand('b')
-        board_model.player_a_status = BoardModel.STOP_SOWING_A
-        board_model.player_b_status = BoardModel.STOP_SOWING_B
+        self.board_model.player_a_hand.reset_hand()
+        self.board_model.player_b_hand.reset_hand()
 
         final_best_value = 0
         if player == 'a':
@@ -106,7 +104,10 @@ class MinimaxAgent:
             hole = move + 20
 
         new_hand = Hand(player=player, hole_pos=hole, counter_count=0)
-        board_model.iterate_sowing(new_hand)
+        new_hand.current_state = Hand.PICKUP_STATE
+
+        board_model.iterate_progress_player(hand=new_hand)
+
         available_moves = board_model.available_moves(player)
 
         if depth == 0 or len(available_moves) == 0:
@@ -116,7 +117,7 @@ class MinimaxAgent:
         if player == 'a':
             max_eva = -math.inf
 
-            match board_model.action_to_take():
+            match board_model.get_next_action():
 
                 case BoardModel.PROMPT_SOWING_BOTH: # similar to prompt sowing a
                     available_moves = board_model.available_moves('a')
@@ -174,7 +175,7 @@ class MinimaxAgent:
 
             min_eva = math.inf
 
-            match board_model.action_to_take():
+            match board_model.get_next_action():
 
                 case BoardModel.PROMPT_SOWING_BOTH:  # similar to prompt sowing b
                     available_moves = board_model.available_moves('b')
