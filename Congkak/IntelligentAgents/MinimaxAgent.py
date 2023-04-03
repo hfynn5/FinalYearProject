@@ -83,7 +83,6 @@ class MinimaxAgent:
 
         return final_best_move
 
-    # TODO: add a check if error. or smth to workaround.
     def minimax(self, board_model, move, depth, self_depth, player, alpha, beta):
 
         self.node_count += 1
@@ -124,10 +123,10 @@ class MinimaxAgent:
                     for move in available_moves:
                         new_board = copy.deepcopy(board_model)
 
-                        if not self.checked_opponent:
-                            depth += 1
+                        # if not self.checked_opponent:
+                        #     depth += 1
 
-                        eva, board = self.minimax(new_board, move, depth - 1, self_depth - 1, 'a', alpha, beta)
+                        eva, board = self.minimax(new_board, move, depth - 1, self_depth, 'a', alpha, beta)
                         if eva > max_eva:
                             max_eva = eva
                             optimal_board = board
@@ -141,10 +140,10 @@ class MinimaxAgent:
                     for move in available_moves:
                         new_board = copy.deepcopy(board_model)
 
-                        if not self.checked_opponent:
-                            depth += 1
+                        # if not self.checked_opponent:
+                        #     depth += 1
 
-                        eva, board = self.minimax(new_board, move, depth - 1, self_depth - 1, 'a', alpha, beta)
+                        eva, board = self.minimax(new_board, move, depth - 1, self_depth, 'a', alpha, beta)
                         if eva > max_eva:
                             max_eva = eva
                             optimal_board = board
@@ -182,10 +181,10 @@ class MinimaxAgent:
                     for move in available_moves:
                         new_board = copy.deepcopy(board_model)
 
-                        if not self.checked_opponent:
-                            depth += 1
+                        # if not self.checked_opponent:
+                        #     depth += 1
 
-                        eva, board = self.minimax(new_board, move, depth - 1, self_depth - 1, 'b', alpha, beta)
+                        eva, board = self.minimax(new_board, move, depth - 1, self_depth, 'b', alpha, beta)
                         if eva < min_eva:
                             min_eva = eva
                             optimal_board = board
@@ -215,10 +214,10 @@ class MinimaxAgent:
                     for move in available_moves:
                         new_board = copy.deepcopy(board_model)
 
-                        if not self.checked_opponent:
-                            depth += 1
+                        # if not self.checked_opponent:
+                        #     depth += 1
 
-                        eva, board = self.minimax(new_board, move, depth - 1, self_depth - 1, 'b', alpha, beta)
+                        eva, board = self.minimax(new_board, move, depth - 1, self_depth, 'b', alpha, beta)
                         if eva < min_eva:
                             min_eva = eva
                             optimal_board = board
