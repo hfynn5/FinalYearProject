@@ -424,6 +424,8 @@ class BoardModel:
         self.game_phase = self.SIMULTANEOUS_PHASE
 
         self.moves_made = []
+        self.pause = False
+        self.waiting = True
 
         self.running = True
 

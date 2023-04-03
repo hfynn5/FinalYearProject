@@ -270,22 +270,22 @@ class BoardGraphic(QMainWindow):
     # creates the menus
     def create_menus(self):
 
-        # save games?
+        # File Menu
         file_menu = self.menuBar().addMenu("File")
 
-        self.new_game_button_action = QAction("New Game", self)
-        self.new_game_button_action.setStatusTip("Create a new game from the start")
-        file_menu.addAction(self.new_game_button_action)
+        self.new_game_menu_button_action = QAction("New Game", self)
+        self.new_game_menu_button_action.setStatusTip("Create a new game from the start")
+        file_menu.addAction(self.new_game_menu_button_action)
 
-        self.save_game_button_action = QAction("Save Game", self)
-        self.save_game_button_action.setStatusTip("Save the game to a text file")
-        file_menu.addAction(self.save_game_button_action)
+        self.save_game_menu_button_action = QAction("Save Game", self)
+        self.save_game_menu_button_action.setStatusTip("Save the game to a text file")
+        file_menu.addAction(self.save_game_menu_button_action)
 
-        self.load_game_button_action = QAction("Load Game", self)
-        self.load_game_button_action.setStatusTip("Load a game from a text file")
-        file_menu.addAction(self.load_game_button_action)
+        self.load_game_menu_button_action = QAction("Load Game", self)
+        self.load_game_menu_button_action.setStatusTip("Load a game from a text file")
+        file_menu.addAction(self.load_game_menu_button_action)
 
-        # edit games?
+        # Edit Menu
         edit_menu = self.menuBar().addMenu("Edit")
 
         submenu = edit_menu.addMenu("Edit Player")
@@ -304,7 +304,7 @@ class BoardGraphic(QMainWindow):
 
         train_menu = self.menuBar().addMenu("Training")
 
-        # views
+        # View Menu
         view_menu = self.menuBar().addMenu("View")
 
         button_action = QAction("idk", self)

@@ -585,7 +585,6 @@ class GameManager:
 
         pass
 
-    # consider moving it all in end game function.
     # runs the next round of the round robin
     def next_round(self):
 
