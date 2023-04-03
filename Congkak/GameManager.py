@@ -621,6 +621,20 @@ class GameManager:
 
         if autorun:
             self.next_action(BoardModel.PROMPT_SOWING_BOTH)
+        else:
+            if self.player_a_agent == self.AGENT_USER:
+                available_moves = self.board_model.available_moves('a')
+                if self.player_a_agent == self.AGENT_USER:
+                    self.board_graphic.set_enable_player_specific_inputs(player='a',
+                                                                         enable_list=available_moves)
+
+            if self.player_b_agent == self.AGENT_USER:
+                available_moves = self.board_model.available_moves('b')
+                if self.player_b_agent == self.AGENT_USER:
+                    self.board_graphic.set_enable_player_specific_inputs(player='b',
+                                                                         enable_list=available_moves)
+
+
 
     def kill_all_workers(self):
         self.board_model.running = False
