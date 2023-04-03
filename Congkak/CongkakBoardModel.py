@@ -364,17 +364,17 @@ class BoardModel:
         elif self.player_a_hand.current_state == Hand.IDLE_STATE and \
              self.player_b_hand.current_state == Hand.IDLE_STATE:
 
-            self.game_phase = self.SEQUENTIAL_PHASE
-
             if self.last_active_player == '':
                 action = self.PROMPT_SOWING_BOTH
                 if self.ping: print("prompting both")
-            elif self.last_active_player == 'a':
-                action = self.PROMPT_SOWING_B
-                if self.ping: print("prompting b")
-            elif self.last_active_player == 'b':
-                action = self.PROMPT_SOWING_A
-                if self.ping: print("prompting a")
+            else:
+                self.game_phase = self.SEQUENTIAL_PHASE
+                if self.last_active_player == 'a':
+                    action = self.PROMPT_SOWING_B
+                    if self.ping: print("prompting b")
+                elif self.last_active_player == 'b':
+                    action = self.PROMPT_SOWING_A
+                    if self.ping: print("prompting a")
 
         elif self.player_a_hand.current_state == Hand.PROMPTING_STATE and \
                 self.player_b_hand.current_state == Hand.PROMPTING_STATE:
@@ -386,6 +386,9 @@ class BoardModel:
         elif self.player_b_hand.current_state == Hand.PROMPTING_STATE:
             action = self.PROMPT_SOWING_B
             if self.ping: print("prompting b")
+        else:
+            print("error has occured.")
+            self.print_all_data()
 
         return action
 
@@ -429,6 +432,7 @@ class BoardModel:
 
         self.running = True
 
+    # TODO: fix so that it works with new system
     # append a move to the list
     def append_move(self, player_a_move, player_b_move):
         if not (type(player_a_move) == int) or 1 <= player_a_move <= 7:
