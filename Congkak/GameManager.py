@@ -148,6 +148,8 @@ class GameManager:
         self.show_starting_hands = True
         self.autoplay_hands = False
 
+        self.graphic_refresh_rate = 0.01
+
         self.current_mode = self.NORMAL_MODE
 
         # for loading
@@ -511,8 +513,10 @@ class GameManager:
     def update_board_graphics_constantly(self):
         pass
         while self.board_graphic.active:
-            time.sleep(0.05)
+            time.sleep(self.graphic_refresh_rate)
+            self.board_model.pause = True
             copied_board_model = copy.deepcopy(self.board_model)
+            self.board_model.pause = False
             update_board_graphics(board_graphic=self.board_graphic, board_model=copied_board_model)
         self.close_program()
 

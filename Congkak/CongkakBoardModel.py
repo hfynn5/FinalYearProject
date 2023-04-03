@@ -48,6 +48,8 @@ class BoardModel:
         self.game_phase = self.SIMULTANEOUS_PHASE
 
         self.sowing_speed = 0
+        self.pause = False
+
 
         self.ping = False
         self.debug = False
@@ -85,7 +87,11 @@ class BoardModel:
         elif hand.current_state == Hand.PROMPTING_STATE:
             self.last_active_player = hand.opponent()
 
-        self.reset_hand(hand.player)
+        print()
+
+        hand.reset_hand()
+
+        hand.reset_hand()
 
         self.update_player_hands_from_current_hand(hand)
 
@@ -111,64 +117,60 @@ class BoardModel:
             self.wait_micromove()
             self.player_a_hand = self.progress_hand(self.player_a_hand)
             self.player_b_hand = self.progress_hand(self.player_b_hand)
-            # self.print_all_data()
 
             pass
+
+        self.player_a_hand.print_data()
+        self.player_b_hand.print_data()
 
         if self.player_a_hand.current_state == Hand.IDLE_STATE and self.player_b_hand.current_state == Hand.IDLE_STATE:
             self.active_players.remove(self.player_a_hand.player)
             self.active_players.remove(self.player_b_hand.player)
             self.last_active_player = ''
-            self.reset_hand('a')
-            self.reset_hand('b')
+            self.player_a_hand.reset_hand()
+            self.player_b_hand.reset_hand()
         elif self.player_a_hand.current_state == Hand.PROMPTING_STATE and \
                 self.player_b_hand.current_state == Hand.PROMPTING_STATE:
             self.last_active_player = ''
-            self.reset_hand('a')
-            self.reset_hand('b')
+            self.player_a_hand.reset_hand()
+            self.player_b_hand.reset_hand()
 
         elif self.player_a_hand.current_state == Hand.IDLE_STATE and \
                 self.player_b_hand.current_state == Hand.PROMPTING_STATE:
             self.active_players.remove(self.player_a_hand.player)
             self.last_active_player = 'a'
-            self.reset_hand('a')
-            self.reset_hand('b')
+            self.player_a_hand.reset_hand()
+            self.player_b_hand.reset_hand()
         elif self.player_b_hand.current_state == Hand.IDLE_STATE and \
                 self.player_a_hand.current_state == Hand.PROMPTING_STATE:
             self.active_players.remove(self.player_b_hand.player)
             self.last_active_player = 'b'
-            self.reset_hand('a')
-            self.reset_hand('b')
+            self.player_a_hand.reset_hand()
+            self.player_b_hand.reset_hand()
 
         elif self.player_a_hand.current_state == Hand.IDLE_STATE and \
-             self.player_b_hand.current_state == Hand.SOWING_STATE:
+                (self.player_b_hand.current_state == Hand.SOWING_STATE or
+                 self.player_b_hand.current_state == Hand.PICKUP_STATE or
+                 self.player_b_hand.current_state == Hand.TIKAM_STATE_1 or
+                 self.player_b_hand.current_state == Hand.TIKAM_STATE_2 or
+                 self.player_b_hand.current_state == Hand.TIKAM_STATE_3):
+
             self.active_players.remove(self.player_a_hand.player)
             self.last_active_player = 'a'
-            self.reset_hand('a')
-            self.iterate_progress_player(hand=self.player_b_hand)
+            self.player_a_hand.reset_hand()
+            self.iterate_progress_player(hand=self.player_b_hand)\
+
         elif self.player_b_hand.current_state == Hand.IDLE_STATE and \
-             self.player_a_hand.current_state == Hand.SOWING_STATE:
+                (self.player_a_hand.current_state == Hand.SOWING_STATE or
+                 self.player_a_hand.current_state == Hand.PICKUP_STATE or
+                 self.player_a_hand.current_state == Hand.TIKAM_STATE_1 or
+                 self.player_a_hand.current_state == Hand.TIKAM_STATE_2 or
+                 self.player_a_hand.current_state == Hand.TIKAM_STATE_3):
+
             self.active_players.remove(self.player_b_hand.player)
             self.last_active_player = 'b'
-            self.reset_hand('b')
+            self.player_b_hand.reset_hand()
             self.iterate_progress_player(hand=self.player_a_hand)
-
-        elif self.player_a_hand.current_state == Hand.IDLE_STATE and \
-             self.player_b_hand.current_state == Hand.SOWING_STATE:
-            self.active_players.remove(self.player_a_hand.player)
-            self.last_active_player = 'a'
-            self.reset_hand('a')
-            self.iterate_progress_player(hand=self.player_b_hand)
-        elif self.player_b_hand.current_state == Hand.IDLE_STATE and \
-             self.player_a_hand.current_state == Hand.SOWING_STATE:
-            self.active_players.remove(self.player_b_hand.player)
-            self.last_active_player = 'b'
-            self.reset_hand('b')
-            self.iterate_progress_player(hand=self.player_a_hand)
-
-        # action = self.get_next_action()
-        #
-        # return action
 
     # progress the hand one micromove
     def progress_hand(self, hand):
@@ -229,6 +231,7 @@ class BoardModel:
         hand.move_one_pos()
         hand = self.hand_drop_one_counter(hand)
         return hand
+
 
     # picks up the one counter
     def tikam_step_1(self, hand):
@@ -296,7 +299,7 @@ class BoardModel:
 
         match hand.current_state:
             case Hand.IDLE_STATE:
-                self.reset_hand(hand.player)
+                hand.reset_hand()
                 pass
             case Hand.SOWING_STATE:
 
@@ -339,7 +342,7 @@ class BoardModel:
                 pass
             case Hand.TIKAM_STATE_3:
                 hand.current_state = Hand.IDLE_STATE
-                self.reset_hand(hand.player)
+                hand.reset_hand()
                 pass
 
         return hand
@@ -350,7 +353,6 @@ class BoardModel:
         action = self.ERROR
 
         # self.print_all_data()
-
         if sum(self.house_a_values) == 0 and sum(self.house_b_values) == 0:
             action = self.GAME_END
             if self.ping: print("game end")
@@ -361,24 +363,37 @@ class BoardModel:
             action = self.PROMPT_SOWING_A
             if self.ping: print("all of b houses empty. prompt player a")
 
-        elif self.last_active_player == 'a':
-            action = self.PROMPT_SOWING_B
-            if self.ping: print("prompting b")
-        elif self.last_active_player == 'b':
-            action = self.PROMPT_SOWING_A
-            if self.ping: print("prompting a")
-        elif self.last_active_player == '':
+        elif self.player_a_hand.current_state == Hand.IDLE_STATE and \
+             self.player_b_hand.current_state == Hand.IDLE_STATE:
+
+            self.game_phase = self.SEQUENTIAL_PHASE
+
+            if self.last_active_player == '':
+                action = self.PROMPT_SOWING_BOTH
+                if self.ping: print("prompting both")
+            elif self.last_active_player == 'a':
+                action = self.PROMPT_SOWING_B
+                if self.ping: print("prompting b")
+            elif self.last_active_player == 'b':
+                action = self.PROMPT_SOWING_A
+                if self.ping: print("prompting a")
+
+        elif self.player_a_hand.current_state == Hand.PROMPTING_STATE and \
+                self.player_b_hand.current_state == Hand.PROMPTING_STATE:
             action = self.PROMPT_SOWING_BOTH
             if self.ping: print("prompting both")
+        elif self.player_a_hand.current_state == Hand.PROMPTING_STATE:
+            action = self.PROMPT_SOWING_A
+            if self.ping: print("prompting a")
+        elif self.player_b_hand.current_state == Hand.PROMPTING_STATE:
+            action = self.PROMPT_SOWING_B
+            if self.ping: print("prompting b")
+
+
+
+
 
         return action
-
-    def reset_hand(self, player):
-
-        if player == 'a':
-            self.player_a_hand.reset_hand()
-        elif player == 'b':
-            self.player_b_hand.reset_hand()
 
     # update player hands given the current hand
     def update_player_hands_from_current_hand(self, current_hand):
@@ -406,8 +421,8 @@ class BoardModel:
         self.storeroom_a_value = 0
         self.storeroom_b_value = 0
 
-        self.reset_hand('a')
-        self.reset_hand('b')
+        self.player_a_hand.reset_hand()
+        self.player_b_hand.reset_hand()
 
         self.active_players = []
         self.last_active_player = ''
@@ -470,11 +485,13 @@ class BoardModel:
         start_time = time.time()
 
         while self.running and time.time() - start_time < self.sowing_speed:
+            while self.pause:
+                pass
             pass
 
         if not self.running:
-            raise Exception("Running the game is disabled.")
             self.print_all_data()
+            raise Exception("Running the game is disabled.")
 
     # print holes
     def print_all_data(self):
