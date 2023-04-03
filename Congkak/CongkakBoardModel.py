@@ -49,7 +49,7 @@ class BoardModel:
 
         self.sowing_speed = 0
         self.pause = False
-
+        self.waiting = True
 
         self.ping = False
         self.debug = False
@@ -59,6 +59,8 @@ class BoardModel:
         self.running = True
 
     def iterate_progress_player(self, hand=None, player=None):
+
+        self.waiting = False
 
         self.game_phase = self.SEQUENTIAL_PHASE
 
@@ -76,10 +78,12 @@ class BoardModel:
 
         self.update_player_hands_from_current_hand(hand)
 
+        self.wait_micromove()
+
         while not hand.current_state == Hand.IDLE_STATE and not hand.current_state == Hand.PROMPTING_STATE:
-            self.wait_micromove()
             hand = self.progress_hand(hand)
             self.update_player_hands_from_current_hand(hand)
+            self.wait_micromove()
 
         if hand.current_state == Hand.IDLE_STATE:
             self.active_players.remove(hand.player)
@@ -87,19 +91,15 @@ class BoardModel:
         elif hand.current_state == Hand.PROMPTING_STATE:
             self.last_active_player = hand.opponent()
 
-        print()
-
-        hand.reset_hand()
-
         hand.reset_hand()
 
         self.update_player_hands_from_current_hand(hand)
 
-        # action = self.get_next_action()
-
-        # return action
+        self.waiting = True
 
     def iterate_progress_both_players(self, hand_a=None, hand_b=None):
+
+        self.waiting = False
 
         self.player_a_hand = hand_a
         self.player_b_hand = hand_b
@@ -110,18 +110,16 @@ class BoardModel:
         if self.player_b_hand.player not in self.active_players:
             self.active_players.append(self.player_b_hand.player)
 
+        self.wait_micromove()
+
         while not self.player_a_hand.current_state == Hand.IDLE_STATE and \
                 not self.player_a_hand.current_state == Hand.PROMPTING_STATE and \
                 not self.player_b_hand.current_state == Hand.IDLE_STATE and \
                 not self.player_b_hand.current_state == Hand.PROMPTING_STATE:
-            self.wait_micromove()
+
             self.player_a_hand = self.progress_hand(self.player_a_hand)
             self.player_b_hand = self.progress_hand(self.player_b_hand)
-
-            pass
-
-        self.player_a_hand.print_data()
-        self.player_b_hand.print_data()
+            self.wait_micromove()
 
         if self.player_a_hand.current_state == Hand.IDLE_STATE and self.player_b_hand.current_state == Hand.IDLE_STATE:
             self.active_players.remove(self.player_a_hand.player)
@@ -171,6 +169,8 @@ class BoardModel:
             self.last_active_player = 'b'
             self.player_b_hand.reset_hand()
             self.iterate_progress_player(hand=self.player_a_hand)
+
+        self.waiting = True
 
     # progress the hand one micromove
     def progress_hand(self, hand):
@@ -231,7 +231,6 @@ class BoardModel:
         hand.move_one_pos()
         hand = self.hand_drop_one_counter(hand)
         return hand
-
 
     # picks up the one counter
     def tikam_step_1(self, hand):
@@ -309,7 +308,7 @@ class BoardModel:
                         hand.current_state = Hand.PROMPTING_STATE
 
                     elif self.get_value_at_position(hand.hole_pos) == 1:
-                        if hand.is_on_house_side():
+                        if hand.is_on_house_side() and hand.has_looped:
                             hand.current_state = Hand.TIKAM_STATE_1
                         else:
                             hand.current_state = Hand.IDLE_STATE
@@ -352,7 +351,6 @@ class BoardModel:
 
         action = self.ERROR
 
-        # self.print_all_data()
         if sum(self.house_a_values) == 0 and sum(self.house_b_values) == 0:
             action = self.GAME_END
             if self.ping: print("game end")
@@ -388,10 +386,6 @@ class BoardModel:
         elif self.player_b_hand.current_state == Hand.PROMPTING_STATE:
             action = self.PROMPT_SOWING_B
             if self.ping: print("prompting b")
-
-
-
-
 
         return action
 
@@ -485,9 +479,12 @@ class BoardModel:
         start_time = time.time()
 
         while self.running and time.time() - start_time < self.sowing_speed:
+            self.waiting = True
             while self.pause:
                 pass
             pass
+
+        self.waiting = False
 
         if not self.running:
             self.print_all_data()
