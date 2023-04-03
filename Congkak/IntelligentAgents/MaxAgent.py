@@ -27,10 +27,8 @@ class MaxAgent:
         board_model.game_phase = BoardModel.SEQUENTIAL_PHASE
         board_model.ping = False
 
-        board_model.reset_hand('a')
-        board_model.reset_hand('b')
-        board_model.player_a_status = BoardModel.STOP_SOWING_A
-        board_model.player_b_status = BoardModel.STOP_SOWING_B
+        self.board_model.player_a_hand.reset_hand()
+        self.board_model.player_b_hand.reset_hand()
 
         self.node_count = 0
         self.leaf_node_count = 0
@@ -44,11 +42,15 @@ class MaxAgent:
                 self.final_best_move = move
 
         print("max: total nodes searched: " + str(self.node_count) + " no of leaf nodes reached: " + str(self.leaf_node_count))
+        print("final move: " + str(self.final_best_move))
         return self.final_best_move
 
     def maximising(self, player, move, board_model, depth):
 
         self.node_count += 1
+
+        if self.node_count % 100 == 0:
+            print("total nodes searched: " + str(self.node_count))
 
         self.depth = max(self.depth, depth)
 
@@ -62,11 +64,13 @@ class MaxAgent:
             hole = move + 20
 
         new_hand = Hand(player=player, hole_pos=hole, counter_count=0)
+        new_hand.current_state = Hand.PICKUP_STATE
 
-        board_model.iterate_sowing(new_hand)
+        board_model.iterate_progress_player(hand=new_hand)
 
-        if board_model.action_to_take() == BoardModel.PROMPT_SOWING_A and player == 'a' or \
-                board_model.action_to_take() == BoardModel.PROMPT_SOWING_B and player == 'b':
+        if board_model.get_next_action() == BoardModel.PROMPT_SOWING_A and player == 'a' or \
+                board_model.get_next_action() == BoardModel.PROMPT_SOWING_B and player == 'b':
+
             available_moves = board_model.available_moves(player)
             for move in available_moves:
                 new_board = copy.deepcopy(board_model)

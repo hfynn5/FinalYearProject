@@ -46,10 +46,8 @@ class MinimaxAgent:
         board_model.game_phase = BoardModel.SEQUENTIAL_PHASE
         board_model.ping = False
 
-        board_model.reset_hand('a')
-        board_model.reset_hand('b')
-        board_model.player_a_status = BoardModel.STOP_SOWING_A
-        board_model.player_b_status = BoardModel.STOP_SOWING_B
+        self.board_model.player_a_hand.reset_hand()
+        self.board_model.player_b_hand.reset_hand()
 
         final_best_value = 0
         if player == 'a':
@@ -85,7 +83,6 @@ class MinimaxAgent:
 
         return final_best_move
 
-    # TODO: add a check if error. or smth to workaround.
     def minimax(self, board_model, move, depth, self_depth, player, alpha, beta):
 
         self.node_count += 1
@@ -106,7 +103,10 @@ class MinimaxAgent:
             hole = move + 20
 
         new_hand = Hand(player=player, hole_pos=hole, counter_count=0)
-        board_model.iterate_sowing(new_hand)
+        new_hand.current_state = Hand.PICKUP_STATE
+
+        board_model.iterate_progress_player(hand=new_hand)
+
         available_moves = board_model.available_moves(player)
 
         if depth == 0 or len(available_moves) == 0:
@@ -116,17 +116,17 @@ class MinimaxAgent:
         if player == 'a':
             max_eva = -math.inf
 
-            match board_model.action_to_take():
+            match board_model.get_next_action():
 
                 case BoardModel.PROMPT_SOWING_BOTH: # similar to prompt sowing a
                     available_moves = board_model.available_moves('a')
                     for move in available_moves:
                         new_board = copy.deepcopy(board_model)
 
-                        if not self.checked_opponent:
-                            depth += 1
+                        # if not self.checked_opponent:
+                        #     depth += 1
 
-                        eva, board = self.minimax(new_board, move, depth - 1, self_depth - 1, 'a', alpha, beta)
+                        eva, board = self.minimax(new_board, move, depth - 1, self_depth, 'a', alpha, beta)
                         if eva > max_eva:
                             max_eva = eva
                             optimal_board = board
@@ -140,10 +140,10 @@ class MinimaxAgent:
                     for move in available_moves:
                         new_board = copy.deepcopy(board_model)
 
-                        if not self.checked_opponent:
-                            depth += 1
+                        # if not self.checked_opponent:
+                        #     depth += 1
 
-                        eva, board = self.minimax(new_board, move, depth - 1, self_depth - 1, 'a', alpha, beta)
+                        eva, board = self.minimax(new_board, move, depth - 1, self_depth, 'a', alpha, beta)
                         if eva > max_eva:
                             max_eva = eva
                             optimal_board = board
@@ -174,17 +174,17 @@ class MinimaxAgent:
 
             min_eva = math.inf
 
-            match board_model.action_to_take():
+            match board_model.get_next_action():
 
                 case BoardModel.PROMPT_SOWING_BOTH:  # similar to prompt sowing b
                     available_moves = board_model.available_moves('b')
                     for move in available_moves:
                         new_board = copy.deepcopy(board_model)
 
-                        if not self.checked_opponent:
-                            depth += 1
+                        # if not self.checked_opponent:
+                        #     depth += 1
 
-                        eva, board = self.minimax(new_board, move, depth - 1, self_depth - 1, 'b', alpha, beta)
+                        eva, board = self.minimax(new_board, move, depth - 1, self_depth, 'b', alpha, beta)
                         if eva < min_eva:
                             min_eva = eva
                             optimal_board = board
@@ -214,10 +214,10 @@ class MinimaxAgent:
                     for move in available_moves:
                         new_board = copy.deepcopy(board_model)
 
-                        if not self.checked_opponent:
-                            depth += 1
+                        # if not self.checked_opponent:
+                        #     depth += 1
 
-                        eva, board = self.minimax(new_board, move, depth - 1, self_depth - 1, 'b', alpha, beta)
+                        eva, board = self.minimax(new_board, move, depth - 1, self_depth, 'b', alpha, beta)
                         if eva < min_eva:
                             min_eva = eva
                             optimal_board = board
