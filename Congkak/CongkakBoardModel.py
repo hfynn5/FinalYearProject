@@ -24,6 +24,13 @@ class BoardModel:
     SIMULTANEOUS_PHASE = 1
     SEQUENTIAL_PHASE = 2
 
+    board_state_dict = {
+        "player a house": [],
+        "player b house": [],
+        "player a storeroom": 0,
+        "player b storeroom": 0
+    }
+
     def __init__(self):
         # player A house 1 starts at left. For the sake of sanity, houses start at 1, not 0
         # player B house 1 starts at left.
@@ -495,6 +502,16 @@ class BoardModel:
         if not self.running:
             self.print_all_data()
             raise Exception("Running the game is disabled.")
+
+    def update_board_state_dict(self):
+        self.board_state_dict["player a house"] = self.house_a_values
+        self.board_state_dict["player b house"] = self.house_b_values
+        self.board_state_dict["player a storeroom"] = self.storeroom_a_value
+        self.board_state_dict["player b storeroom"] = self.storeroom_b_value
+
+    def get_board_state_dict(self):
+        self.update_board_state_dict()
+        return self.board_state_dict
 
     # print holes
     def print_all_data(self):
