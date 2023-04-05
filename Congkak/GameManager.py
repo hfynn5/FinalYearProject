@@ -484,7 +484,7 @@ class GameManager:
                 self.board_graphic.set_enable_player_specific_inputs(player=player,
                                                                      enable_list=available_moves)
             else:
-                self.choosing_hole_action(player=player, hole=self.prompt_agent_for_input(player))
+                self.choosing_hole_action(player=player, hole=self.prompt_agent_for_input(player, simul))
 
     # TODO: add a way to save future moves to save time
     # TODO: make this a worker so that it doesnt freeze the GUI

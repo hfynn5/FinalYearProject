@@ -15,12 +15,15 @@ class MaxAgent:
 
         self.depth = 0
 
+        self.current_best_value = -1
+
         pass
 
     def choose_move(self, player, board_model):
         self.final_best_value = 1
         self.final_best_move = 0
         self.depth = 1
+        self.current_best_value = -1
         available_moves = board_model.available_moves(player)
 
         board_model.sowing_speed = 0
@@ -67,6 +70,15 @@ class MaxAgent:
         new_hand.current_state = Hand.PICKUP_STATE
 
         board_model.iterate_progress_player(hand=new_hand)
+
+        if player == 'a':
+            best_value = board_model.storeroom_a_value
+        elif player == 'b':
+            best_value = board_model.storeroom_b_value
+
+        if best_value > self.current_best_value:
+            self.current_best_value = best_value
+            return best_value
 
         if board_model.get_next_action() == BoardModel.PROMPT_SOWING_A and player == 'a' or \
                 board_model.get_next_action() == BoardModel.PROMPT_SOWING_B and player == 'b':
