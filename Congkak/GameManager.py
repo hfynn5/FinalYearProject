@@ -187,6 +187,8 @@ class GameManager:
         # start constantly updating graphics
         self.start_worker_graphic_updater()
 
+        self.next_action(BoardModel.PROMPT_SOWING_BOTH)
+
         sys.exit(app.exec())
 
     # connect the available input to its functions
@@ -201,6 +203,7 @@ class GameManager:
                                                        self.start_worker_simultaneous_sowing(
                                                            hole_a=self.player_a_hand_pos,
                                                            hole_b=self.player_b_hand_pos,
+                                                           simul_prompt=True
                                                        ))
 
         self.board_graphic.move_speed_slider. \
@@ -248,15 +251,28 @@ class GameManager:
         self.threadpool.start(worker)
 
     # starts a worker for each hand
-    def start_worker_simultaneous_sowing(self, hole_a=None, hole_b=None, hand_a=None, hand_b=None):
+    def start_worker_simultaneous_sowing(self, hole_a=None, hole_b=None, hand_a=None, hand_b=None, simul_prompt=False):
         self.autoplay_hands = True
         self.board_graphic.set_enable_play_button(False)
 
-        if not self.player_a_agent == self.AGENT_USER and (hole_a is None or hole_a <= 0) and hand_a is None:
-            hole_a = self.prompt_agent_for_input('a')
+        prompt_agent_a = False
+        prompt_agent_b = False
 
-        if not self.player_b_agent == self.AGENT_USER and (hole_b is None or hole_b <= 0) and hand_b is None:
-            hole_b = self.prompt_agent_for_input('b')
+        if hand_a is None:
+            prompt_agent_a = (hole_a is None or hole_a <= 0)
+        else:
+            prompt_agent_a = hand_a.current_state == Hand.PROMPTING_STATE
+
+        if hand_b is None:
+            prompt_agent_b = (hole_b is None or hole_b <= 0)
+        else:
+            prompt_agent_b = hand_b.current_state == Hand.PROMPTING_STATE
+
+        if prompt_agent_a and not self.player_a_agent == self.AGENT_USER:
+            hole_a = self.prompt_agent_for_input('a', simul_prompt)
+
+        if prompt_agent_b and not self.player_b_agent == self.AGENT_USER:
+            hole_b = self.prompt_agent_for_input('b', simul_prompt)
 
         self.board_model.append_move(hole_a, hole_b)
 
@@ -301,23 +317,35 @@ class GameManager:
                 if self.current_mode == self.LOADING_MODE:
                     self.do_next_move_from_loaded_moves(action)
                 else:
-                    self.prompt_player('a')
+                    self.prompt_player('a', False)
             case BoardModel.PROMPT_SOWING_B:
                 if self.current_mode == self.LOADING_MODE:
                     self.do_next_move_from_loaded_moves(action)
                 else:
-                    self.prompt_player('b')
+                    self.prompt_player('b', False)
             case BoardModel.PROMPT_SOWING_BOTH:
                 if self.current_mode == self.LOADING_MODE:
                     self.do_next_move_from_loaded_moves(action)
                 else:
                     if self.player_a_agent == self.AGENT_USER or self.player_b_agent == self.AGENT_USER:
-                        self.autoplay_hands = False
-                        self.prompt_player('b')
-                        self.prompt_player('a')
-                        self.board_graphic.set_enable_play_button(True)
+
+                        if (not self.player_a_agent == self.AGENT_USER) ^ (self.player_b_agent == self.AGENT_USER):
+                            print("enable")
+                            self.board_graphic.set_enable_play_button(True)
+                            self.autoplay_hands = False
+                        else:
+                            print("disable")
+                            self.board_graphic.set_enable_play_button(False)
+                            self.autoplay_hands = True
+
+                        if self.player_a_agent == self.AGENT_USER:
+                            self.prompt_player('a', True)
+
+                        if self.player_b_agent == self.AGENT_USER:
+                            self.prompt_player('b', True)
+
                     else:
-                        self.start_worker_simultaneous_sowing()
+                        self.start_worker_simultaneous_sowing(simul_prompt=True)
 
             case BoardModel.GAME_END:
                 print("Game over")
@@ -410,7 +438,6 @@ class GameManager:
                     else:
                         self.run_multiple_games(self.no_of_games_to_run, self.tournament_participants[agent_a_index],
                                                 self.tournament_participants[agent_b_index])
-
                 pass
             case self.LOADING_MODE:
                 print("Game has loaded.")
@@ -422,9 +449,9 @@ class GameManager:
         if self.autoplay_hands:
             if self.board_model.game_phase == BoardModel.SIMULTANEOUS_PHASE:
                 if player == 'a':
-                    self.start_worker_simultaneous_sowing(hole_a=hole, hand_b=self.board_model.player_b_hand)
+                    self.start_worker_simultaneous_sowing(hole_a=hole, hand_b=self.board_model.player_b_hand, simul_prompt=True)
                 elif player == 'b':
-                    self.start_worker_simultaneous_sowing(hole_b=hole, hand_a=self.board_model.player_a_hand)
+                    self.start_worker_simultaneous_sowing(hole_b=hole, hand_a=self.board_model.player_a_hand, simul_prompt=True)
 
             elif self.board_model.game_phase == BoardModel.SEQUENTIAL_PHASE:
                 self.start_worker_sowing(player=player, hole=hole)
@@ -441,7 +468,7 @@ class GameManager:
             self.player_b_hand_pos = hole
 
     # prompts the corresponding player
-    def prompt_player(self, player):
+    def prompt_player(self, player, simul):
 
         available_moves = self.board_model.available_moves(player)
 
@@ -450,7 +477,7 @@ class GameManager:
                 self.board_graphic.set_enable_player_specific_inputs(player=player,
                                                                      enable_list=available_moves)
             else:
-                self.choosing_hole_action(player=player, hole=self.prompt_agent_for_input(player))
+                self.choosing_hole_action(player=player, hole=self.prompt_agent_for_input(player, simul))
 
         elif player == 'b':
             if self.player_b_agent == self.AGENT_USER:
@@ -462,26 +489,32 @@ class GameManager:
     # TODO: add a way to save future moves to save time
     # TODO: make this a worker so that it doesnt freeze the GUI
     # prompt agent for move. returns  move
-    def prompt_agent_for_input(self, player):
+    def prompt_agent_for_input(self, player, simul):
 
-        move = 0
+        move = -1
         while move not in self.board_model.available_moves(player):
             copied_board = copy.deepcopy(self.board_model)
-            move = 0
-            if player == 'a':
-                if self.player_a_agent == self.AGENT_RANDOM:
-                    move = self.random_agent.choose_move(player, copied_board)
-                elif self.player_a_agent == self.AGENT_MAX:
-                    move = self.max_agent.choose_move(player, copied_board)
-                elif self.player_a_agent == self.AGENT_MINIMAX:
-                    move = self.minimax_agent.choose_move(player, copied_board)
-            elif player == 'b':
-                if self.player_b_agent == self.AGENT_RANDOM:
-                    move = self.random_agent.choose_move(player, copied_board)
-                elif self.player_b_agent == self.AGENT_MAX:
-                    move = self.max_agent.choose_move(player, copied_board)
-                elif self.player_b_agent == self.AGENT_MINIMAX:
-                    move = self.minimax_agent.choose_move(player, copied_board)
+            move += 1
+
+            if simul:
+                print("simul")
+                move = self.random_agent.choose_move(player, copied_board)
+                pass
+            else:
+                if player == 'a':
+                    if self.player_a_agent == self.AGENT_RANDOM:
+                        move = self.random_agent.choose_move(player, copied_board)
+                    elif self.player_a_agent == self.AGENT_MAX:
+                        move = self.max_agent.choose_move(player, copied_board)
+                    elif self.player_a_agent == self.AGENT_MINIMAX:
+                        move = self.minimax_agent.choose_move(player, copied_board)
+                elif player == 'b':
+                    if self.player_b_agent == self.AGENT_RANDOM:
+                        move = self.random_agent.choose_move(player, copied_board)
+                    elif self.player_b_agent == self.AGENT_MAX:
+                        move = self.max_agent.choose_move(player, copied_board)
+                    elif self.player_b_agent == self.AGENT_MINIMAX:
+                        move = self.minimax_agent.choose_move(player, copied_board)
 
             if move not in self.board_model.available_moves(player):
                 print("didnt find a valid move.")
@@ -554,7 +587,7 @@ class GameManager:
         self.no_of_games_left = no_of_games - 1
         self.game_results = []
 
-        self.start_worker_simultaneous_sowing()
+        self.next_action(BoardModel.PROMPT_SOWING_BOTH)
 
         pass
 
@@ -634,8 +667,6 @@ class GameManager:
                     self.board_graphic.set_enable_player_specific_inputs(player='b',
                                                                          enable_list=available_moves)
 
-
-
     def kill_all_workers(self):
         self.board_model.running = False
         self.threadpool.clear()
@@ -684,7 +715,7 @@ class GameManager:
                 elif BoardModel.PROMPT_SOWING_B and not current_move[1] == 0 and current_move[0] == 0:
                     self.start_worker_sowing('b', current_move[1])
                 elif BoardModel.PROMPT_SOWING_BOTH and not current_move[0] == 0 and not current_move[1] == 0:
-                    self.start_worker_simultaneous_sowing(current_move[0], current_move[1])
+                    self.start_worker_simultaneous_sowing(current_move[0], current_move[1], simul_prompt=True)
                 else:
                     print("error with seq loading move. action: " + str(action) + " Move: " + str(current_move))
 
@@ -694,7 +725,7 @@ class GameManager:
                 elif BoardModel.PROMPT_SOWING_B and not current_move[1] == 0 and current_move[0] == 0:
                     self.start_worker_simultaneous_sowing(hole_b=current_move[1], hand_a=self.board_model.player_a_hand)
                 elif BoardModel.PROMPT_SOWING_BOTH and not current_move[0] == 0 and not current_move[1] == 0:
-                    self.start_worker_simultaneous_sowing(hole_a=current_move[0], hole_b=current_move[1])
+                    self.start_worker_simultaneous_sowing(hole_a=current_move[0], hole_b=current_move[1], simul_prompt=True)
                 else:
                     print("error with simul loading move. action: " + str(action) + " Move: " + str(current_move))
 

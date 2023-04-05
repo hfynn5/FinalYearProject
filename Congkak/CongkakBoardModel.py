@@ -269,7 +269,7 @@ class BoardModel:
         elif 20 < pos < 28:
             value = self.house_b_values[pos - 21]
         else:
-            print("invalid pos: " + str(pos))
+            print("invalid pos get: " + str(pos))
 
         return value
 
@@ -284,7 +284,7 @@ class BoardModel:
         elif 20 < pos < 28:
             self.house_b_values[pos - 21] += n
         else:
-            print("invalid pos: " + str(pos))
+            print("invalid pos increment: " + str(pos))
 
     # sets the number of counters at a position
     def set_value_at_position(self, pos, value):
@@ -298,10 +298,14 @@ class BoardModel:
         elif 20 < pos < 28:
             self.house_b_values[pos - 21] = value
         else:
-            print("invalid pos: " + str(pos))
+            print("invalid pos set: " + str(pos))
 
     # updates the hand status based on all the data available
     def update_hand_status(self, hand):
+
+        if hand.hole_pos == -1:
+            hand.current_state = Hand.IDLE_STATE
+            return hand
 
         match hand.current_state:
             case Hand.IDLE_STATE:
