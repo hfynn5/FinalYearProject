@@ -13,6 +13,8 @@ from PyQt6.QtGui import QPixmap
 from Congkak.IntelligentAgents.MinimaxAgent import MinimaxAgent
 from Congkak.IntelligentAgents.RandomAgent import RandomAgent
 from Congkak.IntelligentAgents.MaxAgent import MaxAgent
+from Congkak.IntelligentAgents.QLearningSimulAgent import QLearningSimulAgent
+
 
 
 class Worker(QRunnable):
@@ -146,6 +148,7 @@ class GameManager:
         self.max_agent = MaxAgent()
         self.minimax_agent = MinimaxAgent(weights=(0, 0, 0, 0, 0, 0), maximum_depth=2, maximum_self_depth=3,
                                           maximum_number_node=0)
+        self.q_simul_agent = QLearningSimulAgent()
 
         self.game_has_ended = False
         self.show_starting_hands = True
@@ -378,11 +381,13 @@ class GameManager:
         elif self.board_model.storeroom_a_value > self.board_model.storeroom_b_value:
             print("Player A wins")
             result = self.PLAYER_A_WIN
-            winner = "A"
+            winner = "a"
         elif self.board_model.storeroom_b_value > self.board_model.storeroom_a_value:
             print("Player B wins")
             result = self.PLAYER_B_WIN
-            winner = "B"
+            winner = "b"
+
+        self.q_simul_agent.update_all_q_values(winner)
 
         match self.current_mode:
             case self.NORMAL_MODE:
@@ -498,7 +503,7 @@ class GameManager:
 
             if simul:
                 print("simul")
-                move = self.random_agent.choose_move(player, copied_board)
+                move = self.q_simul_agent.choose_move(player, copied_board)
                 pass
             else:
                 if player == 'a':

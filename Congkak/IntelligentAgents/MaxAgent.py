@@ -80,6 +80,8 @@ class MaxAgent:
             self.current_best_value = best_value
             return best_value
 
+        best_value = -1
+
         if board_model.get_next_action() == BoardModel.PROMPT_SOWING_A and player == 'a' or \
                 board_model.get_next_action() == BoardModel.PROMPT_SOWING_B and player == 'b':
 
