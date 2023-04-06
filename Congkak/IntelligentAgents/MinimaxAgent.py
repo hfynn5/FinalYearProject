@@ -45,6 +45,7 @@ class MinimaxAgent:
         board_model.sowing_speed = 0
         board_model.game_phase = BoardModel.SEQUENTIAL_PHASE
         board_model.ping = False
+        board_model.debug = False
 
         self.board_model.player_a_hand.reset_hand()
         self.board_model.player_b_hand.reset_hand()

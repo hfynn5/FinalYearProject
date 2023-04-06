@@ -59,7 +59,7 @@ class BoardModel:
         self.waiting = True
 
         self.ping = False
-        self.debug = False
+        self.debug = True
 
         self.moves_made = []
 
@@ -398,8 +398,9 @@ class BoardModel:
             action = self.PROMPT_SOWING_B
             if self.ping: print("prompting b")
         else:
-            print("error has occured.")
-            self.print_all_data()
+            if self.debug:
+                print("error has occured.")
+                self.print_all_data()
 
         return action
 

@@ -29,6 +29,7 @@ class MaxAgent:
         board_model.sowing_speed = 0
         board_model.game_phase = BoardModel.SEQUENTIAL_PHASE
         board_model.ping = False
+        board_model.debug = False
 
         self.board_model.player_a_hand.reset_hand()
         self.board_model.player_b_hand.reset_hand()
@@ -44,8 +45,8 @@ class MaxAgent:
                 self.final_best_value = evaluation
                 self.final_best_move = move
 
-        print("max: total nodes searched: " + str(self.node_count) + " no of leaf nodes reached: " + str(self.leaf_node_count))
-        print("final move: " + str(self.final_best_move))
+        # print("max: total nodes searched: " + str(self.node_count) + " no of leaf nodes reached: " + str(self.leaf_node_count))
+        # print("final move: " + str(self.final_best_move))
         return self.final_best_move
 
     def maximising(self, player, move, board_model, depth):
