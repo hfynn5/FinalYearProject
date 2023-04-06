@@ -54,7 +54,7 @@ class MaxAgent:
         self.node_count += 1
 
         if self.node_count % 100 == 0:
-            print("total nodes searched: " + str(self.node_count))
+            print("max: total nodes searched: " + str(self.node_count))
 
         self.depth = max(self.depth, depth)
 

@@ -89,7 +89,7 @@ class MinimaxAgent:
         self.node_count += 1
 
         if self.node_count % 100 == 0:
-            print("total nodes searched: " + str(self.node_count))
+            print("minimax: total nodes searched: " + str(self.node_count))
 
         optimal_board = BoardModel()
 

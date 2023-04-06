@@ -1,3 +1,4 @@
+import random
 import time
 import traceback
 
@@ -124,8 +125,12 @@ class BoardModel:
                 not self.player_b_hand.current_state == Hand.IDLE_STATE and \
                 not self.player_b_hand.current_state == Hand.PROMPTING_STATE:
 
-            self.player_a_hand = self.progress_hand(self.player_a_hand)
-            self.player_b_hand = self.progress_hand(self.player_b_hand)
+            if random.random() < 0.5:
+                self.player_a_hand = self.progress_hand(self.player_a_hand)
+                self.player_b_hand = self.progress_hand(self.player_b_hand)
+            else:
+                self.player_b_hand = self.progress_hand(self.player_b_hand)
+                self.player_a_hand = self.progress_hand(self.player_a_hand)
             self.wait_micromove()
 
         if self.player_a_hand.current_state == Hand.IDLE_STATE and self.player_b_hand.current_state == Hand.IDLE_STATE:
