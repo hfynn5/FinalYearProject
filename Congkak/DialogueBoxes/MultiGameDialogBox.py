@@ -39,7 +39,7 @@ class MultiGameDialogBox(QDialog):
 
         self.game_count_spin_box = QSpinBox()
         self.game_count_spin_box.setMinimum(1)
-        self.game_count_spin_box.setMaximum(999)
+        self.game_count_spin_box.setMaximum(9999)
         self.game_count_spin_box.setSuffix(" rounds")
         self.game_count_spin_box.setSingleStep(1)
         self.game_count_spin_box.valueChanged.connect(self.no_games_changed)

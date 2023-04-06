@@ -414,7 +414,7 @@ class BoardGraphic(QMainWindow):
         self.multi_game_end_dialog_box.player_b_score_label.setText(str(player_b_wins))
         self.multi_game_end_dialog_box.draws_label.setText(str(draws))
 
-        self.multi_game_end_dialog_box.game_score_list_label.setText(str(score_list))
+        # self.multi_game_end_dialog_box.game_score_list_label.setText(str(score_list))
 
         self.multi_game_end_dialog_box.exec()
 
