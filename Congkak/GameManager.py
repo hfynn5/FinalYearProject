@@ -155,6 +155,7 @@ class GameManager:
         self.autoplay_hands = False
 
         self.graphic_refresh_rate = 0.01
+        self.update_graphic = True
 
         self.current_mode = self.NORMAL_MODE
 
@@ -502,8 +503,8 @@ class GameManager:
             move += 1
 
             if simul:
-                print("simul")
-                move = self.q_simul_agent.choose_move(player, copied_board)
+                # move = self.q_simul_agent.choose_move(player, copied_board)
+                move = self.random_agent.choose_move(player, copied_board)
                 pass
             else:
                 if player == 'a':
@@ -551,7 +552,8 @@ class GameManager:
         pass
         while self.board_graphic.active:
             time.sleep(self.graphic_refresh_rate)
-            update_board_graphics(board_graphic=self.board_graphic, board_model=self.board_model)
+            if self.update_graphic:
+                update_board_graphics(board_graphic=self.board_graphic, board_model=self.board_model)
         self.close_program()
 
     # updates the sowing speed
