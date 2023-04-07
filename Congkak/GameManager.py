@@ -16,7 +16,6 @@ from Congkak.IntelligentAgents.MaxAgent import MaxAgent
 from Congkak.IntelligentAgents.QLearningSimulAgent import QLearningSimulAgent
 
 
-
 class Worker(QRunnable):
     """
     Worker thread
@@ -120,7 +119,10 @@ class GameManager:
     AGENT_MINIMAX = 'minimax'
     AGENT_MCTS = 'mcts'
 
+    AGENT_Q_SIMUL = 'q simul'
+
     LIST_OF_AGENTS = [AGENT_USER, AGENT_RANDOM, AGENT_MAX, AGENT_MINIMAX]
+    LIST_OF_SIMUL_AGENTS = [AGENT_USER, AGENT_RANDOM, AGENT_Q_SIMUL]
 
     PLAYER_A_WIN = 1
     PLAYER_B_WIN = -1
@@ -143,6 +145,9 @@ class GameManager:
         self.player_a_agent = self.AGENT_USER
         self.player_b_agent = self.AGENT_USER
 
+        self.player_a_simul_agent = self.AGENT_USER
+        self.player_b_simul_agent = self.AGENT_USER
+
         # create Intelligent Agents
         self.random_agent = RandomAgent()
         self.max_agent = MaxAgent()
@@ -154,8 +159,9 @@ class GameManager:
         self.show_starting_hands = True
         self.autoplay_hands = False
 
+        # For graphics
         self.graphic_refresh_rate = 0.01
-        self.update_graphic = True
+        self.update_graphic = False
 
         self.current_mode = self.NORMAL_MODE
 
@@ -218,15 +224,25 @@ class GameManager:
         self.board_graphic.load_game_menu_button_action.triggered.connect(lambda checked: self.load_moves())
         self.board_graphic.new_game_menu_button_action.triggered.connect(lambda checked: self.new_game(False))
 
-        self.board_graphic.player_a_dropdown. \
+        self.board_graphic.player_a_agent_dropdown. \
             activated.connect(lambda
-                              index=self.board_graphic.player_a_dropdown.
+                              index=self.board_graphic.player_a_agent_dropdown.
                               currentIndex(): self.set_player_agent_index('a', index))
 
-        self.board_graphic.player_b_dropdown. \
+        self.board_graphic.player_b_agent_dropdown. \
             activated.connect(lambda
-                              index=self.board_graphic.player_b_dropdown.
+                              index=self.board_graphic.player_b_agent_dropdown.
                               currentIndex(): self.set_player_agent_index('b', index))
+
+        self.board_graphic.player_a_simul_agent_dropdown. \
+            activated.connect(lambda
+                              index=self.board_graphic.player_a_agent_dropdown.
+                              currentIndex(): self.set_player_simul_agent_index('a', index))
+
+        self.board_graphic.player_b_simul_agent_dropdown. \
+            activated.connect(lambda
+                              index=self.board_graphic.player_b_agent_dropdown.
+                              currentIndex(): self.set_player_simul_agent_index('b', index))
 
         self.board_graphic.multiple_games_dialog_box.buttonBox.accepted.connect(self.run_multiple_games)
 
@@ -372,6 +388,8 @@ class GameManager:
 
         self.board_model.active_players.clear()
 
+        update_board_graphics(board_graphic=self.board_graphic, board_model=self.board_model)
+
         result = self.DRAW
         winner = "None"
 
@@ -510,24 +528,38 @@ class GameManager:
 
             # TODO: add option to choose different simul agents per player
             if simul:
-                move = self.q_simul_agent.choose_move(player, copied_board)
-                # move = self.random_agent.choose_move(player, copied_board)
-                pass
+                if player == 'a':
+                    match self.player_a_agent:
+                        case self.AGENT_RANDOM:
+                            move = self.random_agent.choose_move(player, copied_board)
+                        case self.AGENT_Q_SIMUL:
+                            move = self.q_simul_agent.choose_move(player, copied_board)
+
+                elif player == 'b':
+                    match self.player_b_agent:
+                        case self.AGENT_RANDOM:
+                            move = self.random_agent.choose_move(player, copied_board)
+                        case self.AGENT_Q_SIMUL:
+                            move = self.q_simul_agent.choose_move(player, copied_board)
+
             else:
                 if player == 'a':
-                    if self.player_a_agent == self.AGENT_RANDOM:
-                        move = self.random_agent.choose_move(player, copied_board)
-                    elif self.player_a_agent == self.AGENT_MAX:
-                        move = self.max_agent.choose_move(player, copied_board)
-                    elif self.player_a_agent == self.AGENT_MINIMAX:
-                        move = self.minimax_agent.choose_move(player, copied_board)
+                    match self.player_a_agent:
+                        case self.AGENT_RANDOM:
+                            move = self.random_agent.choose_move(player, copied_board)
+                        case self.AGENT_MAX:
+                            move = self.max_agent.choose_move(player, copied_board)
+                        case self.AGENT_MINIMAX:
+                            move = self.minimax_agent.choose_move(player, copied_board)
+
                 elif player == 'b':
-                    if self.player_b_agent == self.AGENT_RANDOM:
-                        move = self.random_agent.choose_move(player, copied_board)
-                    elif self.player_b_agent == self.AGENT_MAX:
-                        move = self.max_agent.choose_move(player, copied_board)
-                    elif self.player_b_agent == self.AGENT_MINIMAX:
-                        move = self.minimax_agent.choose_move(player, copied_board)
+                    match self.player_b_agent:
+                        case self.AGENT_RANDOM:
+                            move = self.random_agent.choose_move(player, copied_board)
+                        case self.AGENT_MAX:
+                            move = self.max_agent.choose_move(player, copied_board)
+                        case self.AGENT_MINIMAX:
+                            move = self.minimax_agent.choose_move(player, copied_board)
 
             if move not in self.board_model.available_moves(player):
                 print("didnt find a valid move.")
@@ -546,13 +578,48 @@ class GameManager:
 
         if player == 'a':
             self.player_a_agent = self.LIST_OF_AGENTS[agent_index]
+            self.board_graphic.player_a_agent_dropdown.setCurrentIndex(agent_index)
+
+            if agent_index == 0 and not self.player_a_simul_agent == self.AGENT_USER:
+                self.set_player_simul_agent_index(player, 0)
+            elif not agent_index == 0 and self.player_a_simul_agent == self.AGENT_USER:
+                self.set_player_simul_agent_index(player, 1)
+
         elif player == 'b':
             self.player_b_agent = self.LIST_OF_AGENTS[agent_index]
+            self.board_graphic.player_b_agent_dropdown.setCurrentIndex(agent_index)
+
+            if agent_index == 0 and not self.player_b_simul_agent == self.AGENT_USER:
+                self.set_player_simul_agent_index(player, 0)
+            elif not agent_index == 0 and self.player_b_simul_agent == self.AGENT_USER:
+                self.set_player_simul_agent_index(player, 1)
 
         if agent_index == 0:
             self.board_graphic.set_enable_player_inputs(player, True)
         else:
             self.board_graphic.set_enable_player_inputs(player, False)
+
+    def set_player_simul_agent_index(self, player, agent_index):
+
+        self.set_hand_pos(player, 0)
+
+        if player == 'a':
+            self.player_a_simul_agent = self.LIST_OF_SIMUL_AGENTS[agent_index]
+            self.board_graphic.player_a_simul_agent_dropdown.setCurrentIndex(agent_index)
+
+            if agent_index == 0 and not self.player_a_agent == self.AGENT_USER:
+                self.set_player_agent_index(player, 0)
+            elif not agent_index == 0 and self.player_a_agent == self.AGENT_USER:
+                self.set_player_agent_index(player, 1)
+
+        elif player == 'b':
+            self.player_b_simul_agent = self.LIST_OF_SIMUL_AGENTS[agent_index]
+            self.board_graphic.player_b_simul_agent_dropdown.setCurrentIndex(agent_index)
+
+            if agent_index == 0 and not self.player_b_agent == self.AGENT_USER:
+                self.set_player_agent_index(player, 0)
+            elif not agent_index == 0 and self.player_b_agent == self.AGENT_USER:
+                self.set_player_agent_index(player, 1)
 
     # updates board graphics constantly
     def update_board_graphics_constantly(self):
