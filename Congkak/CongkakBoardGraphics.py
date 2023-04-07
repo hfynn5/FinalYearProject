@@ -269,7 +269,7 @@ class BoardGraphic(QMainWindow):
 
         self.player_a_simul_agent_dropdown = QComboBox(self)
         self.player_a_simul_agent_dropdown.move(500, 100)
-        self.player_a_simul_agent_dropdown.addItems(['Human', 'Random', 'Q Learning'])
+        self.player_a_simul_agent_dropdown.addItems(['Human', 'Random', 'R Learning'])
 
         label_a = QLabel(self)
         label_a.move(500, 410)
@@ -277,7 +277,7 @@ class BoardGraphic(QMainWindow):
 
         self.player_b_simul_agent_dropdown = QComboBox(self)
         self.player_b_simul_agent_dropdown.move(500, 380)
-        self.player_b_simul_agent_dropdown.addItems(['Human', 'Random', 'Q Learning'])
+        self.player_b_simul_agent_dropdown.addItems(['Human', 'Random', 'R Learning'])
 
 
 

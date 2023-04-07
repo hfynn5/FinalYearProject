@@ -21,14 +21,13 @@ class QState:
     # 1, 1, 1, 1, 1, 1, 1
 
 
-class QLearningSimulAgent:
+class ReinforcementLearningSimulAgent:
 
     def __init__(self):
 
         self.loaded_states = []
         self.used_states_index = []
         self.learning_rate = 0.9
-        self.discount_rate = 0.9
 
         pass
 
@@ -54,53 +53,33 @@ class QLearningSimulAgent:
 
         return choice
 
-    def update_all_q_values(self, winner_player):
+    def update_all_values(self, winner_player):
 
         prev_reward = 1
 
         for state_index in reversed(self.used_states_index):
             curr_state = self.loaded_states[state_index]
-            self.loaded_states[state_index], prev_reward = self.update_q_value(curr_state, winner_player, prev_reward)
+            self.loaded_states[state_index] = self.update_q_value(curr_state, winner_player)
 
     def clear_used_states(self):
         self.used_states_index = []
         self.used_states_index = []
 
-    def update_q_value(self, state, winner_player, prev_reward):
-
-        new_winner_reward = prev_reward
+    def update_value(self, state, winner_player):
 
         current_q_value_a = state.q_value_player_a[state.player_a_choice]
         current_q_value_b = state.q_value_player_b[state.player_b_choice]
 
         if winner_player == 'a':
-
-            increase = self.learning_rate * \
-                        (1 + self.discount_rate * prev_reward - current_q_value_a)
-
-            # print("increase: " + str(increase))
-
-            # increase = self.learning_rate + self.learning_rate * self.discount_rate * prev_reward - self.learning_rate * current_value
-            # increase = self.learning_rate + self.learning_rate * self.discount_rate * prev_reward - 0
-
-            # increase = self.learning_rate + self.learning_rate * self.discount_rate * prev_reward
+            increase = self.learning_rate
 
             state.q_value_player_a[state.player_a_choice] = round(current_q_value_a + increase, 5)
 
-            new_winner_reward = round(max(state.q_value_player_a), 5)
-
         elif winner_player == 'b':
 
-            increase = self.learning_rate * \
-                        (1 + self.discount_rate * prev_reward - current_q_value_b)
-
-            # increase = self.learning_rate + self.discount_rate * prev_reward
-
-            # print("increase: " + str(increase))
+            increase = self.learning_rate
 
             state.q_value_player_b[state.player_b_choice] = round(current_q_value_b + increase, 5)
-
-            new_winner_reward = round(max(state.q_value_player_b), 5)
 
         if state.q_value_player_a[state.player_a_choice] < 0:
             state.q_value_player_a[state.player_a_choice] = 0
@@ -108,7 +87,7 @@ class QLearningSimulAgent:
         if state.q_value_player_b[state.player_b_choice] < 0:
             state.q_value_player_b[state.player_b_choice] = 0
 
-        return state, new_winner_reward
+        return state
 
     def find_state_index(self, board_model):
 

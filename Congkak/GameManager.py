@@ -12,6 +12,7 @@ from Congkak.Hand import Hand
 from Congkak.IntelligentAgents.MaxAgent import MaxAgent
 from Congkak.IntelligentAgents.MinimaxAgent import MinimaxAgent
 from Congkak.IntelligentAgents.QLearningSimulAgent import QLearningSimulAgent
+from Congkak.IntelligentAgents.ReinforcementLearningSimulAgent import ReinforcementLearningSimulAgent
 from Congkak.IntelligentAgents.RandomAgent import RandomAgent
 
 
@@ -119,9 +120,10 @@ class GameManager:
     AGENT_MCTS = 'mcts'
 
     AGENT_Q_SIMUL = 'q simul'
+    AGENT_R_SIMUL = 'r simul'
 
     LIST_OF_AGENTS = [AGENT_USER, AGENT_RANDOM, AGENT_MAX, AGENT_MINIMAX]
-    LIST_OF_SIMUL_AGENTS = [AGENT_USER, AGENT_RANDOM, AGENT_Q_SIMUL]
+    LIST_OF_SIMUL_AGENTS = [AGENT_USER, AGENT_RANDOM, AGENT_R_SIMUL]
 
     PLAYER_A_WIN = 1
     PLAYER_B_WIN = -1
@@ -153,6 +155,7 @@ class GameManager:
         self.minimax_agent = MinimaxAgent(weights=(0, 0, 0, 0, 0, 0), maximum_depth=2, maximum_self_depth=3,
                                           maximum_number_node=0)
         self.q_simul_agent = QLearningSimulAgent()
+        self.r_simul_agent = ReinforcementLearningSimulAgent()
 
         self.game_has_ended = False
         self.show_starting_hands = True
@@ -160,7 +163,7 @@ class GameManager:
 
         # For graphics
         self.graphic_refresh_rate = 0.01
-        self.update_graphic = True
+        self.update_graphic = False
 
         self.current_mode = self.NORMAL_MODE
 
@@ -532,6 +535,8 @@ class GameManager:
                             move = self.random_agent.choose_move(player, copied_board)
                         case self.AGENT_Q_SIMUL:
                             move = self.q_simul_agent.choose_move(player, copied_board)
+                        case self.AGENT_R_SIMUL:
+                            move = self.r_simul_agent.choose_move(player, copied_board)
 
                 elif player == 'b':
                     match self.player_b_simul_agent:
