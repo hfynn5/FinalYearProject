@@ -1,19 +1,18 @@
 import copy
-import sys, traceback
+import sys
 import time
+import traceback
+
+from PyQt6.QtCore import QObject, pyqtSignal, QRunnable, QThreadPool
+from PyQt6.QtWidgets import *
 
 from Congkak.CongkakBoardGraphics import BoardGraphic
 from Congkak.CongkakBoardModel import BoardModel
 from Congkak.Hand import Hand
-from PyQt6.QtWidgets import *
-from PyQt6.QtCore import QObject, QThread, pyqtSignal, QRunnable, QThreadPool
-
-from PyQt6.QtGui import QPixmap
-
-from Congkak.IntelligentAgents.MinimaxAgent import MinimaxAgent
-from Congkak.IntelligentAgents.RandomAgent import RandomAgent
 from Congkak.IntelligentAgents.MaxAgent import MaxAgent
+from Congkak.IntelligentAgents.MinimaxAgent import MinimaxAgent
 from Congkak.IntelligentAgents.QLearningSimulAgent import QLearningSimulAgent
+from Congkak.IntelligentAgents.RandomAgent import RandomAgent
 
 
 class Worker(QRunnable):
@@ -161,7 +160,7 @@ class GameManager:
 
         # For graphics
         self.graphic_refresh_rate = 0.01
-        self.update_graphic = False
+        self.update_graphic = True
 
         self.current_mode = self.NORMAL_MODE
 
@@ -524,19 +523,18 @@ class GameManager:
         move = -1
         while move not in self.board_model.available_moves(player):
             copied_board = copy.deepcopy(self.board_model)
-            move += 1
 
             # TODO: add option to choose different simul agents per player
             if simul:
                 if player == 'a':
-                    match self.player_a_agent:
+                    match self.player_a_simul_agent:
                         case self.AGENT_RANDOM:
                             move = self.random_agent.choose_move(player, copied_board)
                         case self.AGENT_Q_SIMUL:
                             move = self.q_simul_agent.choose_move(player, copied_board)
 
                 elif player == 'b':
-                    match self.player_b_agent:
+                    match self.player_b_simul_agent:
                         case self.AGENT_RANDOM:
                             move = self.random_agent.choose_move(player, copied_board)
                         case self.AGENT_Q_SIMUL:
@@ -563,6 +561,9 @@ class GameManager:
 
             if move not in self.board_model.available_moves(player):
                 print("didnt find a valid move.")
+                # print("simul: " + str(simul) + " player: " + player + "agent a: " + str(self.player_a_agent) + "agent b: " + str(self.player_b_agent))
+                # print("move: " + str(move))
+                # copied_board.print_all_data()
 
         if player == 'a':
             move += 10
@@ -645,24 +646,25 @@ class GameManager:
             no_of_games = self.board_graphic.multiple_games_dialog_box.number_of_games
 
         if agent_a is None:
-            agent_a = self.LIST_OF_AGENTS[self.board_graphic.multiple_games_dialog_box.player_a_agent]
+            self.set_player_agent_index('a', self.board_graphic.multiple_games_dialog_box.player_a_agent)
+        else:
+            self.player_a_agent = agent_a
 
         if agent_b is None:
-            agent_b = self.LIST_OF_AGENTS[self.board_graphic.multiple_games_dialog_box.player_b_agent]
+            self.set_player_agent_index('b', self.board_graphic.multiple_games_dialog_box.player_b_agent)
+        else:
+            self.player_b_agent = agent_b
 
         if agent_a == self.AGENT_USER or agent_b == self.AGENT_USER:
             print("choose two artificial gents")
             return
 
-        print("running " + str(no_of_games) + " games. player a: " + str(agent_a) + ". player b: " + str(agent_b))
+        print("running " + str(no_of_games) + " games. player a: " + str(self.player_a_agent) + ". player b: " + str(self.player_b_agent))
 
         if not self.current_mode == self.ROUND_ROBIN_MODE:
             self.current_mode = self.MULTI_GAME_MODE
 
         self.new_game(False)
-
-        self.player_a_agent = agent_a
-        self.player_b_agent = agent_b
 
         self.no_of_games_to_run = no_of_games
         self.no_of_games_left = no_of_games - 1
@@ -673,7 +675,7 @@ class GameManager:
         pass
 
     # runs a round robin tournament
-    def run_round_robin_tournament(self, no_of_games=None, participants=None):
+    def run_round_robin_tournament(self):
 
         no_of_games = self.board_graphic.tournament_dialog_box.number_of_games
         participants = self.board_graphic.tournament_dialog_box.tournament_participants
@@ -806,7 +808,8 @@ class GameManager:
                 elif BoardModel.PROMPT_SOWING_B and not current_move[1] == 0 and current_move[0] == 0:
                     self.start_worker_simultaneous_sowing(hole_b=current_move[1], hand_a=self.board_model.player_a_hand)
                 elif BoardModel.PROMPT_SOWING_BOTH and not current_move[0] == 0 and not current_move[1] == 0:
-                    self.start_worker_simultaneous_sowing(hole_a=current_move[0], hole_b=current_move[1], simul_prompt=True)
+                    self.start_worker_simultaneous_sowing(hole_a=current_move[0], hole_b=current_move[1],
+                                                          simul_prompt=True)
                 else:
                     print("error with simul loading move. action: " + str(action) + " Move: " + str(current_move))
 
