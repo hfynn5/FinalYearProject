@@ -57,8 +57,11 @@ class BoardGraphic(QMainWindow):
         self.player_a_hand_point = QPoint(0, 0)
         self.player_b_hand_point = QPoint(0, 0)
 
-        self.player_a_dropdown = QComboBox()
-        self.player_b_dropdown = QComboBox()
+        self.player_a_agent_dropdown = QComboBox()
+        self.player_b_agent_dropdown = QComboBox()
+        self.player_a_simul_agent_dropdown = QComboBox()
+        self.player_b_simul_agent_dropdown = QComboBox()
+
 
         self.move_speed_slider = QSlider()
         self.play_button = QPushButton()
@@ -244,13 +247,39 @@ class BoardGraphic(QMainWindow):
             button.setText("Pick")
             self.house_b_buttons.append(button)
 
-        self.player_a_dropdown = QComboBox(self)
-        self.player_a_dropdown.move(650, 100)
-        self.player_a_dropdown.addItems(['Human', 'Random', 'Max', 'Minimax', 'MCTS'])
+        label_a = QLabel(self)
+        label_a.move(650, 70)
+        label_a.setText("Player A agent")
 
-        self.player_b_dropdown = QComboBox(self)
-        self.player_b_dropdown.move(650, 380)
-        self.player_b_dropdown.addItems(['Human', 'Random', 'Max', 'Minimax', 'MCTS'])
+        self.player_a_agent_dropdown = QComboBox(self)
+        self.player_a_agent_dropdown.move(650, 100)
+        self.player_a_agent_dropdown.addItems(['Human', 'Random', 'Max', 'Minimax', 'MCTS'])
+
+        label_a = QLabel(self)
+        label_a.move(650, 410)
+        label_a.setText("Player B agent")
+
+        self.player_b_agent_dropdown = QComboBox(self)
+        self.player_b_agent_dropdown.move(650, 380)
+        self.player_b_agent_dropdown.addItems(['Human', 'Random', 'Max', 'Minimax', 'MCTS'])
+
+        label_a = QLabel(self)
+        label_a.move(500, 70)
+        label_a.setText("Player A simul agent")
+
+        self.player_a_simul_agent_dropdown = QComboBox(self)
+        self.player_a_simul_agent_dropdown.move(500, 100)
+        self.player_a_simul_agent_dropdown.addItems(['Human', 'Random', 'Q Learning'])
+
+        label_a = QLabel(self)
+        label_a.move(500, 410)
+        label_a.setText("Player B simul agent")
+
+        self.player_b_simul_agent_dropdown = QComboBox(self)
+        self.player_b_simul_agent_dropdown.move(500, 380)
+        self.player_b_simul_agent_dropdown.addItems(['Human', 'Random', 'Q Learning'])
+
+
 
         slider_label = QLabel(self)
         slider_label.move(360, 500)
