@@ -408,13 +408,13 @@ class GameManager:
             result = self.PLAYER_B_WIN
             winner = "b"
 
-        self.q_simul_agent.update_all_q_values(winner)
-        self.q_simul_agent.clear_used_states()
+        self.r_simul_agent.update_all_values(winner)
+        self.r_simul_agent.clear_used_states()
 
         match self.current_mode:
             case self.NORMAL_MODE:
 
-                self.q_simul_agent.print_all_states()
+                self.r_simul_agent.print_all_states()
 
                 self.board_graphic.end_game_prompt(winner, self.board_model.storeroom_a_value,
                                                    self.board_model.storeroom_b_value)
@@ -431,7 +431,7 @@ class GameManager:
                     self.new_game(True)
                 else:
 
-                    self.q_simul_agent.print_all_states()
+                    self.r_simul_agent.print_all_states()
 
                     self.board_graphic.multi_end_game_prompt(self.game_results)
 
@@ -544,6 +544,8 @@ class GameManager:
                             move = self.random_agent.choose_move(player, copied_board)
                         case self.AGENT_Q_SIMUL:
                             move = self.q_simul_agent.choose_move(player, copied_board)
+                        case self.AGENT_R_SIMUL:
+                            move = self.r_simul_agent.choose_move(player, copied_board)
 
             else:
                 if player == 'a':
@@ -566,7 +568,9 @@ class GameManager:
 
             if move not in self.board_model.available_moves(player):
                 print("didnt find a valid move.")
-                # print("simul: " + str(simul) + " player: " + player + "agent a: " + str(self.player_a_agent) + "agent b: " + str(self.player_b_agent))
+                print("simul: " + str(simul) + " player: " + player + "agent a: " + str(self.player_a_agent) + "agent b: " + str(self.player_b_agent))
+                print(self.player_a_simul_agent)
+                print(self.player_b_simul_agent)
                 # print("move: " + str(move))
                 # copied_board.print_all_data()
 
@@ -612,6 +616,8 @@ class GameManager:
         if player == 'a':
             self.player_a_simul_agent = self.LIST_OF_SIMUL_AGENTS[agent_index]
             self.board_graphic.player_a_simul_agent_dropdown.setCurrentIndex(agent_index)
+
+
 
             if agent_index == 0 and not self.player_a_agent == self.AGENT_USER:
                 self.set_player_agent_index(player, 0)

@@ -10,12 +10,14 @@ from Congkak.Hand import Hand
 
 @dataclass
 class QState:
+
     house_a_values: list[int]
     house_b_values: list[int]
     q_value_player_a: list[int]
     q_value_player_b: list[int]
     player_a_choice: int = 0
     player_b_choice: int = 0
+    learning_rate: float = 0.01
 
     # 0, 0, 0, 0, 0, 0, 0
     # 1, 1, 1, 1, 1, 1, 1
@@ -27,13 +29,13 @@ class ReinforcementLearningSimulAgent:
 
         self.loaded_states = []
         self.used_states_index = []
-        self.learning_rate = 0.9
+        # self.learning_rate = 0.01
 
         pass
 
     def choose_move(self, player, board_model):
 
-        # self.used_states_index = []
+        # self.learning_rate = min(self.learning_rate + 0.001, 0.1)
 
         state_index = self.find_state_index(board_model)
 
@@ -41,6 +43,8 @@ class ReinforcementLearningSimulAgent:
             self.used_states_index.append(state_index)
 
         current_state = self.loaded_states[state_index]
+
+        self.loaded_states[state_index].learning_rate = min(self.loaded_states[state_index].learning_rate + 0.001, 0.1)
 
         choice = 0
 
@@ -55,11 +59,9 @@ class ReinforcementLearningSimulAgent:
 
     def update_all_values(self, winner_player):
 
-        prev_reward = 1
-
         for state_index in reversed(self.used_states_index):
             curr_state = self.loaded_states[state_index]
-            self.loaded_states[state_index] = self.update_q_value(curr_state, winner_player)
+            self.loaded_states[state_index] = self.update_value(curr_state, winner_player)
 
     def clear_used_states(self):
         self.used_states_index = []
@@ -71,13 +73,13 @@ class ReinforcementLearningSimulAgent:
         current_q_value_b = state.q_value_player_b[state.player_b_choice]
 
         if winner_player == 'a':
-            increase = self.learning_rate
+            increase = state.learning_rate
 
             state.q_value_player_a[state.player_a_choice] = round(current_q_value_a + increase, 5)
 
         elif winner_player == 'b':
 
-            increase = self.learning_rate
+            increase = state.learning_rate
 
             state.q_value_player_b[state.player_b_choice] = round(current_q_value_b + increase, 5)
 
