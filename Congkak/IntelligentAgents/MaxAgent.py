@@ -13,6 +13,8 @@ class MaxAgent:
         self.node_count = 0
         self.leaf_node_count = 0
 
+        self.max_depth = 10
+
         self.depth = 0
 
         self.current_best_value = -1
@@ -53,7 +55,7 @@ class MaxAgent:
 
         self.node_count += 1
 
-        if self.node_count % 100 == 0:
+        if self.node_count % 10000 == 0:
             print("max: total nodes searched: " + str(self.node_count))
 
         self.depth = max(self.depth, depth)

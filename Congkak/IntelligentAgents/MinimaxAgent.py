@@ -80,7 +80,7 @@ class MinimaxAgent:
 
         # print("optimal board: ")
         # optimal_board.print_all_data()
-        print("minimax: total nodes searched: " + str(self.node_count) + " leaf nodes reached: " + str(self.leaf_node_count))
+        # print("minimax: total nodes searched: " + str(self.node_count) + " leaf nodes reached: " + str(self.leaf_node_count))
 
         return final_best_move
     # TODO: add AB pruning
@@ -88,7 +88,7 @@ class MinimaxAgent:
 
         self.node_count += 1
 
-        if self.node_count % 100 == 0:
+        if self.node_count % 10000 == 0:
             print("minimax: total nodes searched: " + str(self.node_count))
 
         optimal_board = BoardModel()
