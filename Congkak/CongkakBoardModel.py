@@ -125,7 +125,7 @@ class BoardModel:
                 not self.player_b_hand.current_state == Hand.IDLE_STATE and \
                 not self.player_b_hand.current_state == Hand.PROMPTING_STATE:
 
-            if random.random() < 0.5:
+            if self.storeroom_a_value > self.storeroom_b_value:
                 self.player_a_hand = self.progress_hand(self.player_a_hand)
                 self.player_b_hand = self.progress_hand(self.player_b_hand)
             else:
