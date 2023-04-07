@@ -389,9 +389,12 @@ class GameManager:
             winner = "b"
 
         self.q_simul_agent.update_all_q_values(winner)
+        self.q_simul_agent.clear_used_states()
 
         match self.current_mode:
             case self.NORMAL_MODE:
+
+                self.q_simul_agent.print_all_states()
 
                 self.board_graphic.end_game_prompt(winner, self.board_model.storeroom_a_value,
                                                    self.board_model.storeroom_b_value)
@@ -407,6 +410,9 @@ class GameManager:
                     self.no_of_games_left -= 1
                     self.new_game(True)
                 else:
+
+                    self.q_simul_agent.print_all_states()
+
                     self.board_graphic.multi_end_game_prompt(self.game_results)
 
                     self.current_mode = self.NORMAL_MODE
@@ -502,9 +508,10 @@ class GameManager:
             copied_board = copy.deepcopy(self.board_model)
             move += 1
 
+            # TODO: add option to choose different simul agents per player
             if simul:
-                # move = self.q_simul_agent.choose_move(player, copied_board)
-                move = self.random_agent.choose_move(player, copied_board)
+                move = self.q_simul_agent.choose_move(player, copied_board)
+                # move = self.random_agent.choose_move(player, copied_board)
                 pass
             else:
                 if player == 'a':

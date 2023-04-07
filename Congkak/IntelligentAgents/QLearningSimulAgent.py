@@ -65,6 +65,7 @@ class QLearningSimulAgent:
 
     def clear_used_states(self):
         self.used_states_index = []
+        self.used_states_index = []
 
     def update_q_value(self, state, winner_player, prev_reward):
 
@@ -77,8 +78,6 @@ class QLearningSimulAgent:
 
             new_value = current_q_value_a + self.learning_rate * \
                         (1 + self.discount_rate * prev_reward - current_q_value_a)
-
-            print(new_value)
 
             state.q_value_player_a[state.player_a_choice] = round(new_value, 5)
 
