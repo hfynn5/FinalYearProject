@@ -67,8 +67,6 @@ class MaxAgent:
 
         hole = 0
 
-        best_value = -1
-
         if player == 'a':
             hole = move + 10
         elif player == 'b':
