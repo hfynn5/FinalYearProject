@@ -339,6 +339,7 @@ class BoardGraphic(QMainWindow):
 
         self.update_graphics_menu_toggle_action = QAction("Update Graphics", self)
         self.update_graphics_menu_toggle_action.setCheckable(True)
+        self.update_graphics_menu_toggle_action.setChecked(True)
         view_menu.addAction(self.update_graphics_menu_toggle_action)
 
         # Game Menu

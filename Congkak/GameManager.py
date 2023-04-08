@@ -152,7 +152,7 @@ class GameManager:
         # create Intelligent Agents
         self.random_agent = RandomAgent()
         self.max_agent = MaxAgent()
-        self.minimax_agent = MinimaxAgent(weights=(0, 0, 0, 0, 0, 0), maximum_depth=2, maximum_self_depth=3,
+        self.minimax_agent = MinimaxAgent(weights=(0, 0, 0, 0, 0, 0), maximum_depth=5, maximum_self_depth=5,
                                           maximum_number_node=0)
         self.q_simul_agent = QLearningSimulAgent()
         self.r_simul_agent = ReinforcementLearningSimulAgent()
@@ -163,7 +163,7 @@ class GameManager:
 
         # For graphics
         self.graphic_refresh_rate = 0.01
-        self.update_graphic = False
+        self.update_graphic = True
 
         self.current_mode = self.NORMAL_MODE
 
