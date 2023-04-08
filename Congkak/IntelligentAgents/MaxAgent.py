@@ -5,7 +5,7 @@ from Congkak.Hand import Hand
 
 
 class MaxAgent:
-    def __init__(self):
+    def __init__(self, max_depth):
         self.board_model = BoardModel()
         self.final_best_value = 1
         self.final_best_move = 0
@@ -13,9 +13,7 @@ class MaxAgent:
         self.node_count = 0
         self.leaf_node_count = 0
 
-        self.max_depth = 10
-
-        self.depth = 0
+        self.max_depth = max_depth
 
         self.current_best_value = -1
 
@@ -24,7 +22,6 @@ class MaxAgent:
     def choose_move(self, player, board_model):
         self.final_best_value = 1
         self.final_best_move = 0
-        self.depth = 1
         self.current_best_value = -1
         available_moves = board_model.available_moves(player)
 
@@ -41,7 +38,7 @@ class MaxAgent:
 
         for move in available_moves:
             new_board = copy.deepcopy(board_model)
-            evaluation = self.maximising(player, move, new_board, 1)
+            evaluation = self.maximising(player, move, new_board, self.max_depth)
 
             if evaluation >= self.final_best_value:
                 self.final_best_value = evaluation
@@ -58,7 +55,15 @@ class MaxAgent:
         if self.node_count % 10000 == 0:
             print("max: total nodes searched: " + str(self.node_count))
 
-        self.depth = max(self.depth, depth)
+        if depth <= 0:
+            print("depth reached")
+            best_value = 0
+            if player == 'a':
+                best_value = board_model.storeroom_a_value
+            elif player == 'b':
+                best_value = board_model.storeroom_b_value
+
+            return best_value
 
         hole = 0
 
@@ -74,14 +79,14 @@ class MaxAgent:
 
         board_model.iterate_progress_player(hand=new_hand)
 
-        if player == 'a':
-            best_value = board_model.storeroom_a_value
-        elif player == 'b':
-            best_value = board_model.storeroom_b_value
+        # if player == 'a':
+        #     best_value = board_model.storeroom_a_value
+        # elif player == 'b':
+        #     best_value = board_model.storeroom_b_value
 
-        if best_value > self.current_best_value:
-            self.current_best_value = best_value
-            return best_value
+        # if best_value > self.current_best_value:
+        #     self.current_best_value = best_value
+        #     return best_value
 
         best_value = -1
 
@@ -91,7 +96,7 @@ class MaxAgent:
             available_moves = board_model.available_moves(player)
             for move in available_moves:
                 new_board = copy.deepcopy(board_model)
-                evaluation = self.maximising(player, move, new_board, depth + 1)
+                evaluation = self.maximising(player, move, new_board, depth - 1)
 
                 if evaluation > self.final_best_value:
                     return evaluation

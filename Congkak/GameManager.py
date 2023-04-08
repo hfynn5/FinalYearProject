@@ -151,7 +151,7 @@ class GameManager:
 
         # create Intelligent Agents
         self.random_agent = RandomAgent()
-        self.max_agent = MaxAgent()
+        self.max_agent = MaxAgent(max_depth=10)
         self.minimax_agent = MinimaxAgent(weights=(0, 0, 0, 0, 0, 0), maximum_depth=5, maximum_self_depth=5,
                                           maximum_number_node=0)
         self.q_simul_agent = QLearningSimulAgent()
