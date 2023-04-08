@@ -45,16 +45,15 @@ class MinimaxAgent:
         board_model.sowing_speed = 0
         board_model.game_phase = BoardModel.SEQUENTIAL_PHASE
         board_model.ping = False
-        board_model.debug = False
-
-        self.board_model.player_a_hand.reset_hand()
-        self.board_model.player_b_hand.reset_hand()
+        board_model.debug = True
 
         final_best_value = 0
         if player == 'a':
+            self.board_model.player_a_hand.reset_hand()
             final_best_value = -math.inf
             board_model.last_active_player = 'b'
         elif player == 'b':
+            self.board_model.player_b_hand.reset_hand()
             final_best_value = math.inf
             board_model.last_active_player = 'a'
 
@@ -80,7 +79,7 @@ class MinimaxAgent:
 
         # print("optimal board: ")
         # optimal_board.print_all_data()
-        # print("minimax: total nodes searched: " + str(self.node_count) + " leaf nodes reached: " + str(self.leaf_node_count))
+        print("minimax: total nodes searched: " + str(self.node_count) + " leaf nodes reached: " + str(self.leaf_node_count))
 
         return final_best_move
     # TODO: add AB pruning
@@ -106,7 +105,10 @@ class MinimaxAgent:
         new_hand = Hand(player=player, hole_pos=hole, counter_count=0)
         new_hand.current_state = Hand.PICKUP_STATE
 
-        board_model.iterate_progress_player(hand=new_hand)
+        if player == 'a':
+            board_model.iterate_progress_both_players(hand_a=new_hand)
+        elif player == 'b':
+            board_model.iterate_progress_both_players(hand_b=new_hand)
 
         available_moves = board_model.available_moves(player)
 
