@@ -109,8 +109,15 @@ class BoardModel:
 
         self.waiting = False
 
-        self.player_a_hand = hand_a
-        self.player_b_hand = hand_b
+        if (self.player_a_hand.current_state == Hand.IDLE_STATE or
+                self.player_a_hand.current_state == Hand.PROMPTING_STATE) and \
+                hand_a is not None:
+            self.player_a_hand = hand_a
+
+        if (self.player_b_hand.current_state == Hand.IDLE_STATE or
+            self.player_b_hand.current_state == Hand.PROMPTING_STATE) and \
+                hand_b is not None:
+            self.player_b_hand = hand_b
 
         if self.player_a_hand.player not in self.active_players:
             self.active_players.append(self.player_a_hand.player)
