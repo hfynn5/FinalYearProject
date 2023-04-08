@@ -226,6 +226,8 @@ class GameManager:
         self.board_graphic.load_game_menu_button_action.triggered.connect(lambda checked: self.load_moves())
         self.board_graphic.new_game_menu_button_action.triggered.connect(lambda checked: self.new_game(False))
 
+        self.board_graphic.update_graphics_menu_toggle_action.triggered.connect(self.toggle_update_graphics)
+
         self.board_graphic.player_a_agent_dropdown. \
             activated.connect(lambda
                               index=self.board_graphic.player_a_agent_dropdown.
@@ -828,6 +830,9 @@ class GameManager:
         if self.move_counter >= len(self.loaded_moves):
             print("Game Loaded")
             self.current_mode = self.NORMAL_MODE
+
+    def toggle_update_graphics(self, state):
+        self.update_graphic = state
 
     def close_program(self):
         self.kill_all_workers()

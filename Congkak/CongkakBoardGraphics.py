@@ -62,13 +62,14 @@ class BoardGraphic(QMainWindow):
         self.player_a_simul_agent_dropdown = QComboBox()
         self.player_b_simul_agent_dropdown = QComboBox()
 
-
         self.move_speed_slider = QSlider()
         self.play_button = QPushButton()
 
         self.new_game_menu_button_action = QAction()
         self.save_game_menu_button_action = QAction()
         self.load_game_menu_button_action = QAction()
+
+        self.update_graphics_menu_toggle_action = QAction()
 
         self.run_multiple_games_menu_button_action = QAction()
         self.run_tournament_menu_button_action = QAction()
@@ -336,8 +337,9 @@ class BoardGraphic(QMainWindow):
         # View Menu
         view_menu = self.menuBar().addMenu("View")
 
-        button_action = QAction("idk", self)
-        view_menu.addAction(button_action)
+        self.update_graphics_menu_toggle_action = QAction("Update Graphics", self)
+        self.update_graphics_menu_toggle_action.setCheckable(True)
+        view_menu.addAction(self.update_graphics_menu_toggle_action)
 
         # Game Menu
         game_menu = self.menuBar().addMenu("Game")
