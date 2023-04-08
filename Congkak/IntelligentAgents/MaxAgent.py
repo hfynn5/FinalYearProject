@@ -56,7 +56,7 @@ class MaxAgent:
             print("max: total nodes searched: " + str(self.node_count))
 
         if depth <= 0:
-            print("depth reached")
+            # print("depth reached")
             best_value = 0
             if player == 'a':
                 best_value = board_model.storeroom_a_value
@@ -78,15 +78,6 @@ class MaxAgent:
         new_hand.current_state = Hand.PICKUP_STATE
 
         board_model.iterate_progress_player(hand=new_hand)
-
-        # if player == 'a':
-        #     best_value = board_model.storeroom_a_value
-        # elif player == 'b':
-        #     best_value = board_model.storeroom_b_value
-
-        # if best_value > self.current_best_value:
-        #     self.current_best_value = best_value
-        #     return best_value
 
         best_value = -1
 

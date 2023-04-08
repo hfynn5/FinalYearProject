@@ -79,10 +79,10 @@ class MinimaxAgent:
 
         # print("optimal board: ")
         # optimal_board.print_all_data()
-        print("minimax: total nodes searched: " + str(self.node_count) + " leaf nodes reached: " + str(self.leaf_node_count))
+        # print("minimax: total nodes searched: " + str(self.node_count) + " leaf nodes reached: " + str(self.leaf_node_count))
 
         return final_best_move
-    # TODO: add AB pruning
+
     def minimax(self, board_model, move, depth, self_depth, player, alpha, beta):
 
         self.node_count += 1

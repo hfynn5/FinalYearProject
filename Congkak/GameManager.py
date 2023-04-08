@@ -412,6 +412,7 @@ class GameManager:
 
         self.r_simul_agent.update_all_values(winner)
         self.r_simul_agent.clear_used_states()
+        # print("max depth reached so far: " + str(self.max_agent.max_depth_reached_ever))
 
         match self.current_mode:
             case self.NORMAL_MODE:
