@@ -15,6 +15,8 @@ from Congkak.IntelligentAgents.QLearningSimulAgent import QLearningSimulAgent
 from Congkak.IntelligentAgents.ReinforcementLearningSimulAgent import ReinforcementLearningSimulAgent
 from Congkak.IntelligentAgents.RandomAgent import RandomAgent
 
+from statistics import mean
+
 
 class Worker(QRunnable):
     """
@@ -434,6 +436,9 @@ class GameManager:
                 else:
 
                     self.r_simul_agent.print_all_states()
+
+                    print("average leaf count: " + str(mean(self.max_agent.all_leaves)))
+                    print("average depth: " + str(mean(self.max_agent.all_depths)))
 
                     self.board_graphic.multi_end_game_prompt(self.game_results)
 

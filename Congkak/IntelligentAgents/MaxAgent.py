@@ -2,7 +2,7 @@ import copy
 
 from Congkak.CongkakBoardModel import BoardModel
 from Congkak.Hand import Hand
-
+from statistics import mean
 
 class MaxAgent:
     def __init__(self, max_depth):
@@ -16,6 +16,9 @@ class MaxAgent:
         self.max_depth = max_depth
 
         self.current_best_value = -1
+
+        self.all_leaves = []
+        self.all_depths = []
 
         pass
 
@@ -44,7 +47,9 @@ class MaxAgent:
                 self.final_best_value = evaluation
                 self.final_best_move = move
 
-        # print("max: total nodes searched: " + str(self.node_count) + " no of leaf nodes reached: " + str(self.leaf_node_count))
+        self.all_leaves.append(self.leaf_node_count)
+
+        print("max: total nodes searched: " + str(self.node_count) + " no of leaf nodes reached: " + str(self.leaf_node_count))
         # print("final move: " + str(self.final_best_move))
         return self.final_best_move
 
@@ -93,6 +98,7 @@ class MaxAgent:
                 if evaluation >= best_value:
                     best_value = evaluation
         else:
+            self.all_depths.append(10-depth)
             self.leaf_node_count += 1
             if player == 'a':
                 best_value = board_model.storeroom_a_value
