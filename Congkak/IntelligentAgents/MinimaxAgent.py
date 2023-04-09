@@ -4,6 +4,15 @@ import random
 from Congkak.CongkakBoardModel import BoardModel
 from Congkak.Hand import Hand
 
+
+def evaluate_position(board_model, player):
+    best_value = 0
+
+    best_value = board_model.storeroom_a_value - board_model.storeroom_b_value
+
+    return best_value
+
+
 class MinimaxAgent:
 
     # h1 = maximise counters on players side
@@ -94,7 +103,7 @@ class MinimaxAgent:
 
         if depth == 0 or self_depth == 0:
             self.leaf_node_count += 1
-            return self.evaluate_position(board_model, player), board_model
+            return evaluate_position(board_model, player), board_model
 
         hole = 0
         if player == 'a':
@@ -114,7 +123,7 @@ class MinimaxAgent:
 
         if depth == 0 or len(available_moves) == 0:
             self.leaf_node_count += 1
-            return self.evaluate_position(board_model, player), board_model
+            return evaluate_position(board_model, player), board_model
 
         if player == 'a':
             max_eva = -math.inf
@@ -232,10 +241,3 @@ class MinimaxAgent:
                             break
 
             return min_eva, optimal_board
-
-    def evaluate_position(self, board_model, player):
-        best_value = 0
-
-        best_value = board_model.storeroom_a_value - board_model.storeroom_b_value
-
-        return best_value

@@ -4,6 +4,20 @@ from Congkak.CongkakBoardModel import BoardModel
 from Congkak.Hand import Hand
 from statistics import mean
 
+
+def evaluate_position(board_model, player):
+    best_value = 0
+
+    best_value = board_model.storeroom_a_value - board_model.storeroom_b_value
+
+    if player == 'a':
+        return best_value
+    elif player == 'b':
+        return -best_value
+
+    return best_value
+
+
 class MaxAgent:
     def __init__(self, max_depth):
         self.board_model = BoardModel()
@@ -100,9 +114,7 @@ class MaxAgent:
         else:
             self.all_depths.append(10-depth)
             self.leaf_node_count += 1
-            if player == 'a':
-                best_value = board_model.storeroom_a_value
-            elif player == 'b':
-                best_value = board_model.storeroom_b_value
+
+            best_value = evaluate_position(board_model,player)
 
         return best_value
