@@ -153,8 +153,8 @@ class GameManager:
 
         # create Intelligent Agents
         self.random_agent = RandomAgent()
-        self.max_agent = MaxAgent(max_depth=10)
-        self.minimax_agent = MinimaxAgent(weights=(0, 0, 0, 0, 0, 0), maximum_depth=5, maximum_self_depth=5,
+        self.max_agent = MaxAgent(max_depth=5)
+        self.minimax_agent = MinimaxAgent(weights=(0, 0, 0, 0, 0, 0), maximum_depth=5, maximum_self_depth=0,
                                           maximum_number_node=0)
         self.q_simul_agent = QLearningSimulAgent()
         self.r_simul_agent = ReinforcementLearningSimulAgent()
@@ -575,11 +575,15 @@ class GameManager:
 
             if move not in self.board_model.available_moves(player):
                 print("didnt find a valid move.")
-                print("simul: " + str(simul) + " player: " + player + "agent a: " + str(self.player_a_agent) + "agent b: " + str(self.player_b_agent))
-                print(self.player_a_simul_agent)
-                print(self.player_b_simul_agent)
-                # print("move: " + str(move))
-                # copied_board.print_all_data()
+                print("simul: " + str(simul) + " player: " + player +
+                      " agent a: " + str(self.player_a_agent) +
+                      " agent b: " + str(self.player_b_agent) +
+                      " simul agent a: " + str(self.player_a_simul_agent) +
+                      " simul agent b: " + str(self.player_b_simul_agent))
+                print("move: " + str(move))
+                copied_board.print_all_data()
+                raise("no valid move")
+
 
         if player == 'a':
             move += 10
