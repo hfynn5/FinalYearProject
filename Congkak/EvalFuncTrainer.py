@@ -24,14 +24,27 @@ class EvalFuncTrainer:
         self.gaus_std_dev = initial_std_dev
 
         self.individual_a_index = 0
-        self.individual_b_index = 0
+        self.individual_b_index = -1
 
         self.initialize_population(self.pop_size)
 
 
+    def get_next_two_agents(self):
 
-    def get_next_agent(self):
-        return
+        self.individual_b_index += 1
+
+        if self.individual_b_index >= len(self.population):
+            self.individual_b_index = 0
+            self.individual_a_index += 1
+
+            if self.individual_a_index >= len(self.population):
+                return None
+
+        return self.population[self.individual_a_index], self.population[self.individual_b_index]
+
+    def update_score(self, individual_a_score, individual_b_score):
+        self.population[self.individual_a_index].score += individual_a_score
+        self.population[self.individual_b_index].score += individual_b_score
 
     def crossover_individuals(self, individual_a, individual_b):
 
