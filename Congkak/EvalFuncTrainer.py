@@ -1,3 +1,4 @@
+import math
 import random
 from dataclasses import dataclass, field
 
@@ -28,6 +29,38 @@ class EvalFuncTrainer:
 
         self.initialize_population(self.pop_size)
 
+    def generate_next_population(self):
+
+        def get_score(individual_x):
+            return individual_x.score
+
+        self.population.sort(key=get_score, reverse=True)
+
+        self.population = self.population[:math.floor(self.pop_size/2)]
+
+        random.shuffle(self.population)
+
+        first_half = self.population[:math.floor(self.pop_size/2)]
+        second_half = self.population[math.floor(self.pop_size/2):]
+
+        for index, individual_a in enumerate(first_half):
+
+            individual_b = second_half[index+1]
+
+            new_individual_a, new_individual_b = self.crossover_individuals(individual_a, individual_b)
+
+            self.population.append(new_individual_a)
+            self.population.append(new_individual_b)
+
+        for index, individual in enumerate(self.population):
+            individual = self.mutate_chromosome(individual, self.gaus_std_dev)
+
+            individual.score = 0
+
+        self.individual_a_index = 0
+        self.individual_b_index = -1
+
+        pass
 
     def get_next_two_agents(self):
 
@@ -68,7 +101,7 @@ class EvalFuncTrainer:
 
         return individual_a, individual_b
 
-    def mutate_chromosome(self, individual, mutation_rate, std_dev):
+    def mutate_chromosome(self, individual, std_dev):
 
         for point in range(self.size_of_chromosome):
             individual.weight_chromosome[point] = gaussian_mutator(individual.weight_chromosome[point],
