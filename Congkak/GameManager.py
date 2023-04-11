@@ -8,6 +8,7 @@ from PyQt6.QtWidgets import *
 
 from Congkak.CongkakBoardGraphics import BoardGraphic
 from Congkak.CongkakBoardModel import BoardModel
+from Congkak.EvalFuncTrainer import EvalFuncTrainer
 from Congkak.Hand import Hand
 from Congkak.IntelligentAgents.MaxAgent import MaxAgent
 from Congkak.IntelligentAgents.MinimaxAgent import MinimaxAgent
@@ -159,6 +160,11 @@ class GameManager:
         self.q_simul_agent = QLearningSimulAgent()
         self.r_simul_agent = ReinforcementLearningSimulAgent()
 
+        self.eval_func_trainer = None
+        self.trainer_pop_size = 40
+        self.trainer_chromosome_size = 6
+        self.trainer_std_dev = 0.01
+
         self.game_has_ended = False
         self.show_starting_hands = True
         self.autoplay_hands = False
@@ -250,9 +256,14 @@ class GameManager:
                               index=self.board_graphic.player_b_agent_dropdown.
                               currentIndex(): self.set_player_simul_agent_index('b', index))
 
+        self.board_graphic.run_eval_func_training_menu_button_action.\
+            triggered.connect(self.start_training_eval_function)
+
         self.board_graphic.multiple_games_dialog_box.buttonBox.accepted.connect(self.run_multiple_games)
 
         self.board_graphic.tournament_dialog_box.buttonBox.accepted.connect(self.run_round_robin_tournament)
+
+
 
     # makes worker constantly update graphics
     def start_worker_graphic_updater(self):
@@ -742,6 +753,21 @@ class GameManager:
         self.run_multiple_games(self.no_of_games_to_run, self.tournament_participants[agent_a_index],
                                 self.tournament_participants[agent_b_index])
 
+    def start_training_eval_function(self, no_of_games=None, agent_a=None, agent_b=None):
+        self.eval_func_trainer = EvalFuncTrainer(12,
+                                                 self.trainer_chromosome_size,
+                                                 self.trainer_std_dev)
+
+        self.eval_func_trainer.get_next_two_agents()
+        self.eval_func_trainer.update_score(2, 5)
+        self.eval_func_trainer.get_next_two_agents()
+        self.eval_func_trainer.update_score(3, 6)
+        self.eval_func_trainer.get_next_two_agents()
+        self.eval_func_trainer.update_score(4, 7)
+
+        self.eval_func_trainer.generate_next_population()
+
+
     # Restarts a new game
     def new_game(self, autorun):
 
@@ -772,6 +798,7 @@ class GameManager:
                     self.board_graphic.set_enable_player_specific_inputs(player='b',
                                                                          enable_list=available_moves)
 
+    # stops all workers
     def kill_all_workers(self):
         self.board_model.running = False
         self.threadpool.clear()
@@ -780,10 +807,7 @@ class GameManager:
 
         self.board_model.running = True
 
-    # is this possible?
-    def kill_specific_workers(self):
-        pass
-
+    # save moves BROKEN
     def save_moves(self):
         file = open("moves.txt", 'w')
 
@@ -793,6 +817,7 @@ class GameManager:
         file.write("END")
         file.close()
 
+    # load moves BROKEN
     def load_moves(self):
 
         self.board_model.reset_game()
@@ -809,6 +834,7 @@ class GameManager:
         self.move_counter = 0
         self.do_next_move_from_loaded_moves(BoardModel.PROMPT_SOWING_BOTH)
 
+    # plays the next move loaded BROKEN??
     def do_next_move_from_loaded_moves(self, action):
 
         if self.move_counter < len(self.loaded_moves):
@@ -840,9 +866,11 @@ class GameManager:
             print("Game Loaded")
             self.current_mode = self.NORMAL_MODE
 
+    # toggles whether the graphics should update
     def toggle_update_graphics(self, state):
         self.update_graphic = state
 
+    # closes the program
     def close_program(self):
         self.kill_all_workers()
         sys.exit("Window closed")

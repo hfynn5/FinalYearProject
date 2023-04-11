@@ -29,6 +29,10 @@ class EvalFuncTrainer:
 
         self.initialize_population(self.pop_size)
 
+        print("length: " + str(len(self.population)))
+        for individual in self.population:
+            print(individual)
+
     def generate_next_population(self):
 
         def get_score(individual_x):
@@ -40,12 +44,12 @@ class EvalFuncTrainer:
 
         random.shuffle(self.population)
 
-        first_half = self.population[:math.floor(self.pop_size/2)]
-        second_half = self.population[math.floor(self.pop_size/2):]
+        first_half = self.population[:math.floor(self.pop_size/4)]
+        second_half = self.population[math.floor(self.pop_size/4):]
 
         for index, individual_a in enumerate(first_half):
 
-            individual_b = second_half[index+1]
+            individual_b = second_half[index]
 
             new_individual_a, new_individual_b = self.crossover_individuals(individual_a, individual_b)
 

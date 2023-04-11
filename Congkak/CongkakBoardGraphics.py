@@ -7,6 +7,7 @@ from Congkak.DialogueBoxes.TournamentDialogBox import TournamentDialogBox
 from Congkak.DialogueBoxes.GameEndDialogBox import GameEndDialogBox
 from Congkak.DialogueBoxes.MultiGameEndDialogBox import MultiGameEndDialogBox
 from Congkak.DialogueBoxes.TournamentEndDialogBox import TournamentEndDialogBox
+from Congkak.DialogueBoxes.EvalFuncTrainingDialogBox import EvalFuncTrainingDialogBox
 import sys
 
 from PyQt6.QtWidgets import QApplication, QWidget, QLabel, QMainWindow
@@ -71,10 +72,14 @@ class BoardGraphic(QMainWindow):
 
         self.update_graphics_menu_toggle_action = QAction()
 
+        self.run_eval_func_training_menu_button_action = QAction()
+
         self.run_multiple_games_menu_button_action = QAction()
         self.run_tournament_menu_button_action = QAction()
 
         self.game_end_dialog_box = GameEndDialogBox()
+
+        self.eval_func_training_dialog_box = EvalFuncTrainingDialogBox()
 
         self.multiple_games_dialog_box = MultiGameDialogBox()
         self.multi_game_end_dialog_box = MultiGameEndDialogBox()
@@ -332,7 +337,12 @@ class BoardGraphic(QMainWindow):
         button_action = QAction("Change Speed", self)
         edit_menu.addAction(button_action)
 
+        # Training Menu
         train_menu = self.menuBar().addMenu("Training")
+
+        self.run_eval_func_training_menu_button_action = QAction("Run Evaluation Function Training", self)
+        self.run_eval_func_training_menu_button_action.setStatusTip("Run Evaluation Function Training")
+        train_menu.addAction(self.run_eval_func_training_menu_button_action)
 
         # View Menu
         view_menu = self.menuBar().addMenu("View")
@@ -345,6 +355,7 @@ class BoardGraphic(QMainWindow):
         # Game Menu
         game_menu = self.menuBar().addMenu("Game")
 
+        # TODO: make the menus that are used locally to be only used locally
         self.run_multiple_games_menu_button_action = QAction("Run Multiple Games...", self)
         self.run_multiple_games_menu_button_action.setStatusTip("Run Multiple Games")
         self.run_multiple_games_menu_button_action.triggered.connect(self.multiple_games_dialog_box.exec)
