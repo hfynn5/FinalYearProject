@@ -6,22 +6,66 @@ from Congkak.Hand import Hand
 from statistics import mean
 
 
-def evaluate_position(board_model, player):
-    best_value = 0
+# h0 = maximise counters on players side
+# h1 = maximise the number of houses with counters in them
+# h2 = maximise the counters in the player's storeroom
+# h3 = minimise the counters in the opponent's storeroom
+# h4 = maximise the number of chain moves
+# h5 = maximise the difference between the player's and opponent's storeroom
 
-    best_value = board_model.storeroom_a_value - board_model.storeroom_b_value
+def evaluate_position(board_model, player, chain_count, heuristic_weights):
 
-    return best_value
+    heuristics = [0, 0, 0, 0, 0, 0]
+
+    if player == 'a':
+        heuristics[0] = sum(board_model.house_a_values)
+
+        for house in board_model.house_a_values:
+            if house > 0:
+                heuristics[1] += 1
+
+        heuristics[2] = board_model.storeroom_a_value
+
+        heuristics[3] = -board_model.storeroom_b_value
+
+        heuristics[5] = board_model.storeroom_a_value - board_model.storeroom_b_value
+
+    elif player == 'b':
+        heuristics[0] = sum(board_model.house_b_values)
+
+        for house in board_model.house_b_values:
+            if house > 0:
+                heuristics[1] += 1
+
+        heuristics[2] = board_model.storeroom_b_value
+
+        heuristics[3] = -board_model.storeroom_a_value
+
+        heuristics[5] = board_model.storeroom_b_value - board_model.storeroom_a_value
+
+    heuristics[4] = chain_count
+
+    best_value = sum([w*h for (w, h) in zip(heuristic_weights, heuristics)])
+
+    if player == 'a':
+        return best_value
+    elif player == 'b':
+        return -best_value
 
 
 class MaxAgent:
-    def __init__(self, max_depth):
+    def __init__(self, weights,  max_depth):
         self.board_model = BoardModel()
 
         self.node_count = 0
         self.leaf_node_count = 0
 
         self.max_depth = max_depth
+
+        self.heuristics_weights = [0, 0, 0, 0, 0, 0]
+
+        for weight in weights:
+            self.heuristics_weights = weight
 
         self.all_leaves = []
         self.all_depths = []
@@ -67,7 +111,7 @@ class MaxAgent:
         # print("final move: " + str(final_best_move) + " final best value: " + str(final_best_value))
         return final_best_move
 
-    def maximising(self, player, move, board_model, depth):
+    def maximising(self, player, move, board_model, depth, chain_count):
 
         self.node_count += 1
 
@@ -76,7 +120,7 @@ class MaxAgent:
 
         if depth <= 0:
 
-            best_value = evaluate_position(board_model, player)
+            best_value = evaluate_position(board_model, player, chain_count)
 
             return best_value
 
@@ -102,7 +146,7 @@ class MaxAgent:
             available_moves = board_model.available_moves(player)
             for move in available_moves:
                 new_board = copy.deepcopy(board_model)
-                evaluation = self.maximising(player, move, new_board, depth - 1)
+                evaluation = self.maximising(player, move, new_board, depth - 1, chain_count + 1)
 
                 if player == 'a' and evaluation >= best_value or \
                         player == 'b' and evaluation <= best_value:
@@ -112,6 +156,6 @@ class MaxAgent:
             self.all_depths.append(self.max_depth - depth)
             self.leaf_node_count += 1
 
-            best_value = evaluate_position(board_model, player)
+            best_value = evaluate_position(board_model, player, chain_count, self.heuristics_weights)
 
         return best_value
