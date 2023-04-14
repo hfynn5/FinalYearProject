@@ -36,7 +36,7 @@ class MinimaxAgent:
         self.leaf_node_count = 0
         self.checked_opponent = False
 
-        self.heuristics_weights = range(6)
+        self.heuristics_weights = [0, 0, 0, 0, 0, 0]
 
         for weight in weights:
             self.heuristics_weights = weight
@@ -170,8 +170,8 @@ class MinimaxAgent:
                     for move in available_moves:
                         new_board = copy.deepcopy(board_model)
 
-                        self.checked_opponent = True
-                        self_depth = self.maximum_self_depth
+                        # self.checked_opponent = True
+                        # self_depth = self.maximum_self_depth
 
                         eva, board = self.minimax(new_board, move, depth - 1, self_depth - 1, 'b', alpha, beta)
                         if eva > max_eva:
@@ -212,8 +212,8 @@ class MinimaxAgent:
                     for move in available_moves:
                         new_board = copy.deepcopy(board_model)
 
-                        self.checked_opponent = True
-                        self_depth = self.maximum_self_depth
+                        # self.checked_opponent = True
+                        # self_depth = self.maximum_self_depth
 
                         eva, board = self.minimax(new_board, move, depth - 1, self_depth - 1, 'a', alpha, beta)
                         if eva < min_eva:
