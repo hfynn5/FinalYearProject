@@ -64,8 +64,7 @@ class MaxAgent:
 
         self.heuristics_weights = [0, 0, 0, 0, 0, 0]
 
-        for weight in weights:
-            self.heuristics_weights = weight
+        self.heuristics_weights = weights
 
         self.all_leaves = []
         self.all_depths = []
@@ -80,7 +79,6 @@ class MaxAgent:
             final_best_value = -math.inf
         elif player == 'b':
             final_best_value = math.inf
-
 
         final_best_move = 0
         available_moves = board_model.available_moves(player)
@@ -98,7 +96,7 @@ class MaxAgent:
 
         for move in available_moves:
             new_board = copy.deepcopy(board_model)
-            evaluation = self.maximising(player, move, new_board, self.max_depth)
+            evaluation = self.maximising(player, move, new_board, self.max_depth, 0)
 
             if player == 'a' and evaluation >= final_best_value or \
                     player == 'b' and evaluation <= final_best_value:
@@ -120,7 +118,7 @@ class MaxAgent:
 
         if depth <= 0:
 
-            best_value = evaluate_position(board_model, player, chain_count)
+            best_value = evaluate_position(board_model, player, chain_count, self.heuristics_weights)
 
             return best_value
 
