@@ -125,8 +125,9 @@ class GameManager:
     AGENT_Q_SIMUL = 'q simul'
     AGENT_R_SIMUL = 'r simul'
 
-    LIST_OF_AGENTS = [AGENT_USER, AGENT_RANDOM, AGENT_MAX, AGENT_MINIMAX]
-    LIST_OF_SIMUL_AGENTS = [AGENT_USER, AGENT_RANDOM, AGENT_R_SIMUL]
+    LIST_OF_AGENTS_INDEX = [AGENT_USER, AGENT_RANDOM, AGENT_MAX, AGENT_MINIMAX]
+    LIST_OF_SIMUL_AGENTS_INDEX = [AGENT_USER, AGENT_RANDOM, AGENT_R_SIMUL]
+    # if update, make sure to update the list below.
 
     PLAYER_A_WIN = 1
     PLAYER_B_WIN = -1
@@ -136,6 +137,7 @@ class GameManager:
     MULTI_GAME_MODE = 1
     ROUND_ROBIN_MODE = 2
     LOADING_MODE = 3
+    EVAL_TRAINING_MODE = 4
 
     def __init__(self):
 
@@ -146,24 +148,38 @@ class GameManager:
 
         # user, random, max, minimax, mcts
         # self.agent_list = [self.AGENT_USER, self.AGENT_RANDOM, self.AGENT_MAX, self.AGENT_MINIMAX, self.AGENT_MCTS]
-        self.player_a_agent = self.AGENT_USER
-        self.player_b_agent = self.AGENT_USER
+        self.player_a_agent_index = self.AGENT_USER
+        self.player_b_agent_index = self.AGENT_USER
 
-        self.player_a_simul_agent = self.AGENT_USER
-        self.player_b_simul_agent = self.AGENT_USER
+        self.player_a_simul_agent_index = self.AGENT_USER
+        self.player_b_simul_agent_index = self.AGENT_USER
+
+        self.player_a_agent = RandomAgent()
+        self.player_b_agent = RandomAgent()
+        self.player_a_agent_simul = RandomAgent()
+        self.player_b_agent_simul = RandomAgent()
 
         # create Intelligent Agents
+        self.minmax_depth = 5
+
         self.random_agent = RandomAgent()
-        self.max_agent = MaxAgent(max_depth=5)
-        self.minimax_agent = MinimaxAgent(weights=(0, 0, 0, 0, 0, 0), maximum_depth=5, maximum_self_depth=0,
+        self.max_agent = MaxAgent(max_depth=self.minmax_depth, weights=[0, 0, 0, 0, 0, 1])
+        self.minimax_agent = MinimaxAgent(weights=[0, 0, 0, 0, 0, 0], maximum_depth=self.minmax_depth, maximum_self_depth=0,
                                           maximum_number_node=0)
         self.q_simul_agent = QLearningSimulAgent()
         self.r_simul_agent = ReinforcementLearningSimulAgent()
 
+        self.list_of_art_agents = [None, self.random_agent, self.max_agent, self.minimax_agent]
+        self.list_of_simul_art_agents = [None, self.random_agent, self.r_simul_agent]
+        # if update, make sure to update the list above.
+
+        # training evaluation function
         self.eval_func_trainer = None
         self.trainer_pop_size = 40
         self.trainer_chromosome_size = 6
         self.trainer_std_dev = 0.01
+        self.TEF_individual_a = MaxAgent(max_depth=5, weights=[0, 0, 0, 0, 0, 0])
+        self.TEF_individual_b = MaxAgent(max_depth=5, weights=[0, 0, 0, 0, 0, 0])
 
         self.game_has_ended = False
         self.show_starting_hands = True
@@ -185,8 +201,8 @@ class GameManager:
         self.game_results = []
 
         # for round robin
-        self.round_robin_results = [[0 for x in range(len(self.LIST_OF_AGENTS)-1)]
-                                    for x in range(len(self.LIST_OF_AGENTS)-1)]
+        self.round_robin_results = [[0 for x in range(len(self.LIST_OF_AGENTS_INDEX) - 1)]
+                                    for x in range(len(self.LIST_OF_AGENTS_INDEX) - 1)]
         self.tournament_participants = []
 
         # declare threadpool
@@ -263,8 +279,6 @@ class GameManager:
 
         self.board_graphic.tournament_dialog_box.buttonBox.accepted.connect(self.run_round_robin_tournament)
 
-
-
     # makes worker constantly update graphics
     def start_worker_graphic_updater(self):
         worker = Worker(self.update_board_graphics_constantly)
@@ -305,10 +319,10 @@ class GameManager:
         else:
             prompt_agent_b = hand_b.current_state == Hand.PROMPTING_STATE
 
-        if prompt_agent_a and not self.player_a_agent == self.AGENT_USER:
+        if prompt_agent_a and not self.player_a_agent_index == self.AGENT_USER:
             hole_a = self.prompt_agent_for_input('a', simul_prompt)
 
-        if prompt_agent_b and not self.player_b_agent == self.AGENT_USER:
+        if prompt_agent_b and not self.player_b_agent_index == self.AGENT_USER:
             hole_b = self.prompt_agent_for_input('b', simul_prompt)
 
         self.board_model.append_move(hole_a, hole_b)
@@ -364,9 +378,9 @@ class GameManager:
                 if self.current_mode == self.LOADING_MODE:
                     self.do_next_move_from_loaded_moves(action)
                 else:
-                    if self.player_a_agent == self.AGENT_USER or self.player_b_agent == self.AGENT_USER:
+                    if self.player_a_agent_index == self.AGENT_USER or self.player_b_agent_index == self.AGENT_USER:
 
-                        if (not self.player_a_agent == self.AGENT_USER) ^ (self.player_b_agent == self.AGENT_USER):
+                        if (not self.player_a_agent_index == self.AGENT_USER) ^ (self.player_b_agent_index == self.AGENT_USER):
                             print("enable")
                             self.board_graphic.set_enable_play_button(True)
                             self.autoplay_hands = False
@@ -375,10 +389,10 @@ class GameManager:
                             self.board_graphic.set_enable_play_button(False)
                             self.autoplay_hands = True
 
-                        if self.player_a_agent == self.AGENT_USER:
+                        if self.player_a_agent_index == self.AGENT_USER:
                             self.prompt_player('a', True)
 
-                        if self.player_b_agent == self.AGENT_USER:
+                        if self.player_b_agent_index == self.AGENT_USER:
                             self.prompt_player('b', True)
 
                     else:
@@ -458,8 +472,8 @@ class GameManager:
                 pass
             case self.ROUND_ROBIN_MODE:
 
-                agent_a_index = self.tournament_participants.index(self.player_a_agent)
-                agent_b_index = self.tournament_participants.index(self.player_b_agent)
+                agent_a_index = self.tournament_participants.index(self.player_a_agent_index)
+                agent_b_index = self.tournament_participants.index(self.player_b_agent_index)
 
                 if result == self.PLAYER_A_WIN:
                     self.round_robin_results[agent_a_index][agent_b_index] += 1
@@ -472,8 +486,8 @@ class GameManager:
                     self.new_game(True)
                 else:
 
-                    agent_a_index = self.tournament_participants.index(self.player_a_agent)
-                    agent_b_index = self.tournament_participants.index(self.player_b_agent)
+                    agent_a_index = self.tournament_participants.index(self.player_a_agent_index)
+                    agent_b_index = self.tournament_participants.index(self.player_b_agent_index)
 
                     agent_b_index += 1
 
@@ -489,6 +503,13 @@ class GameManager:
                         self.run_multiple_games(self.no_of_games_to_run, self.tournament_participants[agent_a_index],
                                                 self.tournament_participants[agent_b_index])
                 pass
+
+            case self.EVAL_TRAINING_MODE:
+
+
+
+                pass
+
             case self.LOADING_MODE:
                 print("Game has loaded.")
                 self.current_mode = self.NORMAL_MODE
@@ -523,14 +544,14 @@ class GameManager:
         available_moves = self.board_model.available_moves(player)
 
         if player == 'a':
-            if self.player_a_agent == self.AGENT_USER:
+            if self.player_a_agent_index == self.AGENT_USER:
                 self.board_graphic.set_enable_player_specific_inputs(player=player,
                                                                      enable_list=available_moves)
             else:
                 self.choosing_hole_action(player=player, hole=self.prompt_agent_for_input(player, simul))
 
         elif player == 'b':
-            if self.player_b_agent == self.AGENT_USER:
+            if self.player_b_agent_index == self.AGENT_USER:
                 self.board_graphic.set_enable_player_specific_inputs(player=player,
                                                                      enable_list=available_moves)
             else:
@@ -548,49 +569,53 @@ class GameManager:
             # TODO: add option to choose different simul agents per player
             if simul:
                 if player == 'a':
-                    match self.player_a_simul_agent:
-                        case self.AGENT_RANDOM:
-                            move = self.random_agent.choose_move(player, copied_board)
-                        case self.AGENT_Q_SIMUL:
-                            move = self.q_simul_agent.choose_move(player, copied_board)
-                        case self.AGENT_R_SIMUL:
-                            move = self.r_simul_agent.choose_move(player, copied_board)
+                    move = self.player_a_agent_simul.choose_move(player, copied_board)
+                    # match self.player_a_simul_agent_index:
+                    # case self.AGENT_RANDOM:
+                    #     move = self.random_agent.choose_move(player, copied_board)
+                    # case self.AGENT_Q_SIMUL:
+                    #     move = self.q_simul_agent.choose_move(player, copied_board)
+                    # case self.AGENT_R_SIMUL:
+                    #     move = self.r_simul_agent.choose_move(player, copied_board)
 
                 elif player == 'b':
-                    match self.player_b_simul_agent:
-                        case self.AGENT_RANDOM:
-                            move = self.random_agent.choose_move(player, copied_board)
-                        case self.AGENT_Q_SIMUL:
-                            move = self.q_simul_agent.choose_move(player, copied_board)
-                        case self.AGENT_R_SIMUL:
-                            move = self.r_simul_agent.choose_move(player, copied_board)
+                    move = self.player_b_agent_simul.choose_move(player, copied_board)
+                    # match self.player_b_simul_agent_index:
+                    #     case self.AGENT_RANDOM:
+                    #         move = self.random_agent.choose_move(player, copied_board)
+                    #     case self.AGENT_Q_SIMUL:
+                    #         move = self.q_simul_agent.choose_move(player, copied_board)
+                    #     case self.AGENT_R_SIMUL:
+                    #         move = self.r_simul_agent.choose_move(player, copied_board)
 
             else:
                 if player == 'a':
-                    match self.player_a_agent:
-                        case self.AGENT_RANDOM:
-                            move = self.random_agent.choose_move(player, copied_board)
-                        case self.AGENT_MAX:
-                            move = self.max_agent.choose_move(player, copied_board)
-                        case self.AGENT_MINIMAX:
-                            move = self.minimax_agent.choose_move(player, copied_board)
+                    move = self.player_a_agent.choose_move(player, copied_board)
+                    # match self.player_a_agent_index:
+                    #     case self.AGENT_RANDOM:
+                    #         move = self.random_agent.choose_move(player, copied_board)
+                    #     case self.AGENT_MAX:
+                    #         move = self.max_agent.choose_move(player, copied_board)
+                    #     case self.AGENT_MINIMAX:
+                    #         move = self.minimax_agent.choose_move(player, copied_board)
 
                 elif player == 'b':
-                    match self.player_b_agent:
-                        case self.AGENT_RANDOM:
-                            move = self.random_agent.choose_move(player, copied_board)
-                        case self.AGENT_MAX:
-                            move = self.max_agent.choose_move(player, copied_board)
-                        case self.AGENT_MINIMAX:
-                            move = self.minimax_agent.choose_move(player, copied_board)
+                    move = self.player_b_agent.choose_move(player, copied_board)
+                    # match self.player_b_agent_index:
+                    #     case self.AGENT_RANDOM:
+                    #         move = self.random_agent.choose_move(player, copied_board)
+                    #     case self.AGENT_MAX:
+                    #         move = self.max_agent.choose_move(player, copied_board)
+                    #     case self.AGENT_MINIMAX:
+                    #         move = self.minimax_agent.choose_move(player, copied_board)
 
             if move not in self.board_model.available_moves(player):
                 print("didnt find a valid move.")
                 print("simul: " + str(simul) + " player: " + player +
-                      " agent a: " + str(self.player_a_agent) +
-                      " agent b: " + str(self.player_b_agent) +
-                      " simul agent a: " + str(self.player_a_simul_agent) +
-                      " simul agent b: " + str(self.player_b_simul_agent))
+                      " agent a: " + str(self.player_a_agent_index) +
+                      " agent b: " + str(self.player_b_agent_index) +
+                      " simul agent a: " + str(self.player_a_simul_agent_index) +
+                      " simul agent b: " + str(self.player_b_simul_agent_index))
                 print("move: " + str(move))
                 copied_board.print_all_data()
                 raise("no valid move")
@@ -609,21 +634,23 @@ class GameManager:
         self.set_hand_pos(player, 0)
 
         if player == 'a':
-            self.player_a_agent = self.LIST_OF_AGENTS[agent_index]
+            self.player_a_agent_index = self.LIST_OF_AGENTS_INDEX[agent_index]
+            self.player_a_agent = self.list_of_art_agents[agent_index]
             self.board_graphic.player_a_agent_dropdown.setCurrentIndex(agent_index)
 
-            if agent_index == 0 and not self.player_a_simul_agent == self.AGENT_USER:
+            if agent_index == 0 and not self.player_a_simul_agent_index == self.AGENT_USER:
                 self.set_player_simul_agent_index(player, 0)
-            elif not agent_index == 0 and self.player_a_simul_agent == self.AGENT_USER:
+            elif not agent_index == 0 and self.player_a_simul_agent_index == self.AGENT_USER:
                 self.set_player_simul_agent_index(player, 1)
 
         elif player == 'b':
-            self.player_b_agent = self.LIST_OF_AGENTS[agent_index]
+            self.player_b_agent_index = self.LIST_OF_AGENTS_INDEX[agent_index]
+            self.player_b_agent = self.list_of_art_agents[agent_index]
             self.board_graphic.player_b_agent_dropdown.setCurrentIndex(agent_index)
 
-            if agent_index == 0 and not self.player_b_simul_agent == self.AGENT_USER:
+            if agent_index == 0 and not self.player_b_simul_agent_index == self.AGENT_USER:
                 self.set_player_simul_agent_index(player, 0)
-            elif not agent_index == 0 and self.player_b_simul_agent == self.AGENT_USER:
+            elif not agent_index == 0 and self.player_b_simul_agent_index == self.AGENT_USER:
                 self.set_player_simul_agent_index(player, 1)
 
         if agent_index == 0:
@@ -636,23 +663,24 @@ class GameManager:
         self.set_hand_pos(player, 0)
 
         if player == 'a':
-            self.player_a_simul_agent = self.LIST_OF_SIMUL_AGENTS[agent_index]
+            self.player_a_simul_agent_index = self.LIST_OF_SIMUL_AGENTS_INDEX[agent_index]
             self.board_graphic.player_a_simul_agent_dropdown.setCurrentIndex(agent_index)
+            self.player_a_agent_simul = self.list_of_simul_art_agents[agent_index]
 
 
-
-            if agent_index == 0 and not self.player_a_agent == self.AGENT_USER:
+            if agent_index == 0 and not self.player_a_agent_index == self.AGENT_USER:
                 self.set_player_agent_index(player, 0)
-            elif not agent_index == 0 and self.player_a_agent == self.AGENT_USER:
+            elif not agent_index == 0 and self.player_a_agent_index == self.AGENT_USER:
                 self.set_player_agent_index(player, 1)
 
         elif player == 'b':
-            self.player_b_simul_agent = self.LIST_OF_SIMUL_AGENTS[agent_index]
+            self.player_b_simul_agent_index = self.LIST_OF_SIMUL_AGENTS_INDEX[agent_index]
             self.board_graphic.player_b_simul_agent_dropdown.setCurrentIndex(agent_index)
+            self.player_b_agent_simul = self.list_of_simul_art_agents[agent_index]
 
-            if agent_index == 0 and not self.player_b_agent == self.AGENT_USER:
+            if agent_index == 0 and not self.player_b_agent_index == self.AGENT_USER:
                 self.set_player_agent_index(player, 0)
-            elif not agent_index == 0 and self.player_b_agent == self.AGENT_USER:
+            elif not agent_index == 0 and self.player_b_agent_index == self.AGENT_USER:
                 self.set_player_agent_index(player, 1)
 
     # updates board graphics constantly
@@ -679,20 +707,20 @@ class GameManager:
             no_of_games = self.board_graphic.multiple_games_dialog_box.number_of_games
 
         if agent_a is None:
-            self.set_player_agent_index('a', self.board_graphic.multiple_games_dialog_box.player_a_agent)
+            self.set_player_agent_index('a', self.board_graphic.multiple_games_dialog_box.player_a_agent_index)
         else:
-            self.player_a_agent = agent_a
+            self.player_a_agent_index = agent_a
 
         if agent_b is None:
-            self.set_player_agent_index('b', self.board_graphic.multiple_games_dialog_box.player_b_agent)
+            self.set_player_agent_index('b', self.board_graphic.multiple_games_dialog_box.player_b_agent_index)
         else:
-            self.player_b_agent = agent_b
+            self.player_b_agent_index = agent_b
 
         if agent_a == self.AGENT_USER or agent_b == self.AGENT_USER:
             print("choose two artificial gents")
             return
 
-        print("running " + str(no_of_games) + " games. player a: " + str(self.player_a_agent) + ". player b: " + str(self.player_b_agent))
+        print("running " + str(no_of_games) + " games. player a: " + str(self.player_a_agent_index) + ". player b: " + str(self.player_b_agent_index))
 
         if not self.current_mode == self.ROUND_ROBIN_MODE:
             self.current_mode = self.MULTI_GAME_MODE
@@ -718,27 +746,27 @@ class GameManager:
         self.tournament_participants = []
 
         for index in participants:
-            self.tournament_participants.append(self.LIST_OF_AGENTS[index])
+            self.tournament_participants.append(self.LIST_OF_AGENTS_INDEX[index])
 
         self.current_mode = self.ROUND_ROBIN_MODE
 
-        self.player_a_agent = self.tournament_participants[0]
-        self.player_b_agent = self.tournament_participants[0]
+        self.player_a_agent_index = self.tournament_participants[0]
+        self.player_b_agent_index = self.tournament_participants[0]
 
         self.no_of_games_to_run = no_of_games
 
         self.round_robin_results = [[0 for x in range(len(self.tournament_participants))]
                                     for x in range(len(self.tournament_participants))]
 
-        self.run_multiple_games(self.no_of_games_to_run, self.player_a_agent, self.player_b_agent)
+        self.run_multiple_games(self.no_of_games_to_run, self.player_a_agent_index, self.player_b_agent_index)
 
         pass
 
     # runs the next round of the round robin
     def next_round(self):
 
-        agent_a_index = self.tournament_participants.index(self.player_a_agent)
-        agent_b_index = self.tournament_participants.index(self.player_b_agent)
+        agent_a_index = self.tournament_participants.index(self.player_a_agent_index)
+        agent_b_index = self.tournament_participants.index(self.player_b_agent_index)
 
         agent_b_index += 1
 
@@ -758,15 +786,12 @@ class GameManager:
                                                  self.trainer_chromosome_size,
                                                  self.trainer_std_dev)
 
-        self.eval_func_trainer.get_next_two_agents()
-        self.eval_func_trainer.update_score(2, 5)
-        self.eval_func_trainer.get_next_two_agents()
-        self.eval_func_trainer.update_score(3, 6)
-        self.eval_func_trainer.get_next_two_agents()
-        self.eval_func_trainer.update_score(4, 7)
+    def next_TEF_individual(self, no_of_games):
+        self.no_of_games_to_run = no_of_games
+        pass
 
-        self.eval_func_trainer.generate_next_population()
-
+    def next_TEF_round(self):
+        pass
 
     # Restarts a new game
     def new_game(self, autorun):
@@ -786,15 +811,15 @@ class GameManager:
         if autorun:
             self.next_action(BoardModel.PROMPT_SOWING_BOTH)
         else:
-            if self.player_a_agent == self.AGENT_USER:
+            if self.player_a_agent_index == self.AGENT_USER:
                 available_moves = self.board_model.available_moves('a')
-                if self.player_a_agent == self.AGENT_USER:
+                if self.player_a_agent_index == self.AGENT_USER:
                     self.board_graphic.set_enable_player_specific_inputs(player='a',
                                                                          enable_list=available_moves)
 
-            if self.player_b_agent == self.AGENT_USER:
+            if self.player_b_agent_index == self.AGENT_USER:
                 available_moves = self.board_model.available_moves('b')
-                if self.player_b_agent == self.AGENT_USER:
+                if self.player_b_agent_index == self.AGENT_USER:
                     self.board_graphic.set_enable_player_specific_inputs(player='b',
                                                                          enable_list=available_moves)
 
