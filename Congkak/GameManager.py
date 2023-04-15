@@ -160,7 +160,7 @@ class GameManager:
         self.player_b_agent_simul = RandomAgent()
 
         # create Intelligent Agents
-        self.minmax_depth = 5
+        self.minmax_depth = 3
 
         self.random_agent = RandomAgent()
         self.max_agent = MaxAgent(max_depth=self.minmax_depth, weights=[0, 0, 0, 0, 0, 1])
@@ -174,12 +174,18 @@ class GameManager:
         # if update, make sure to update the list above.
 
         # training evaluation function
-        self.eval_func_trainer = None
         self.trainer_pop_size = 40
         self.trainer_chromosome_size = 6
         self.trainer_std_dev = 0.01
+        self.eval_func_trainer = EvalFuncTrainer(10, 20,
+                                                 self.trainer_chromosome_size,
+                                                 self.trainer_std_dev)
         self.TEF_individual_a = MaxAgent(max_depth=5, weights=[0, 0, 0, 0, 0, 0])
         self.TEF_individual_b = MaxAgent(max_depth=5, weights=[0, 0, 0, 0, 0, 0])
+        self.TEF_population = None
+        self.TEF_individual_a_index = 0
+        self.TEF_individual_b_index = 0
+        self.TEF_generation_count = 0
 
         self.game_has_ended = False
         self.show_starting_hands = True
@@ -440,8 +446,6 @@ class GameManager:
         self.r_simul_agent.update_all_values(winner)
         self.r_simul_agent.clear_used_states()\
 
-        print("current mode: " + str(self.current_mode))
-
         match self.current_mode:
             case self.NORMAL_MODE:
 
@@ -457,7 +461,7 @@ class GameManager:
 
                 self.game_results.append(result)
                 if self.no_of_games_left > 0:
-                    print(str(self.no_of_games_left) + " games left...")
+                    print("Multi: " + str(self.no_of_games_left) + " games left...")
                     self.no_of_games_left -= 1
                     self.new_game(True)
                 else:
@@ -483,7 +487,7 @@ class GameManager:
                     self.round_robin_results[agent_b_index][agent_a_index] += 1
 
                 if self.no_of_games_left > 0:
-                    print(str(self.no_of_games_left) + " games left...")
+                    print("RR: " + str(self.no_of_games_left) + " games left...")
                     self.no_of_games_left -= 1
                     self.new_game(True)
                 else:
@@ -508,7 +512,63 @@ class GameManager:
 
             case self.EVAL_TRAINING_MODE:
 
+                if result == self.PLAYER_A_WIN:
+                    self.eval_func_trainer.population[self.TEF_individual_a_index].score += 1
+                elif result == self.PLAYER_B_WIN:
+                    self.eval_func_trainer.population[self.TEF_individual_b_index].score += 1
 
+                if self.no_of_games_left > 0:
+                    print("TEF: " + str(self.no_of_games_left) + " games left...")
+                    self.no_of_games_left -= 1
+                    self.new_game(True)
+                else:
+
+                    self.TEF_individual_b_index += 1
+
+                    if self.TEF_individual_b_index >= len(self.TEF_population):
+                        self.TEF_individual_a_index += 1
+                        self.TEF_individual_b_index = self.TEF_individual_a_index + 1
+
+                    if self.TEF_individual_a_index >= len(self.TEF_population) or self.TEF_individual_b_index >= len(self.TEF_population):
+
+                        print(self.eval_func_trainer.generation_count)
+                        print(self.eval_func_trainer.max_generation_count)
+
+                        if self.eval_func_trainer.generation_count >= self.eval_func_trainer.max_generation_count:
+                            # end training.
+                            print("training completed")
+                            print(self.eval_func_trainer.get_best_individual())
+                        else:
+                            print("new generation")
+                            self.eval_func_trainer.generate_next_population()
+
+                            self.TEF_population = self.eval_func_trainer.population
+
+                            self.TEF_individual_a_index = 0
+                            self.TEF_individual_b_index = 1
+
+                            self.TEF_individual_a = MaxAgent(max_depth=self.minmax_depth,
+                                                             weights=self.TEF_population[0].weight_chromosome)
+                            self.TEF_individual_b = MaxAgent(max_depth=self.minmax_depth,
+                                                             weights=self.TEF_population[1].weight_chromosome)
+
+                            self.run_multiple_games(no_of_games=self.no_of_games_to_run,
+                                                    agent_a=self.TEF_individual_a,
+                                                    agent_b=self.TEF_individual_b)
+
+                    else:
+
+                        print("running round robin with agent no " + str(self.TEF_individual_a_index) +
+                              " and agent no " + str(self.TEF_individual_b_index))
+
+                        self.TEF_individual_a = MaxAgent(max_depth=self.minmax_depth,
+                                                         weights=self.TEF_population[self.TEF_individual_a_index].weight_chromosome)
+                        self.TEF_individual_b = MaxAgent(max_depth=self.minmax_depth,
+                                                         weights=self.TEF_population[self.TEF_individual_b_index].weight_chromosome)
+
+                        self.run_multiple_games(no_of_games=self.no_of_games_to_run,
+                                                agent_a=self.TEF_individual_a,
+                                                agent_b=self.TEF_individual_b)
 
                 pass
 
@@ -687,9 +747,6 @@ class GameManager:
         elif agent_a_name is None and agent_a is not None:
             self.player_a_agent = agent_a
 
-        print(agent_b_name)
-        print(agent_b)
-
         if agent_b_name is None and agent_b is None:
             self.set_player_agent_index('b', self.board_graphic.multiple_games_dialog_box.player_b_agent)
         elif agent_b_name is not None and agent_b is None:
@@ -702,7 +759,13 @@ class GameManager:
             print("choose two artificial gents")
             return
 
-        print("running " + str(no_of_games) + " games. player a: " + str(self.player_a_agent_name) + ". player b: " + str(self.player_b_agent_name))
+        if self.current_mode == self.MULTI_GAME_MODE or self.current_mode == self.ROUND_ROBIN_MODE:
+            print("running " + str(no_of_games) + " games. player a: " + str(
+                self.player_a_agent_name) + ". player b: " + str(self.player_b_agent_name))
+        elif self.current_mode == self.EVAL_TRAINING_MODE:
+            print("running " + str(no_of_games) + " games. player a: " + str(
+                self.player_a_agent.heuristics_weights) +
+                  ". player b: " + str(self.player_b_agent.heuristics_weights))
 
         if not self.current_mode == self.ROUND_ROBIN_MODE and not self.current_mode == self.EVAL_TRAINING_MODE:
             self.current_mode = self.MULTI_GAME_MODE
@@ -744,37 +807,36 @@ class GameManager:
 
         pass
 
-    # # runs the next round of the round robin
-    # def next_RR_round(self):
-    #
-    #     agent_a_index = self.tournament_participants.index(self.player_a_agent_name)
-    #     agent_b_index = self.tournament_participants.index(self.player_b_agent_name)
-    #
-    #     agent_b_index += 1
-    #
-    #     if agent_b_index >= len(self.tournament_participants):
-    #         agent_a_index += 1
-    #         agent_b_index = agent_a_index
-    #
-    #     if agent_a_index >= len(self.tournament_participants):
-    #         print("round robin over. results: ")
-    #         print(self.round_robin_results)
-    #
-    #     self.run_multiple_games(no_of_games=self.no_of_games_to_run, agent_a_name=self.tournament_participants[agent_a_index],
-    #                             agent_b_name=self.tournament_participants[agent_b_index])
+    def start_training_eval_function(self, max_no_generations=3, no_of_games=3, agent_a=None, agent_b=None):
 
-    def start_training_eval_function(self, no_of_games=None, agent_a=None, agent_b=None):
-        self.eval_func_trainer = EvalFuncTrainer(12,
-                                                 self.trainer_chromosome_size,
-                                                 self.trainer_std_dev)
+        self.current_mode = self.EVAL_TRAINING_MODE
 
-    # use round robin logic
-    def next_TEF_individual(self, no_of_games):
+        self.eval_func_trainer = EvalFuncTrainer(max_generation_count=3,
+                                                 pop_size=8,
+                                                 size_of_chromosome=self.trainer_chromosome_size,
+                                                 initial_std_dev=self.trainer_std_dev)
+
+        self.TEF_population = self.eval_func_trainer.population
+
         self.no_of_games_to_run = no_of_games
-        pass
 
-    def next_TEF_round(self):
-        pass
+        self.TEF_individual_a_index = 0
+        self.TEF_individual_b_index = 1
+
+        self.TEF_individual_a = MaxAgent(max_depth=self.minmax_depth, weights=self.TEF_population[0].weight_chromosome)
+        self.TEF_individual_b = MaxAgent(max_depth=self.minmax_depth, weights=self.TEF_population[1].weight_chromosome)
+
+        self.run_multiple_games(no_of_games=self.no_of_games_to_run,
+                                agent_a=self.TEF_individual_a,
+                                agent_b=self.TEF_individual_b)
+
+    # # use round robin logic
+    # def next_TEF_individual(self, no_of_games):
+    #     self.no_of_games_to_run = no_of_games
+    #     pass
+    #
+    # def next_TEF_round(self):
+    #     pass
 
     # Restarts a new game
     def new_game(self, autorun):

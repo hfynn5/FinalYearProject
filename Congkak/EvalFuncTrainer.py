@@ -15,7 +15,14 @@ def gaussian_mutator(x, std_dev):
 
 class EvalFuncTrainer:
 
-    def __init__(self, pop_size, size_of_chromosome, initial_std_dev):
+    def __init__(self, max_generation_count, pop_size, size_of_chromosome, initial_std_dev):
+
+        # print("inside")
+        # print(max_generation_count)
+        # print("inside end")
+
+        self.max_generation_count = max_generation_count
+        self.generation_count = 0
 
         self.population = []
 
@@ -29,14 +36,18 @@ class EvalFuncTrainer:
 
         self.initialize_population(self.pop_size)
 
-        print("length: " + str(len(self.population)))
-        for individual in self.population:
-            print(individual)
+        # print("length: " + str(len(self.population)))
+        # for individual in self.population:
+        #     print(individual)`
 
     def generate_next_population(self):
 
+        print("generating....")
+
         def get_score(individual_x):
             return individual_x.score
+
+        self.generation_count += 1
 
         self.population.sort(key=get_score, reverse=True)
 
@@ -78,6 +89,9 @@ class EvalFuncTrainer:
                 return None
 
         return self.population[self.individual_a_index], self.population[self.individual_b_index]
+
+    def get_best_individual(self):
+        pass
 
     def update_score(self, individual_a_score, individual_b_score):
         self.population[self.individual_a_index].score += individual_a_score
