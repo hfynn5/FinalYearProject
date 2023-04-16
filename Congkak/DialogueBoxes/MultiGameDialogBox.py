@@ -40,12 +40,12 @@ class MultiGameDialogBox(QDialog):
         self.player_a_simul_dropdown = QComboBox(self)
         self.player_a_simul_dropdown.addItems(['Random', 'R Learning'])
         self.player_a_simul_dropdown.activated. \
-            connect(lambda index=self.player_a_dropdown.currentIndex(): self.set_player_a_simul_agent(index))
+            connect(lambda index=self.player_a_simul_dropdown.currentIndex(): self.set_player_a_simul_agent(index))
 
         self.player_b_simul_dropdown = QComboBox(self)
         self.player_b_simul_dropdown.addItems(['Random', 'R Learning'])
         self.player_b_simul_dropdown.activated. \
-            connect(lambda index=self.player_b_dropdown.currentIndex(): self.set_player_b_simul_agent(index))
+            connect(lambda index=self.player_b_simul_dropdown.currentIndex(): self.set_player_b_simul_agent(index))
 
         self.game_count_spin_box = QSpinBox()
         self.game_count_spin_box.setMinimum(1)
