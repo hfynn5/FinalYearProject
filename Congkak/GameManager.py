@@ -125,8 +125,8 @@ class GameManager:
     AGENT_Q_SIMUL = 'q simul'
     AGENT_R_SIMUL = 'r simul'
 
-    LIST_OF_AGENTS_INDEX = [AGENT_USER, AGENT_RANDOM, AGENT_MAX, AGENT_MINIMAX]
-    LIST_OF_SIMUL_AGENTS_INDEX = [AGENT_USER, AGENT_RANDOM, AGENT_R_SIMUL]
+    LIST_OF_AGENTS_NAME = [AGENT_USER, AGENT_RANDOM, AGENT_MAX, AGENT_MINIMAX]
+    LIST_OF_SIMUL_AGENTS_NAME = [AGENT_USER, AGENT_RANDOM, AGENT_R_SIMUL]
     # if update, make sure to update the list below.
 
     PLAYER_A_WIN = 1
@@ -206,8 +206,8 @@ class GameManager:
         self.game_results = []
 
         # for round robin
-        self.round_robin_results = [[0 for x in range(len(self.LIST_OF_AGENTS_INDEX) - 1)]
-                                    for x in range(len(self.LIST_OF_AGENTS_INDEX) - 1)]
+        self.round_robin_results = [[0 for x in range(len(self.LIST_OF_AGENTS_NAME) - 1)]
+                                    for x in range(len(self.LIST_OF_AGENTS_NAME) - 1)]
         self.tournament_participants = []
         self.rr_simul_agent = RandomAgent()
 
@@ -279,8 +279,10 @@ class GameManager:
                               index=self.board_graphic.player_b_agent_dropdown.
                               currentIndex(): self.set_player_simul_agent_index('b', index))
 
-        self.board_graphic.run_eval_func_training_menu_button_action.\
-            triggered.connect(self.start_training_eval_function)
+        # self.board_graphic.run_eval_func_training_menu_button_action.\
+        #     triggered.connect(self.start_training_eval_function)
+
+        self.board_graphic.eval_func_training_dialog_box.buttonBox.accepted.connect(self.start_training_eval_function)
 
         self.board_graphic.multiple_games_dialog_box.buttonBox.accepted.connect(self.run_multiple_games)
 
@@ -572,7 +574,9 @@ class GameManager:
 
                         self.run_multiple_games(no_of_games=self.no_of_games_to_run,
                                                 agent_a=self.TEF_individual_a,
-                                                agent_b=self.TEF_individual_b)
+                                                agent_b=self.TEF_individual_b,
+                                                simul_agent_a=self.rr_simul_agent,
+                                                simul_agent_b=self.rr_simul_agent)
 
                 pass
 
@@ -671,7 +675,7 @@ class GameManager:
         self.set_hand_pos(player, 0)
 
         if player == 'a':
-            self.player_a_agent_name = self.LIST_OF_AGENTS_INDEX[agent_index]
+            self.player_a_agent_name = self.LIST_OF_AGENTS_NAME[agent_index]
             self.player_a_agent = self.list_of_art_agents[agent_index]
             self.board_graphic.player_a_agent_dropdown.setCurrentIndex(agent_index)
 
@@ -681,7 +685,7 @@ class GameManager:
                 self.set_player_simul_agent_index(player, 1)
 
         elif player == 'b':
-            self.player_b_agent_name = self.LIST_OF_AGENTS_INDEX[agent_index]
+            self.player_b_agent_name = self.LIST_OF_AGENTS_NAME[agent_index]
             self.player_b_agent = self.list_of_art_agents[agent_index]
             self.board_graphic.player_b_agent_dropdown.setCurrentIndex(agent_index)
 
@@ -700,10 +704,9 @@ class GameManager:
         self.set_hand_pos(player, 0)
 
         if player == 'a':
-            self.player_a_simul_agent_index = self.LIST_OF_SIMUL_AGENTS_INDEX[agent_index]
+            self.player_a_simul_agent_index = self.LIST_OF_SIMUL_AGENTS_NAME[agent_index]
             self.board_graphic.player_a_simul_agent_dropdown.setCurrentIndex(agent_index)
             self.player_a_agent_simul = self.list_of_simul_art_agents[agent_index]
-
 
             if agent_index == 0 and not self.player_a_agent_name == self.AGENT_USER:
                 self.set_player_agent_index(player, 0)
@@ -711,7 +714,7 @@ class GameManager:
                 self.set_player_agent_index(player, 1)
 
         elif player == 'b':
-            self.player_b_simul_agent_index = self.LIST_OF_SIMUL_AGENTS_INDEX[agent_index]
+            self.player_b_simul_agent_index = self.LIST_OF_SIMUL_AGENTS_NAME[agent_index]
             self.board_graphic.player_b_simul_agent_dropdown.setCurrentIndex(agent_index)
             self.player_b_agent_simul = self.list_of_simul_art_agents[agent_index]
 
@@ -750,7 +753,7 @@ class GameManager:
             self.set_player_agent_index('a', self.board_graphic.multiple_games_dialog_box.player_a_agent)
         elif agent_a_name is not None and agent_a is None:
             self.player_a_agent_name = agent_a_name
-            self.set_player_agent_index('a', self.LIST_OF_AGENTS_INDEX.index(agent_a_name))
+            self.set_player_agent_index('a', self.LIST_OF_AGENTS_NAME.index(agent_a_name))
         elif agent_a_name is None and agent_a is not None:
             self.player_a_agent = agent_a
 
@@ -758,7 +761,7 @@ class GameManager:
             self.set_player_agent_index('b', self.board_graphic.multiple_games_dialog_box.player_b_agent)
         elif agent_b_name is not None and agent_b is None:
             self.player_b_agent_name = agent_b_name
-            self.set_player_agent_index('b', self.LIST_OF_AGENTS_INDEX.index(agent_b_name))
+            self.set_player_agent_index('b', self.LIST_OF_AGENTS_NAME.index(agent_b_name))
         elif agent_b_name is None and agent_b is not None:
             self.player_b_agent = agent_b
 
@@ -766,7 +769,7 @@ class GameManager:
             self.set_player_simul_agent_index('a', self.board_graphic.multiple_games_dialog_box.player_a_simul_agent)
         elif simul_agent_a_name is not None and simul_agent_a is None:
             self.player_a_agent_name = simul_agent_a_name
-            self.set_player_simul_agent_index('a', self.LIST_OF_SIMUL_AGENTS_INDEX.index(simul_agent_a_name))
+            self.set_player_simul_agent_index('a', self.LIST_OF_SIMUL_AGENTS_NAME.index(simul_agent_a_name))
         elif simul_agent_a_name is None and simul_agent_a is not None:
             self.player_a_agent_simul = simul_agent_a
 
@@ -774,7 +777,7 @@ class GameManager:
             self.set_player_simul_agent_index('b', self.board_graphic.multiple_games_dialog_box.player_b_simul_agent)
         elif simul_agent_b_name is not None and simul_agent_b is None:
             self.player_b_agent_name = simul_agent_b_name
-            self.set_player_simul_agent_index('b', self.LIST_OF_SIMUL_AGENTS_INDEX.index(simul_agent_b_name))
+            self.set_player_simul_agent_index('b', self.LIST_OF_SIMUL_AGENTS_NAME.index(simul_agent_b_name))
         elif simul_agent_b_name is None and simul_agent_b is not None:
             self.player_b_agent_simul = simul_agent_b
 
@@ -816,7 +819,7 @@ class GameManager:
         self.tournament_participants = []
 
         for index in participants:
-            self.tournament_participants.append(self.LIST_OF_AGENTS_INDEX[index])
+            self.tournament_participants.append(self.LIST_OF_AGENTS_NAME[index])
 
         self.current_mode = self.ROUND_ROBIN_MODE
 
@@ -834,12 +837,21 @@ class GameManager:
 
         pass
 
-    def start_training_eval_function(self, max_no_generations=3, no_of_games=3, agent_a=None, agent_b=None):
+    def start_training_eval_function(self, max_no_generations=None, no_of_games=None, pop_size=None):
+
+        if max_no_generations is None:
+            max_no_generations = self.board_graphic.eval_func_training_dialog_box.max_generation_count
+
+        if no_of_games is None:
+            no_of_games = self.board_graphic.eval_func_training_dialog_box.no_of_games
+
+        if pop_size is None:
+            pop_size = self.board_graphic.eval_func_training_dialog_box.pop_size
 
         self.current_mode = self.EVAL_TRAINING_MODE
 
-        self.eval_func_trainer = EvalFuncTrainer(max_generation_count=3,
-                                                 pop_size=8,
+        self.eval_func_trainer = EvalFuncTrainer(max_generation_count=max_no_generations,
+                                                 pop_size=pop_size,
                                                  size_of_chromosome=self.trainer_chromosome_size,
                                                  initial_std_dev=self.trainer_std_dev)
 
@@ -853,9 +865,16 @@ class GameManager:
         self.TEF_individual_a = MaxAgent(max_depth=self.minmax_depth, weights=self.TEF_population[0].weight_chromosome)
         self.TEF_individual_b = MaxAgent(max_depth=self.minmax_depth, weights=self.TEF_population[1].weight_chromosome)
 
+        self.rr_simul_agent = self.random_agent
+
+        self.set_player_simul_agent_index('a', 1)
+        self.set_player_simul_agent_index('b', 1)
+
         self.run_multiple_games(no_of_games=self.no_of_games_to_run,
                                 agent_a=self.TEF_individual_a,
-                                agent_b=self.TEF_individual_b)
+                                agent_b=self.TEF_individual_b,
+                                simul_agent_a=self.rr_simul_agent,
+                                simul_agent_b=self.rr_simul_agent)
 
     # # use round robin logic
     # def next_TEF_individual(self, no_of_games):
