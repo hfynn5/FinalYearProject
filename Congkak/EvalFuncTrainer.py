@@ -17,10 +17,6 @@ class EvalFuncTrainer:
 
     def __init__(self, max_generation_count, pop_size, size_of_chromosome, initial_std_dev):
 
-        # print("inside")
-        # print(max_generation_count)
-        # print("inside end")
-
         self.max_generation_count = max_generation_count
         self.generation_count = 0
 
@@ -106,14 +102,6 @@ class EvalFuncTrainer:
     def crossover_individuals(self, individual_a, individual_b):
 
         crossover_point = random.randint(0, self.size_of_chromosome)
-
-        # chromosome_a_start = individual_a.weight_chromosome[:crossover_point]
-        # chromosome_a_end = individual_a.weight_chromosome[crossover_point:]
-        # chromosome_b_start = individual_b.weight_chromosome[:crossover_point]
-        # chromosome_b_end = individual_b.weight_chromosome[crossover_point:]
-
-        # new_chromosome_a = chromosome_a_start + chromosome_b_end
-        # new_chromosome_b = chromosome_b_start + chromosome_a_end
 
         new_chromosome_a = individual_a.weight_chromosome[:crossover_point] + \
                            individual_b.weight_chromosome[crossover_point:]

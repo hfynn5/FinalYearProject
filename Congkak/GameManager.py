@@ -447,7 +447,10 @@ class GameManager:
             winner = "b"
 
         self.r_simul_agent.update_all_values(winner)
-        self.r_simul_agent.clear_used_states()\
+        self.r_simul_agent.clear_used_states()
+
+        # TODO: refactor the hell out of this section
+        #  (do it only if you have time and sanity (you have neither))
 
         match self.current_mode:
             case self.NORMAL_MODE:
@@ -470,10 +473,6 @@ class GameManager:
                 else:
 
                     self.r_simul_agent.print_all_states()
-
-                    # print("average leaf count: " + str(mean(self.max_agent.all_leaves)))
-                    # print("average depth: " + str(mean(self.max_agent.all_depths)))
-
                     self.board_graphic.multi_end_game_prompt(self.game_results)
 
                     self.current_mode = self.NORMAL_MODE
@@ -535,26 +534,25 @@ class GameManager:
                         self.TEF_individual_a_index += 1
                         self.TEF_individual_b_index = self.TEF_individual_a_index + 1
 
-                    if self.TEF_individual_a_index >= len(self.TEF_population) or self.TEF_individual_b_index >= len(self.TEF_population):
-
-                        print(self.eval_func_trainer.generation_count)
-                        print(self.eval_func_trainer.max_generation_count)
+                    if self.TEF_individual_a_index >= len(self.TEF_population) or \
+                            self.TEF_individual_b_index >= len(self.TEF_population):
 
                         if self.eval_func_trainer.generation_count >= self.eval_func_trainer.max_generation_count:
                             # end training.
-                            print("training completed")
                             best_individual = self.eval_func_trainer.get_best_individual()
                             weight = best_individual.weight_chromosome
-                            print("best individual weight: " + str(weight))
+
+                            # TODO: make this part optional/togglable
+
                             self.max_agent = MaxAgent(max_depth=self.minmax_depth,
                                                       weights=weight)
                             self.minimax_agent = MinimaxAgent(weights=weight,
                                                               maximum_depth=self.minmax_depth, maximum_self_depth=0,
                                                               maximum_number_node=0)
+
                             self.board_graphic.TEF_end_prompt(self.eval_func_trainer.generation_count, weight)
                             self.current_mode = self.NORMAL_MODE
                         else:
-                            print("new generation")
                             self.eval_func_trainer.generate_next_population()
 
                             self.TEF_population = self.eval_func_trainer.population
@@ -586,7 +584,6 @@ class GameManager:
                                                 agent_b=self.TEF_individual_b,
                                                 simul_agent_a=self.rr_simul_agent,
                                                 simul_agent_b=self.rr_simul_agent)
-
                 pass
 
             case self.LOADING_MODE:
@@ -708,6 +705,7 @@ class GameManager:
         else:
             self.board_graphic.set_enable_player_inputs(player, False)
 
+    # sets the player simul agent
     def set_player_simul_agent_index(self, player, agent_index):
 
         self.set_hand_pos(player, 0)
@@ -846,6 +844,7 @@ class GameManager:
 
         pass
 
+    # start training the evaluation function
     def start_training_eval_function(self, max_no_generations=None, no_of_games=None, pop_size=None):
 
         if max_no_generations is None:
@@ -884,14 +883,6 @@ class GameManager:
                                 agent_b=self.TEF_individual_b,
                                 simul_agent_a=self.rr_simul_agent,
                                 simul_agent_b=self.rr_simul_agent)
-
-    # # use round robin logic
-    # def next_TEF_individual(self, no_of_games):
-    #     self.no_of_games_to_run = no_of_games
-    #     pass
-    #
-    # def next_TEF_round(self):
-    #     pass
 
     # Restarts a new game
     def new_game(self, autorun):
