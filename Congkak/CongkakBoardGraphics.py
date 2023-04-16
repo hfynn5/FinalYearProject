@@ -342,6 +342,7 @@ class BoardGraphic(QMainWindow):
 
         self.run_eval_func_training_menu_button_action = QAction("Run Evaluation Function Training", self)
         self.run_eval_func_training_menu_button_action.setStatusTip("Run Evaluation Function Training")
+        self.run_eval_func_training_menu_button_action.triggered.connect(self.eval_func_training_dialog_box.exec)
         train_menu.addAction(self.run_eval_func_training_menu_button_action)
 
         # View Menu
