@@ -8,6 +8,7 @@ from Congkak.DialogueBoxes.GameEndDialogBox import GameEndDialogBox
 from Congkak.DialogueBoxes.MultiGameEndDialogBox import MultiGameEndDialogBox
 from Congkak.DialogueBoxes.TournamentEndDialogBox import TournamentEndDialogBox
 from Congkak.DialogueBoxes.EvalFuncTrainingDialogBox import EvalFuncTrainingDialogBox
+from Congkak.DialogueBoxes.EvalFuncTrainingEndDialogBox import EvalFuncTrainingEndDialogBox
 import sys
 
 from PyQt6.QtWidgets import QApplication, QWidget, QLabel, QMainWindow
@@ -80,6 +81,7 @@ class BoardGraphic(QMainWindow):
         self.game_end_dialog_box = GameEndDialogBox()
 
         self.eval_func_training_dialog_box = EvalFuncTrainingDialogBox()
+        self.eval_func_trainig_end_dialog_box = EvalFuncTrainingEndDialogBox()
 
         self.multiple_games_dialog_box = MultiGameDialogBox()
         self.multi_game_end_dialog_box = MultiGameEndDialogBox()
@@ -468,6 +470,17 @@ class BoardGraphic(QMainWindow):
 
         self.tournament_end_dialog_box.exec()
 
+        pass
+
+    def TEF_end_prompt(self, no_generations, best_weight):
+
+        for i, weight in enumerate(best_weight):
+            best_weight[i] = round(weight, 3)
+
+        self.eval_func_trainig_end_dialog_box.no_generations_label.setText(str(no_generations))
+        self.eval_func_trainig_end_dialog_box.best_weight_label.setText(str(best_weight))
+
+        self.eval_func_trainig_end_dialog_box.exec()
         pass
 
     # enable or disable the inputs

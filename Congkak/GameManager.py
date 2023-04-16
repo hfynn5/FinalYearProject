@@ -544,12 +544,14 @@ class GameManager:
                             # end training.
                             print("training completed")
                             best_individual = self.eval_func_trainer.get_best_individual()
-                            print("best individual weight: " + str(best_individual.weight_chromosome))
+                            weight = best_individual.weight_chromosome
+                            print("best individual weight: " + str(weight))
                             self.max_agent = MaxAgent(max_depth=self.minmax_depth,
-                                                      weights=best_individual.weight_chromosome)
-                            self.minimax_agent = MinimaxAgent(weights=best_individual.weight_chromosome,
+                                                      weights=weight)
+                            self.minimax_agent = MinimaxAgent(weights=weight,
                                                               maximum_depth=self.minmax_depth, maximum_self_depth=0,
                                                               maximum_number_node=0)
+                            self.board_graphic.TEF_end_prompt(self.eval_func_trainer.generation_count, weight)
                             self.current_mode = self.NORMAL_MODE
                         else:
                             print("new generation")
