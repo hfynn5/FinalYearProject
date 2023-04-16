@@ -150,7 +150,6 @@ class GameManager:
         # self.agent_list = [self.AGENT_USER, self.AGENT_RANDOM, self.AGENT_MAX, self.AGENT_MINIMAX, self.AGENT_MCTS]
         self.player_a_agent_name = self.AGENT_USER
         self.player_b_agent_name = self.AGENT_USER
-
         self.player_a_simul_agent_index = self.AGENT_USER
         self.player_b_simul_agent_index = self.AGENT_USER
 
@@ -210,6 +209,8 @@ class GameManager:
         self.round_robin_results = [[0 for x in range(len(self.LIST_OF_AGENTS_INDEX) - 1)]
                                     for x in range(len(self.LIST_OF_AGENTS_INDEX) - 1)]
         self.tournament_participants = []
+        self.rr_simul_agent = RandomAgent()
+
 
         # declare threadpool
         self.threadpool = QThreadPool()
@@ -506,8 +507,11 @@ class GameManager:
                                                                  self.no_of_games_to_run, self.round_robin_results)
                         self.current_mode = self.NORMAL_MODE
                     else:
-                        self.run_multiple_games(no_of_games=self.no_of_games_to_run, agent_a_name=self.tournament_participants[agent_a_index],
-                                                agent_b_name=self.tournament_participants[agent_b_index])
+                        self.run_multiple_games(no_of_games=self.no_of_games_to_run,
+                                                agent_a_name=self.tournament_participants[agent_a_index],
+                                                agent_b_name=self.tournament_participants[agent_b_index],
+                                                simul_agent_a=self.rr_simul_agent,
+                                                simul_agent_b=self.rr_simul_agent)
                 pass
 
             case self.EVAL_TRAINING_MODE:
@@ -805,6 +809,8 @@ class GameManager:
         no_of_games = self.board_graphic.tournament_dialog_box.number_of_games
         participants = self.board_graphic.tournament_dialog_box.tournament_participants
 
+        self.rr_simul_agent = self.list_of_simul_art_agents[self.board_graphic.tournament_dialog_box.player_simul_agent]
+
         participants.sort()
 
         self.tournament_participants = []
@@ -822,7 +828,9 @@ class GameManager:
         self.round_robin_results = [[0 for x in range(len(self.tournament_participants))]
                                     for x in range(len(self.tournament_participants))]
 
-        self.run_multiple_games(no_of_games=self.no_of_games_to_run, agent_a_name=self.player_a_agent_name, agent_b_name=self.player_b_agent_name)
+        self.run_multiple_games(no_of_games=self.no_of_games_to_run, agent_a_name=self.player_a_agent_name,
+                                agent_b_name=self.player_b_agent_name,
+                                simul_agent_a=self.rr_simul_agent, simul_agent_b=self.rr_simul_agent)
 
         pass
 
