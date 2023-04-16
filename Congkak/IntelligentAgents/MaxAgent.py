@@ -105,7 +105,7 @@ class MaxAgent:
 
         self.all_leaves.append(self.leaf_node_count)
 
-        print("max: player: " + player + " total nodes searched: " + str(self.node_count) + " no of leaf nodes reached: " + str(self.leaf_node_count))
+        # print("max: player: " + player + " total nodes searched: " + str(self.node_count) + " no of leaf nodes reached: " + str(self.leaf_node_count))
         # print("final move: " + str(final_best_move) + " final best value: " + str(final_best_value))
         return final_best_move
 
