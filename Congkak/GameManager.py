@@ -734,7 +734,10 @@ class GameManager:
             self.board_model.sowing_speed = 1 / move_per_second
 
     # runs multiple games
-    def run_multiple_games(self, no_of_games=None, agent_a_name=None, agent_b_name=None, agent_a=None, agent_b=None):
+    def run_multiple_games(self, no_of_games=None, agent_a_name=None, agent_b_name=None,
+                           agent_a=None, agent_b=None,
+                           simul_agent_a_name=None, simul_agent_b_name=None,
+                           simul_agent_a=None, simul_agent_b=None):
 
         if no_of_games is None:
             no_of_games = self.board_graphic.multiple_games_dialog_box.number_of_games
@@ -754,6 +757,22 @@ class GameManager:
             self.set_player_agent_index('b', self.LIST_OF_AGENTS_INDEX.index(agent_b_name))
         elif agent_b_name is None and agent_b is not None:
             self.player_b_agent = agent_b
+
+        if simul_agent_a_name is None and simul_agent_a is None:
+            self.set_player_simul_agent_index('a', self.board_graphic.multiple_games_dialog_box.player_a_simul_agent)
+        elif simul_agent_a_name is not None and simul_agent_a is None:
+            self.player_a_agent_name = simul_agent_a_name
+            self.set_player_simul_agent_index('a', self.LIST_OF_SIMUL_AGENTS_INDEX.index(simul_agent_a_name))
+        elif simul_agent_a_name is None and simul_agent_a is not None:
+            self.player_a_agent_simul = simul_agent_a
+
+        if simul_agent_b_name is None and simul_agent_b is None:
+            self.set_player_simul_agent_index('b', self.board_graphic.multiple_games_dialog_box.player_b_simul_agent)
+        elif simul_agent_b_name is not None and simul_agent_b is None:
+            self.player_b_agent_name = simul_agent_b_name
+            self.set_player_simul_agent_index('b', self.LIST_OF_SIMUL_AGENTS_INDEX.index(simul_agent_b_name))
+        elif simul_agent_b_name is None and simul_agent_b is not None:
+            self.player_b_agent_simul = simul_agent_b
 
         if agent_a_name == self.AGENT_USER or agent_b_name == self.AGENT_USER:
             print("choose two artificial gents")
