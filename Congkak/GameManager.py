@@ -163,7 +163,7 @@ class GameManager:
 
         self.random_agent = RandomAgent()
         self.max_agent = MaxAgent(max_depth=self.minmax_depth, weights=[0, 0, 0, 0, 0, 1])
-        self.minimax_agent = MinimaxAgent(weights=[0, 0, 0, 0, 0, 0], maximum_depth=self.minmax_depth, maximum_self_depth=0,
+        self.minimax_agent = MinimaxAgent(weights=[0, 0, 0, 0, 0, 1], maximum_depth=self.minmax_depth, maximum_self_depth=0,
                                           maximum_number_node=0)
         self.q_simul_agent = QLearningSimulAgent()
         self.r_simul_agent = ReinforcementLearningSimulAgent()
@@ -543,7 +543,14 @@ class GameManager:
                         if self.eval_func_trainer.generation_count >= self.eval_func_trainer.max_generation_count:
                             # end training.
                             print("training completed")
-                            print(self.eval_func_trainer.get_best_individual())
+                            best_individual = self.eval_func_trainer.get_best_individual()
+                            print("best individual weight: " + str(best_individual.weight_chromosome))
+                            self.max_agent = MaxAgent(max_depth=self.minmax_depth,
+                                                      weights=best_individual.weight_chromosome)
+                            self.minimax_agent = MinimaxAgent(weights=best_individual.weight_chromosome,
+                                                              maximum_depth=self.minmax_depth, maximum_self_depth=0,
+                                                              maximum_number_node=0)
+                            self.current_mode = self.NORMAL_MODE
                         else:
                             print("new generation")
                             self.eval_func_trainer.generate_next_population()

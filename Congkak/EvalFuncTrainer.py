@@ -91,7 +91,13 @@ class EvalFuncTrainer:
         return self.population[self.individual_a_index], self.population[self.individual_b_index]
 
     def get_best_individual(self):
-        pass
+
+        def get_score(individual_x):
+            return individual_x.score
+
+        self.population.sort(key=get_score, reverse=True)
+
+        return self.population[1]
 
     def update_score(self, individual_a_score, individual_b_score):
         self.population[self.individual_a_index].score += individual_a_score
