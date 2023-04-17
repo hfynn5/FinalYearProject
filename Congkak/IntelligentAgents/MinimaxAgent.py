@@ -41,6 +41,8 @@ class MinimaxAgent:
         for weight in weights:
             self.heuristics_weights = weight
 
+        self.all_leaves = []
+
         pass
 
     def choose_move(self, player, board_model):
@@ -81,6 +83,8 @@ class MinimaxAgent:
                 final_best_value = evaluation
                 final_best_move = move
                 optimal_board = board
+
+        self.all_leaves.append(self.leaf_node_count)
 
             # print("total nodes searched: " + str(self.node_count) + " leaf nodes reached: " + str(self.leaf_node_count))
             # print("optimal board so far: ")
@@ -135,10 +139,6 @@ class MinimaxAgent:
                     available_moves = board_model.available_moves('a')
                     for move in available_moves:
                         new_board = copy.deepcopy(board_model)
-
-                        # if not self.checked_opponent:
-                        #     depth += 1
-
                         eva, board = self.minimax(new_board, move, depth - 1, self_depth, 'a', alpha, beta)
                         if eva > max_eva:
                             max_eva = eva
@@ -152,10 +152,6 @@ class MinimaxAgent:
                     available_moves = board_model.available_moves('a')
                     for move in available_moves:
                         new_board = copy.deepcopy(board_model)
-
-                        # if not self.checked_opponent:
-                        #     depth += 1
-
                         eva, board = self.minimax(new_board, move, depth - 1, self_depth, 'a', alpha, beta)
                         if eva > max_eva:
                             max_eva = eva

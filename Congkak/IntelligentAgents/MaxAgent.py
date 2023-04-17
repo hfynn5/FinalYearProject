@@ -105,7 +105,7 @@ class MaxAgent:
 
         self.all_leaves.append(self.leaf_node_count)
 
-        # print("max: player: " + player + " total nodes searched: " + str(self.node_count) + " no of leaf nodes reached: " + str(self.leaf_node_count))
+        print("max: player: " + player + " total nodes searched: " + str(self.node_count) + " no of leaf nodes reached: " + str(self.leaf_node_count))
         # print("final move: " + str(final_best_move) + " final best value: " + str(final_best_value))
         return final_best_move
 
@@ -114,9 +114,13 @@ class MaxAgent:
         self.node_count += 1
 
         if self.node_count % 10000 == 0:
-            print("max: total nodes searched: " + str(self.node_count))
+            print("max: total nodes searched: " + str(self.node_count) + " leaf nodes reached: " + str(self.leaf_node_count))
 
         if depth <= 0:
+
+            # print("depth reached")
+
+            self.all_depths.append(self.max_depth - depth)
 
             best_value = evaluate_position(board_model, player, chain_count, self.heuristics_weights)
 
@@ -145,7 +149,6 @@ class MaxAgent:
             for move in available_moves:
                 new_board = copy.deepcopy(board_model)
                 evaluation = self.maximising(player, move, new_board, depth - 1, chain_count + 1)
-
                 if player == 'a' and evaluation >= best_value or \
                         player == 'b' and evaluation <= best_value:
                     best_value = evaluation
@@ -153,7 +156,6 @@ class MaxAgent:
         else:
             self.all_depths.append(self.max_depth - depth)
             self.leaf_node_count += 1
-
             best_value = evaluate_position(board_model, player, chain_count, self.heuristics_weights)
 
         return best_value
