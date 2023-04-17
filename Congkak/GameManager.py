@@ -126,7 +126,7 @@ class GameManager:
     AGENT_R_SIMUL = 'r simul'
 
     LIST_OF_AGENTS_NAME = [AGENT_USER, AGENT_RANDOM, AGENT_MAX, AGENT_MINIMAX]
-    LIST_OF_SIMUL_AGENTS_NAME = [AGENT_USER, AGENT_RANDOM, AGENT_R_SIMUL]
+    LIST_OF_SIMUL_AGENTS_NAME = [AGENT_USER, AGENT_RANDOM, AGENT_R_SIMUL, AGENT_Q_SIMUL]
     # if update, make sure to update the list below.
 
     PLAYER_A_WIN = 1
@@ -171,7 +171,7 @@ class GameManager:
         self.rl_simul_agent = ReinforcementLearningSimulAgent()
 
         self.list_of_art_agents = [None, self.random_agent, self.max_agent, self.minimax_agent]
-        self.list_of_simul_art_agents = [None, self.random_agent, self.rl_simul_agent]
+        self.list_of_simul_art_agents = [None, self.random_agent, self.rl_simul_agent, self.q_simul_agent]
         # if update, make sure to update the list above.
 
         # training evaluation function
@@ -476,7 +476,7 @@ class GameManager:
 
                 try:
                     print("max: average leaf count: " + str(mean(self.max_agent.all_leaves)))
-                    print("depths: " + str(self.max_agent.all_depths))
+                    print("max: depths: " + str(self.max_agent.all_depths))
                 except:
                     pass
 
