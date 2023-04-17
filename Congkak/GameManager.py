@@ -159,7 +159,7 @@ class GameManager:
         self.player_b_agent_simul = RandomAgent()
 
         # create Intelligent Agents
-        self.minmax_depth = 3
+        self.minmax_depth = 5
 
         self.random_agent = RandomAgent()
         self.max_agent = MaxAgent(max_depth=self.minmax_depth, weights=[0, 0, 0, 0, 0, 1])
@@ -460,6 +460,18 @@ class GameManager:
                 self.board_graphic.end_game_prompt(winner, self.board_model.storeroom_a_value,
                                                    self.board_model.storeroom_b_value)
                 print("Game has ended. Moves made: ")
+
+                try:
+                    print("max: average leaf count: " + str(mean(self.max_agent.all_leaves)))
+                    print("depths: " + str(self.max_agent.all_depths))
+                except:
+                    pass
+
+                try:
+                    print("minimax: average leaf count: " + str(mean(self.minimax_agent.all_leaves)))
+                except:
+                    pass
+
                 for move in self.board_model.moves_made:
                     print(move)
 
