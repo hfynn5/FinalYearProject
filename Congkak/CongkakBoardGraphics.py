@@ -100,6 +100,9 @@ class BoardGraphic(QMainWindow):
 
         self.set_pictures()
 
+        self.status_bar = QStatusBar(self)
+        self.setStatusBar(self.status_bar)
+
         # show all the widgets
         self.show()
 
@@ -490,6 +493,9 @@ class BoardGraphic(QMainWindow):
 
         self.eval_func_trainig_end_dialog_box.exec()
         pass
+
+    def update_status_bar_message(self, message):
+        self.status_bar.showMessage(message)
 
     # enable or disable the inputs
     def set_enable_inputs(self, enable):

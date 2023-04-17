@@ -25,7 +25,7 @@ class TournamentDialogBox(QDialog):
         layout = QGridLayout()
 
         self.player_simul_dropdown = QComboBox(self)
-        self.player_simul_dropdown.addItems(['Random', 'R Learning'])
+        self.player_simul_dropdown.addItems(['Random', 'R Learning', 'Q Learning'])
         self.player_simul_dropdown.activated. \
             connect(lambda index=self.player_simul_dropdown.currentIndex(): self.set_player_simul_agent(index))
 

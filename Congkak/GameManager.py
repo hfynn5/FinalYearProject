@@ -109,6 +109,10 @@ def update_board_graphics(board_graphic: BoardGraphic, board_model: BoardModel):
                                     player_b_hand=copied_board_model.player_b_hand)
 
 
+def update_graphics_status(board_graphic: BoardGraphic, message):
+    board_graphic.update_status_bar_message(message)
+
+
 def error_handler(etype, value, tb):
     error_msg = ''.join(traceback.format_exception(etype, value, tb))
     # do something with the error message, for example print it
@@ -298,6 +302,8 @@ class GameManager:
     # makes worker to start sowing
     def start_worker_sowing(self, player=None, hole=None, new_hand=None):
 
+        update_graphics_status(self.board_graphic, "Sowing player " + player.upper() + "...")
+
         if player == 'a':
             self.board_model.append_move(hole, 0)
         elif player == 'b':
@@ -314,6 +320,9 @@ class GameManager:
 
     # starts a worker for each hand
     def start_worker_simultaneous_sowing(self, hole_a=None, hole_b=None, hand_a=None, hand_b=None, simul_prompt=False):
+
+        update_graphics_status(self.board_graphic, "Sowing both players...")
+
         self.autoplay_hands = True
         self.board_graphic.set_enable_play_button(False)
 
@@ -464,6 +473,8 @@ class GameManager:
         match self.current_mode:
             case self.NORMAL_MODE:
 
+                update_graphics_status(self.board_graphic, "Game has ended")
+
                 if self.player_a_agent_simul == self.rl_simul_agent or self.player_b_agent_simul == self.rl_simul_agent:
                     self.rl_simul_agent.print_all_states()
 
@@ -497,6 +508,7 @@ class GameManager:
                     self.new_game(True)
                 else:
 
+                    update_graphics_status(self.board_graphic, "Multi game has ended")
                     self.rl_simul_agent.print_all_states()
                     self.board_graphic.multi_end_game_prompt(self.game_results)
 
@@ -529,6 +541,7 @@ class GameManager:
                         agent_b_index = agent_a_index
 
                     if agent_a_index >= len(self.tournament_participants):
+                        update_graphics_status(self.board_graphic, "Round Robin has ended")
                         self.board_graphic.tournament_end_prompt(self.tournament_participants,
                                                                  self.no_of_games_to_run, self.round_robin_results)
                         self.current_mode = self.NORMAL_MODE
@@ -564,6 +577,9 @@ class GameManager:
 
                         if self.eval_func_trainer.generation_count >= self.eval_func_trainer.max_generation_count:
                             # end training.
+
+                            update_graphics_status(self.board_graphic, "Round Robin has ended")
+
                             best_individual = self.eval_func_trainer.get_best_individual()
                             weight = best_individual.weight_chromosome
 
@@ -667,7 +683,8 @@ class GameManager:
         while move not in self.board_model.available_moves(player):
             copied_board = copy.deepcopy(self.board_model)
 
-            # TODO: add option to choose different simul agents per player
+            update_graphics_status(self.board_graphic, "Prompting agent " + player.upper() + " for a move...")
+
             if simul:
                 if player == 'a':
                     move = self.player_a_agent_simul.choose_move(player, copied_board)
