@@ -9,12 +9,12 @@ from Congkak.Hand import Hand
 
 
 @dataclass
-class QState:
+class State:
 
     house_a_values: list[int]
     house_b_values: list[int]
-    q_value_player_a: list[int]
-    q_value_player_b: list[int]
+    value_player_a: list[int]
+    value_player_b: list[int]
     player_a_choice: int = 0
     player_b_choice: int = 0
     learning_rate: float = 0.01
@@ -44,15 +44,15 @@ class ReinforcementLearningSimulAgent:
 
         current_state = self.loaded_states[state_index]
 
-        self.loaded_states[state_index].learning_rate = min(self.loaded_states[state_index].learning_rate + 0.001, 0.1)
+        self.loaded_states[state_index].learning_rate = min(self.loaded_states[state_index].learning_rate - 0.001, 0.1)
 
         choice = 0
 
         if player == 'a':
-            choice = random.choices([1, 2, 3, 4, 5, 6, 7], current_state.q_value_player_a)[0]
+            choice = random.choices([1, 2, 3, 4, 5, 6, 7], current_state.value_player_a)[0]
             self.loaded_states[state_index].player_a_choice = choice - 1
         elif player == 'b':
-            choice = random.choices([1, 2, 3, 4, 5, 6, 7], current_state.q_value_player_b)[0]
+            choice = random.choices([1, 2, 3, 4, 5, 6, 7], current_state.value_player_b)[0]
             self.loaded_states[state_index].player_b_choice = choice - 1
 
         return choice
@@ -69,25 +69,22 @@ class ReinforcementLearningSimulAgent:
 
     def update_value(self, state, winner_player):
 
-        current_q_value_a = state.q_value_player_a[state.player_a_choice]
-        current_q_value_b = state.q_value_player_b[state.player_b_choice]
+        current_value_a = state.value_player_a[state.player_a_choice]
+        current_value_b = state.value_player_b[state.player_b_choice]
 
         if winner_player == 'a':
             increase = state.learning_rate
-
-            state.q_value_player_a[state.player_a_choice] = round(current_q_value_a + increase, 5)
+            state.value_player_a[state.player_a_choice] = round(current_value_a + increase, 5)
 
         elif winner_player == 'b':
-
             increase = state.learning_rate
+            state.value_player_b[state.player_b_choice] = round(current_value_b + increase, 5)
 
-            state.q_value_player_b[state.player_b_choice] = round(current_q_value_b + increase, 5)
+        if state.value_player_a[state.player_a_choice] < 0:
+            state.value_player_a[state.player_a_choice] = 0
 
-        if state.q_value_player_a[state.player_a_choice] < 0:
-            state.q_value_player_a[state.player_a_choice] = 0
-
-        if state.q_value_player_b[state.player_b_choice] < 0:
-            state.q_value_player_b[state.player_b_choice] = 0
+        if state.value_player_b[state.player_b_choice] < 0:
+            state.value_player_b[state.player_b_choice] = 0
 
         return state
 
@@ -112,10 +109,10 @@ class ReinforcementLearningSimulAgent:
             else:
                 house_b_prob.append(0)
 
-        self.loaded_states.append(QState(board_model.house_a_values,
-                                         board_model.house_b_values,
-                                         house_a_prob,
-                                         house_b_prob))
+        self.loaded_states.append(State(board_model.house_a_values,
+                                        board_model.house_b_values,
+                                        house_a_prob,
+                                        house_b_prob))
 
         return len(self.loaded_states) - 1
 
