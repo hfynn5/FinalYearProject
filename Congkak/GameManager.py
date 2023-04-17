@@ -159,10 +159,12 @@ class GameManager:
         self.player_b_agent_simul = RandomAgent()
 
         # create Intelligent Agents
+        self.max_depth = 5
         self.minmax_depth = 5
+        self.is_training_state_agents = False
 
         self.random_agent = RandomAgent()
-        self.max_agent = MaxAgent(max_depth=self.minmax_depth, weights=[0, 0, 0, 0, 0, 1])
+        self.max_agent = MaxAgent(max_depth=self.max_depth, weights=[0, 0, 0, 0, 0, 1])
         self.minimax_agent = MinimaxAgent(weights=[0, 0, 0, 0, 0, 1], maximum_depth=self.minmax_depth, maximum_self_depth=0,
                                           maximum_number_node=0)
         self.q_simul_agent = QLearningSimulAgent()
@@ -446,8 +448,12 @@ class GameManager:
             result = self.PLAYER_B_WIN
             winner = "b"
 
-        self.r_simul_agent.update_all_values(winner)
-        self.r_simul_agent.clear_used_states()
+        if self.is_training_state_agents:
+            self.r_simul_agent.update_all_values(winner)
+            self.r_simul_agent.clear_used_states()
+
+            self.q_simul_agent.update_all_q_values(winner)
+            self.q_simul_agent.clear_used_states()
 
         # TODO: refactor the hell out of this section
         #  (do it only if you have time and sanity (you have neither))
@@ -556,7 +562,7 @@ class GameManager:
 
                             # TODO: make this part optional/togglable
 
-                            self.max_agent = MaxAgent(max_depth=self.minmax_depth,
+                            self.max_agent = MaxAgent(max_depth=self.max_depth,
                                                       weights=weight)
                             self.minimax_agent = MinimaxAgent(weights=weight,
                                                               maximum_depth=self.minmax_depth, maximum_self_depth=0,
@@ -572,9 +578,9 @@ class GameManager:
                             self.TEF_individual_a_index = 0
                             self.TEF_individual_b_index = 1
 
-                            self.TEF_individual_a = MaxAgent(max_depth=self.minmax_depth,
+                            self.TEF_individual_a = MaxAgent(max_depth=self.max_depth,
                                                              weights=self.TEF_population[0].weight_chromosome)
-                            self.TEF_individual_b = MaxAgent(max_depth=self.minmax_depth,
+                            self.TEF_individual_b = MaxAgent(max_depth=self.max_depth,
                                                              weights=self.TEF_population[1].weight_chromosome)
 
                             self.run_multiple_games(no_of_games=self.no_of_games_to_run,
@@ -586,9 +592,9 @@ class GameManager:
                         print("running round robin with agent no " + str(self.TEF_individual_a_index) +
                               " and agent no " + str(self.TEF_individual_b_index))
 
-                        self.TEF_individual_a = MaxAgent(max_depth=self.minmax_depth,
+                        self.TEF_individual_a = MaxAgent(max_depth=self.max_depth,
                                                          weights=self.TEF_population[self.TEF_individual_a_index].weight_chromosome)
-                        self.TEF_individual_b = MaxAgent(max_depth=self.minmax_depth,
+                        self.TEF_individual_b = MaxAgent(max_depth=self.max_depth,
                                                          weights=self.TEF_population[self.TEF_individual_b_index].weight_chromosome)
 
                         self.run_multiple_games(no_of_games=self.no_of_games_to_run,
@@ -882,8 +888,8 @@ class GameManager:
         self.TEF_individual_a_index = 0
         self.TEF_individual_b_index = 1
 
-        self.TEF_individual_a = MaxAgent(max_depth=self.minmax_depth, weights=self.TEF_population[0].weight_chromosome)
-        self.TEF_individual_b = MaxAgent(max_depth=self.minmax_depth, weights=self.TEF_population[1].weight_chromosome)
+        self.TEF_individual_a = MaxAgent(max_depth=self.max_depth, weights=self.TEF_population[0].weight_chromosome)
+        self.TEF_individual_b = MaxAgent(max_depth=self.max_depth, weights=self.TEF_population[1].weight_chromosome)
 
         self.rr_simul_agent = self.random_agent
 
@@ -997,6 +1003,9 @@ class GameManager:
     # toggles whether the graphics should update
     def toggle_update_graphics(self, state):
         self.update_graphic = state
+
+    def toggle_learning_state_agents(self, state):
+        self.is_training_state_agents = state
 
     # closes the program
     def close_program(self):
