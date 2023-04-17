@@ -14,8 +14,8 @@ class QState:
     house_b_values: list[int]
     q_value_player_a: list[int]
     q_value_player_b: list[int]
-    player_a_choice: int = 0
-    player_b_choice: int = 0
+    player_a_choice: int = -1
+    player_b_choice: int = -1
 
     # 0, 0, 0, 0, 0, 0, 0
     # 1, 1, 1, 1, 1, 1, 1
@@ -63,7 +63,11 @@ class QLearningSimulAgent:
             self.loaded_states[state_index], prev_reward = self.update_q_value(curr_state, winner_player, prev_reward)
 
     def clear_used_states(self):
-        self.used_states_index = []
+
+        for state in self.loaded_states:
+            state.player_a_choice = -1
+            state.player_b_choice = -1
+
         self.used_states_index = []
 
     def update_q_value(self, state, winner_player, prev_reward):
@@ -75,8 +79,11 @@ class QLearningSimulAgent:
 
         if winner_player == 'a':
 
+            if state.player_a_choice < 0:
+                return state
+
             increase = self.learning_rate * \
-                        (1 + self.discount_rate * prev_reward - current_q_value_a)
+                       (1 + self.discount_rate * prev_reward - current_q_value_a)
 
             # print("increase: " + str(increase))
 
@@ -90,6 +97,9 @@ class QLearningSimulAgent:
             new_winner_reward = round(max(state.q_value_player_a), 5)
 
         elif winner_player == 'b':
+
+            if state.player_b_choice < 0:
+                return state
 
             increase = self.learning_rate * \
                         (1 + self.discount_rate * prev_reward - current_q_value_b)
