@@ -168,13 +168,24 @@ class GameManager:
         self.is_training_state_agents = False
 
         self.random_agent = RandomAgent()
-        self.max_agent = MaxAgent(max_depth=self.max_depth, weights=[0, 0, 0, 0, 0, 1])
-        self.minimax_agent = MinimaxAgent(weights=[0, 0, 0, 0, 0, 1], maximum_depth=self.minmax_depth, maximum_self_depth=0,
-                                          maximum_number_node=0)
+        # self.max_agent = MaxAgent(max_depth=self.max_depth, weights=[0, 0, 0, 0, 0, 1])
+        # self.minimax_agent = MinimaxAgent(weights=[0, 0, 0, 0, 0, 1], maximum_depth=self.minmax_depth, maximum_self_depth=0,
+        #                                   maximum_number_node=0)
+
+        self.max_agent_a = MaxAgent(max_depth=self.max_depth, weights=[0, 0, 0, 0, 0, 1])
+        self.max_agent_b = MaxAgent(max_depth=self.max_depth, weights=[0, 0, 0, 0, 0, 1])
+        self.minimax_agent_a = MinimaxAgent(weights=[0, 0, 0, 0, 0, 1], maximum_depth=self.minmax_depth,
+                                            maximum_self_depth=0,
+                                            maximum_number_node=0)
+        self.minimax_agent_b = MinimaxAgent(weights=[0, 0, 0, 0, 0, 1], maximum_depth=self.minmax_depth,
+                                            maximum_self_depth=0,
+                                            maximum_number_node=0)
+
         self.q_simul_agent = QLearningSimulAgent()
         self.rl_simul_agent = ReinforcementLearningSimulAgent()
 
-        self.list_of_art_agents = [None, self.random_agent, self.max_agent, self.minimax_agent]
+        self.list_of_art_agents_a = [None, self.random_agent, self.max_agent_a, self.minimax_agent_a]
+        self.list_of_art_agents_b = [None, self.random_agent, self.max_agent_a, self.minimax_agent_a]
         self.list_of_simul_art_agents = [None, self.random_agent, self.rl_simul_agent, self.q_simul_agent]
         # if update, make sure to update the list above.
 
@@ -486,13 +497,24 @@ class GameManager:
                 print("Game has ended. Moves made: ")
 
                 try:
-                    print("max: average leaf count: " + str(mean(self.max_agent.all_leaves)))
-                    print("max: depths: " + str(self.max_agent.all_depths))
+                    print("max a: average leaf count: " + str(mean(self.max_agent_a.all_leaves)))
+                    print("max a: depths: " + str(self.max_agent_a.all_depths))
                 except:
                     pass
 
                 try:
-                    print("minimax: average leaf count: " + str(mean(self.minimax_agent.all_leaves)))
+                    print("max b: average leaf count: " + str(mean(self.max_agent_b.all_leaves)))
+                    print("max b: depths: " + str(self.max_agent_b.all_depths))
+                except:
+                    pass
+
+                try:
+                    print("minimax a: average leaf count: " + str(mean(self.minimax_agent_a.all_leaves)))
+                except:
+                    pass
+
+                try:
+                    print("minimax b: average leaf count: " + str(mean(self.minimax_agent_b.all_leaves)))
                 except:
                     pass
 
@@ -585,11 +607,11 @@ class GameManager:
 
                             # TODO: make this part optional/togglable
 
-                            self.max_agent = MaxAgent(max_depth=self.max_depth,
-                                                      weights=weight)
-                            self.minimax_agent = MinimaxAgent(weights=weight,
-                                                              maximum_depth=self.minmax_depth, maximum_self_depth=0,
-                                                              maximum_number_node=0)
+                            # self.max_agent = MaxAgent(max_depth=self.max_depth,
+                            #                           weights=weight)
+                            # self.minimax_agent = MinimaxAgent(weights=weight,
+                            #                                   maximum_depth=self.minmax_depth, maximum_self_depth=0,
+                            #                                   maximum_number_node=0)
 
                             self.board_graphic.TEF_end_prompt(self.eval_func_trainer.generation_count, weight)
                             self.current_mode = self.NORMAL_MODE
@@ -724,7 +746,7 @@ class GameManager:
 
         if player == 'a':
             self.player_a_agent_name = self.LIST_OF_AGENTS_NAME[agent_index]
-            self.player_a_agent = self.list_of_art_agents[agent_index]
+            self.player_a_agent = self.list_of_art_agents_a[agent_index]
             self.board_graphic.player_a_agent_dropdown.setCurrentIndex(agent_index)
 
             if agent_index == 0 and not self.player_a_simul_agent_index == self.AGENT_USER:
@@ -734,7 +756,7 @@ class GameManager:
 
         elif player == 'b':
             self.player_b_agent_name = self.LIST_OF_AGENTS_NAME[agent_index]
-            self.player_b_agent = self.list_of_art_agents[agent_index]
+            self.player_b_agent = self.list_of_art_agents_b[agent_index]
             self.board_graphic.player_b_agent_dropdown.setCurrentIndex(agent_index)
 
             if agent_index == 0 and not self.player_b_simul_agent_index == self.AGENT_USER:
@@ -771,6 +793,25 @@ class GameManager:
                 self.set_player_agent_index(player, 0)
             elif not agent_index == 0 and self.player_b_agent_name == self.AGENT_USER:
                 self.set_player_agent_index(player, 1)
+
+    def set_max_and_minimax_agent_weights(self, player, is_max, is_minimax, weights):
+
+        if is_max:
+            if player == 'a':
+                self.max_agent_a = MaxAgent(max_depth=self.max_depth, weights=weights)
+            elif player == 'b':
+                self.max_agent_b = MaxAgent(max_depth=self.max_depth, weights=weights)
+
+        if is_minimax:
+            if player == 'a':
+                self.minimax_agent_a = MinimaxAgent(weights=weights, maximum_depth=self.minmax_depth,
+                                                    maximum_self_depth=0,
+                                                    maximum_number_node=0)
+            elif player == 'b':
+                self.minimax_agent_b = MinimaxAgent(weights=weights, maximum_depth=self.minmax_depth,
+                                                    maximum_self_depth=0,
+                                                    maximum_number_node=0)
+
 
     # updates board graphics constantly
     def update_board_graphics_constantly(self):
@@ -1028,6 +1069,7 @@ class GameManager:
     def toggle_update_graphics(self, state):
         self.update_graphic = state
 
+    # toggles whether the simul state agents should learn
     def toggle_learning_state_agents(self, state):
         self.is_training_state_agents = state
 
