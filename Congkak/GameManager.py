@@ -95,7 +95,6 @@ class WorkerSignals(QObject):
 
 # updates board graphic
 def update_board_graphics(board_graphic: BoardGraphic, board_model: BoardModel):
-
     if board_model.waiting:
         board_model.pause = True
         copied_board_model = copy.deepcopy(board_model)
@@ -278,23 +277,23 @@ class GameManager:
 
         self.board_graphic.player_a_agent_dropdown. \
             activated.connect(lambda
-                              index=self.board_graphic.player_a_agent_dropdown.
-                              currentIndex(): self.set_player_agent_index('a', index))
+                                  index=self.board_graphic.player_a_agent_dropdown.
+                                      currentIndex(): self.set_player_agent_index('a', index))
 
         self.board_graphic.player_b_agent_dropdown. \
             activated.connect(lambda
-                              index=self.board_graphic.player_b_agent_dropdown.
-                              currentIndex(): self.set_player_agent_index('b', index))
+                                  index=self.board_graphic.player_b_agent_dropdown.
+                                      currentIndex(): self.set_player_agent_index('b', index))
 
         self.board_graphic.player_a_simul_agent_dropdown. \
             activated.connect(lambda
-                              index=self.board_graphic.player_a_agent_dropdown.
-                              currentIndex(): self.set_player_simul_agent_index('a', index))
+                                  index=self.board_graphic.player_a_agent_dropdown.
+                                      currentIndex(): self.set_player_simul_agent_index('a', index))
 
         self.board_graphic.player_b_simul_agent_dropdown. \
             activated.connect(lambda
-                              index=self.board_graphic.player_b_agent_dropdown.
-                              currentIndex(): self.set_player_simul_agent_index('b', index))
+                                  index=self.board_graphic.player_b_agent_dropdown.
+                                      currentIndex(): self.set_player_simul_agent_index('b', index))
 
         # self.board_graphic.run_eval_func_training_menu_button_action.\
         #     triggered.connect(self.start_training_eval_function)
@@ -303,8 +302,8 @@ class GameManager:
 
         self.board_graphic.eval_func_training_end_dialog_box. \
             apply_weights_max_agent_a_button.clicked.connect(lambda
-                                                             checked, max=True, minimax=False, player='a',
-                                                             weights=None:
+                                                                 checked, max=True, minimax=False, player='a',
+                                                                 weights=None:
                                                              self.set_max_and_minimax_agent_weights(player=player,
                                                                                                     is_max=max,
                                                                                                     is_minimax=minimax,
@@ -313,8 +312,8 @@ class GameManager:
 
         self.board_graphic.eval_func_training_end_dialog_box. \
             apply_weights_max_agent_b_button.clicked.connect(lambda
-                                                             checked, max=True, minimax=False, player='b',
-                                                             weights=None:
+                                                                 checked, max=True, minimax=False, player='b',
+                                                                 weights=None:
                                                              self.set_max_and_minimax_agent_weights(player=player,
                                                                                                     is_max=max,
                                                                                                     is_minimax=minimax,
@@ -323,25 +322,23 @@ class GameManager:
 
         self.board_graphic.eval_func_training_end_dialog_box. \
             apply_weights_minimax_agent_a_button.clicked.connect(lambda
-                                                             checked, max=False, minimax=True, player='a',
-                                                             weights=None:
-                                                             self.set_max_and_minimax_agent_weights(player=player,
-                                                                                                    is_max=max,
-                                                                                                    is_minimax=minimax,
-                                                                                                    weights=weights)
-                                                             )
+                                                                     checked, max=False, minimax=True, player='a',
+                                                                     weights=None:
+                                                                 self.set_max_and_minimax_agent_weights(player=player,
+                                                                                                        is_max=max,
+                                                                                                        is_minimax=minimax,
+                                                                                                        weights=weights)
+                                                                 )
 
         self.board_graphic.eval_func_training_end_dialog_box. \
             apply_weights_minimax_agent_b_button.clicked.connect(lambda
-                                                             checked, max=False, minimax=True, player='b',
-                                                             weights=None:
-                                                             self.set_max_and_minimax_agent_weights(player=player,
-                                                                                                    is_max=max,
-                                                                                                    is_minimax=minimax,
-                                                                                                    weights=weights)
-                                                             )
-
-
+                                                                     checked, max=False, minimax=True, player='b',
+                                                                     weights=None:
+                                                                 self.set_max_and_minimax_agent_weights(player=player,
+                                                                                                        is_max=max,
+                                                                                                        is_minimax=minimax,
+                                                                                                        weights=weights)
+                                                                 )
 
         self.board_graphic.multiple_games_dialog_box.buttonBox.accepted.connect(self.run_multiple_games)
 
@@ -453,7 +450,8 @@ class GameManager:
                 else:
                     if self.player_a_agent_name == self.AGENT_USER or self.player_b_agent_name == self.AGENT_USER:
 
-                        if (not self.player_a_agent_name == self.AGENT_USER) ^ (self.player_b_agent_name == self.AGENT_USER):
+                        if (not self.player_a_agent_name == self.AGENT_USER) ^ (
+                                self.player_b_agent_name == self.AGENT_USER):
                             print("enable")
                             self.board_graphic.set_enable_play_button(True)
                             self.autoplay_hands = False
@@ -639,7 +637,8 @@ class GameManager:
                     if self.TEF_individual_a_index >= len(self.TEF_population) or \
                             self.TEF_individual_b_index >= len(self.TEF_population):
 
-                        if self.eval_func_trainer.generation_count >= self.eval_func_trainer.max_generation_count:
+                        if self.eval_func_trainer.generation_count >= self.eval_func_trainer.max_generation_count or \
+                                self.eval_func_trainer.check_if_converge():
                             # end training.
 
                             update_graphics_status(self.board_graphic, "Round Robin has ended")
@@ -680,9 +679,11 @@ class GameManager:
                               " and agent no " + str(self.TEF_individual_b_index))
 
                         self.TEF_individual_a = MaxAgent(max_depth=self.max_depth,
-                                                         weights=self.TEF_population[self.TEF_individual_a_index].weight_chromosome)
+                                                         weights=self.TEF_population[
+                                                             self.TEF_individual_a_index].weight_chromosome)
                         self.TEF_individual_b = MaxAgent(max_depth=self.max_depth,
-                                                         weights=self.TEF_population[self.TEF_individual_b_index].weight_chromosome)
+                                                         weights=self.TEF_population[
+                                                             self.TEF_individual_b_index].weight_chromosome)
 
                         self.run_multiple_games(no_of_games=self.no_of_games_to_run,
                                                 agent_a=self.TEF_individual_a,
@@ -701,9 +702,11 @@ class GameManager:
         if self.autoplay_hands:
             if self.board_model.game_phase == BoardModel.SIMULTANEOUS_PHASE:
                 if player == 'a':
-                    self.start_worker_simultaneous_sowing(hole_a=hole, hand_b=self.board_model.player_b_hand, simul_prompt=True)
+                    self.start_worker_simultaneous_sowing(hole_a=hole, hand_b=self.board_model.player_b_hand,
+                                                          simul_prompt=True)
                 elif player == 'b':
-                    self.start_worker_simultaneous_sowing(hole_b=hole, hand_a=self.board_model.player_a_hand, simul_prompt=True)
+                    self.start_worker_simultaneous_sowing(hole_b=hole, hand_a=self.board_model.player_a_hand,
+                                                          simul_prompt=True)
 
             elif self.board_model.game_phase == BoardModel.SEQUENTIAL_PHASE:
                 self.start_worker_sowing(player=player, hole=hole)
@@ -950,7 +953,8 @@ class GameManager:
         no_of_games = self.board_graphic.tournament_dialog_box.number_of_games
         participants = self.board_graphic.tournament_dialog_box.tournament_participants
 
-        self.round_robin_simul_agent = self.list_of_simul_art_agents[self.board_graphic.tournament_dialog_box.player_simul_agent]
+        self.round_robin_simul_agent = self.list_of_simul_art_agents[
+            self.board_graphic.tournament_dialog_box.player_simul_agent]
 
         participants.sort()
 

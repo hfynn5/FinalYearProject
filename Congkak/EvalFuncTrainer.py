@@ -38,12 +38,12 @@ class EvalFuncTrainer:
 
     def generate_next_population(self):
 
-        print("generating....")
+        self.generation_count += 1
+
+        print("generating.... generation: " + str(self.generation_count))
 
         def get_score(individual_x):
             return individual_x.score
-
-        self.generation_count += 1
 
         self.population.sort(key=get_score, reverse=True)
 
@@ -99,6 +99,24 @@ class EvalFuncTrainer:
         self.population[self.individual_a_index].score += individual_a_score
         self.population[self.individual_b_index].score += individual_b_score
 
+    def check_if_converge(self, tolerance=0.05):
+
+        value_ranges = []
+
+        for i in range(self.size_of_chromosome):
+            values = []
+            for individual in self.population:
+                values.append(individual.weight_chromosome[i])
+
+            value_range = max(values) - min(values)
+
+            value_ranges.append(value_range)
+
+            if value_range > tolerance:
+                return False
+
+        return True
+
     def crossover_individuals(self, individual_a, individual_b):
 
         crossover_point = random.randint(0, self.size_of_chromosome)
@@ -116,8 +134,8 @@ class EvalFuncTrainer:
     def mutate_chromosome(self, individual, std_dev):
 
         for point in range(self.size_of_chromosome):
-            individual.weight_chromosome[point] = gaussian_mutator(individual.weight_chromosome[point],
-                                                                   std_dev)
+            individual.weight_chromosome[point] = round(gaussian_mutator(individual.weight_chromosome[point],
+                                                                         std_dev), 5)
 
         return individual
 
@@ -128,6 +146,6 @@ class EvalFuncTrainer:
         for x in range(pop_size):
             random_weight = []
             for c in range(self.size_of_chromosome):
-                random_weight.append(random.random())
+                random_weight.append(round(random.random(), 5))
 
             self.population.append(Individual(random_weight, 0))
