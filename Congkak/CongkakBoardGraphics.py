@@ -73,6 +73,7 @@ class BoardGraphic(QMainWindow):
 
         self.update_graphics_menu_toggle_action = QAction()
 
+        self.train_state_agent_menu_toggle_action = QAction()
         self.run_eval_func_training_menu_button_action = QAction()
 
         self.run_multiple_games_menu_button_action = QAction()
@@ -341,6 +342,13 @@ class BoardGraphic(QMainWindow):
 
         # Training Menu
         train_menu = self.menuBar().addMenu("Training")
+
+        self.train_state_agent_menu_toggle_action = QAction("Train State Agents", self)
+        self.train_state_agent_menu_toggle_action.setCheckable(True)
+        self.train_state_agent_menu_toggle_action.setChecked(False)
+        train_menu.addAction(self.train_state_agent_menu_toggle_action)
+
+        train_menu.addSeparator()
 
         self.run_eval_func_training_menu_button_action = QAction("Run Evaluation Function Training", self)
         self.run_eval_func_training_menu_button_action.setStatusTip("Run Evaluation Function Training")

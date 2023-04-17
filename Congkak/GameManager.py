@@ -168,10 +168,10 @@ class GameManager:
         self.minimax_agent = MinimaxAgent(weights=[0, 0, 0, 0, 0, 1], maximum_depth=self.minmax_depth, maximum_self_depth=0,
                                           maximum_number_node=0)
         self.q_simul_agent = QLearningSimulAgent()
-        self.r_simul_agent = ReinforcementLearningSimulAgent()
+        self.rl_simul_agent = ReinforcementLearningSimulAgent()
 
         self.list_of_art_agents = [None, self.random_agent, self.max_agent, self.minimax_agent]
-        self.list_of_simul_art_agents = [None, self.random_agent, self.r_simul_agent]
+        self.list_of_simul_art_agents = [None, self.random_agent, self.rl_simul_agent]
         # if update, make sure to update the list above.
 
         # training evaluation function
@@ -211,8 +211,7 @@ class GameManager:
         self.round_robin_results = [[0 for x in range(len(self.LIST_OF_AGENTS_NAME) - 1)]
                                     for x in range(len(self.LIST_OF_AGENTS_NAME) - 1)]
         self.tournament_participants = []
-        self.rr_simul_agent = RandomAgent()
-
+        self.round_robin_simul_agent = RandomAgent()
 
         # declare threadpool
         self.threadpool = QThreadPool()
@@ -260,6 +259,7 @@ class GameManager:
         self.board_graphic.new_game_menu_button_action.triggered.connect(lambda checked: self.new_game(False))
 
         self.board_graphic.update_graphics_menu_toggle_action.triggered.connect(self.toggle_update_graphics)
+        self.board_graphic.train_state_agent_menu_toggle_action.triggered.connect(self.toggle_learning_state_agents)
 
         self.board_graphic.player_a_agent_dropdown. \
             activated.connect(lambda
@@ -449,11 +449,14 @@ class GameManager:
             winner = "b"
 
         if self.is_training_state_agents:
-            self.r_simul_agent.update_all_values(winner)
-            self.r_simul_agent.clear_used_states()
 
-            self.q_simul_agent.update_all_q_values(winner)
-            self.q_simul_agent.clear_used_states()
+            if self.player_a_agent_simul == self.rl_simul_agent or self.player_b_agent_simul == self.rl_simul_agent:
+                self.rl_simul_agent.update_all_values(winner)
+                self.rl_simul_agent.clear_used_states()
+
+            if self.player_a_agent_simul == self.q_simul_agent or self.player_b_agent_simul == self.q_simul_agent:
+                self.q_simul_agent.update_all_q_values(winner)
+                self.q_simul_agent.clear_used_states()
 
         # TODO: refactor the hell out of this section
         #  (do it only if you have time and sanity (you have neither))
@@ -461,7 +464,11 @@ class GameManager:
         match self.current_mode:
             case self.NORMAL_MODE:
 
-                self.r_simul_agent.print_all_states()
+                if self.player_a_agent_simul == self.rl_simul_agent or self.player_b_agent_simul == self.rl_simul_agent:
+                    self.rl_simul_agent.print_all_states()
+
+                if self.player_a_agent_simul == self.q_simul_agent or self.player_b_agent_simul == self.q_simul_agent:
+                    self.q_simul_agent.print_all_states()
 
                 self.board_graphic.end_game_prompt(winner, self.board_model.storeroom_a_value,
                                                    self.board_model.storeroom_b_value)
@@ -490,7 +497,7 @@ class GameManager:
                     self.new_game(True)
                 else:
 
-                    self.r_simul_agent.print_all_states()
+                    self.rl_simul_agent.print_all_states()
                     self.board_graphic.multi_end_game_prompt(self.game_results)
 
                     self.current_mode = self.NORMAL_MODE
@@ -529,8 +536,8 @@ class GameManager:
                         self.run_multiple_games(no_of_games=self.no_of_games_to_run,
                                                 agent_a_name=self.tournament_participants[agent_a_index],
                                                 agent_b_name=self.tournament_participants[agent_b_index],
-                                                simul_agent_a=self.rr_simul_agent,
-                                                simul_agent_b=self.rr_simul_agent)
+                                                simul_agent_a=self.round_robin_simul_agent,
+                                                simul_agent_b=self.round_robin_simul_agent)
                 pass
 
             case self.EVAL_TRAINING_MODE:
@@ -600,8 +607,8 @@ class GameManager:
                         self.run_multiple_games(no_of_games=self.no_of_games_to_run,
                                                 agent_a=self.TEF_individual_a,
                                                 agent_b=self.TEF_individual_b,
-                                                simul_agent_a=self.rr_simul_agent,
-                                                simul_agent_b=self.rr_simul_agent)
+                                                simul_agent_a=self.round_robin_simul_agent,
+                                                simul_agent_b=self.round_robin_simul_agent)
                 pass
 
             case self.LOADING_MODE:
@@ -837,7 +844,7 @@ class GameManager:
         no_of_games = self.board_graphic.tournament_dialog_box.number_of_games
         participants = self.board_graphic.tournament_dialog_box.tournament_participants
 
-        self.rr_simul_agent = self.list_of_simul_art_agents[self.board_graphic.tournament_dialog_box.player_simul_agent]
+        self.round_robin_simul_agent = self.list_of_simul_art_agents[self.board_graphic.tournament_dialog_box.player_simul_agent]
 
         participants.sort()
 
@@ -858,7 +865,7 @@ class GameManager:
 
         self.run_multiple_games(no_of_games=self.no_of_games_to_run, agent_a_name=self.player_a_agent_name,
                                 agent_b_name=self.player_b_agent_name,
-                                simul_agent_a=self.rr_simul_agent, simul_agent_b=self.rr_simul_agent)
+                                simul_agent_a=self.round_robin_simul_agent, simul_agent_b=self.round_robin_simul_agent)
 
         pass
 
@@ -891,7 +898,7 @@ class GameManager:
         self.TEF_individual_a = MaxAgent(max_depth=self.max_depth, weights=self.TEF_population[0].weight_chromosome)
         self.TEF_individual_b = MaxAgent(max_depth=self.max_depth, weights=self.TEF_population[1].weight_chromosome)
 
-        self.rr_simul_agent = self.random_agent
+        self.round_robin_simul_agent = self.random_agent
 
         self.set_player_simul_agent_index('a', 1)
         self.set_player_simul_agent_index('b', 1)
@@ -899,8 +906,8 @@ class GameManager:
         self.run_multiple_games(no_of_games=self.no_of_games_to_run,
                                 agent_a=self.TEF_individual_a,
                                 agent_b=self.TEF_individual_b,
-                                simul_agent_a=self.rr_simul_agent,
-                                simul_agent_b=self.rr_simul_agent)
+                                simul_agent_a=self.round_robin_simul_agent,
+                                simul_agent_b=self.round_robin_simul_agent)
 
     # Restarts a new game
     def new_game(self, autorun):
