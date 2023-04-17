@@ -62,8 +62,6 @@ class MaxAgent:
 
         self.max_depth = max_depth
 
-        self.heuristics_weights = [0, 0, 0, 0, 0, 0]
-
         self.heuristics_weights = weights
 
         self.all_leaves = []

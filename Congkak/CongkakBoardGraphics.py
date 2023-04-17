@@ -82,7 +82,7 @@ class BoardGraphic(QMainWindow):
         self.game_end_dialog_box = GameEndDialogBox()
 
         self.eval_func_training_dialog_box = EvalFuncTrainingDialogBox()
-        self.eval_func_trainig_end_dialog_box = EvalFuncTrainingEndDialogBox()
+        self.eval_func_training_end_dialog_box = EvalFuncTrainingEndDialogBox()
 
         self.multiple_games_dialog_box = MultiGameDialogBox()
         self.multi_game_end_dialog_box = MultiGameEndDialogBox()
@@ -291,8 +291,6 @@ class BoardGraphic(QMainWindow):
         self.player_b_simul_agent_dropdown.move(500, 380)
         self.player_b_simul_agent_dropdown.addItems(['Human', 'Random', 'R Learning', 'Q Learning'])
 
-
-
         slider_label = QLabel(self)
         slider_label.move(360, 500)
         slider_label.setText("Moves Per Second")
@@ -488,10 +486,11 @@ class BoardGraphic(QMainWindow):
         for i, weight in enumerate(best_weight):
             best_weight[i] = round(weight, 3)
 
-        self.eval_func_trainig_end_dialog_box.no_generations_label.setText(str(no_generations))
-        self.eval_func_trainig_end_dialog_box.best_weight_label.setText(str(best_weight))
+        self.eval_func_training_end_dialog_box.no_generations_label.setText(str(no_generations))
+        self.eval_func_training_end_dialog_box.final_weight = best_weight
+        self.eval_func_training_end_dialog_box.best_weight_label.setText(str(best_weight))
 
-        self.eval_func_trainig_end_dialog_box.exec()
+        self.eval_func_training_end_dialog_box.exec()
         pass
 
     def update_status_bar_message(self, message):
