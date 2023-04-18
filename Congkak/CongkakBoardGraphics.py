@@ -9,6 +9,7 @@ from Congkak.DialogueBoxes.MultiGameEndDialogBox import MultiGameEndDialogBox
 from Congkak.DialogueBoxes.TournamentEndDialogBox import TournamentEndDialogBox
 from Congkak.DialogueBoxes.EvalFuncTrainingDialogBox import EvalFuncTrainingDialogBox
 from Congkak.DialogueBoxes.EvalFuncTrainingEndDialogBox import EvalFuncTrainingEndDialogBox
+from Congkak.DialogueBoxes.UpdateWeightsDialogBox import UpdateWeightsDialogBox
 import sys
 
 from PyQt6.QtWidgets import QApplication, QWidget, QLabel, QMainWindow
@@ -80,6 +81,8 @@ class BoardGraphic(QMainWindow):
         self.run_tournament_menu_button_action = QAction()
 
         self.game_end_dialog_box = GameEndDialogBox()
+
+        self.update_weights_dialog_box = UpdateWeightsDialogBox()
 
         self.eval_func_training_dialog_box = EvalFuncTrainingDialogBox()
         self.eval_func_training_end_dialog_box = EvalFuncTrainingEndDialogBox()
@@ -350,6 +353,10 @@ class BoardGraphic(QMainWindow):
         train_menu.addAction(self.train_state_agent_menu_toggle_action)
 
         train_menu.addSeparator()
+
+        update_weights_menu_button = QAction("Open Weight Edit Box", self)
+        update_weights_menu_button.triggered.connect(self.update_weights_dialog_box.exec)
+        train_menu.addAction(update_weights_menu_button)
 
         self.run_eval_func_training_menu_button_action = QAction("Run Evaluation Function Training", self)
         self.run_eval_func_training_menu_button_action.setStatusTip("Run Evaluation Function Training")
