@@ -101,3 +101,6 @@ class UpdateWeightsDialogBox(QDialog):
 
     def update_weight(self, index, value):
         self.final_weight[index] = value
+
+        print(self.final_weight)
+

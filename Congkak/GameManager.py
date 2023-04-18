@@ -303,7 +303,7 @@ class GameManager:
         self.board_graphic.eval_func_training_end_dialog_box. \
             apply_weights_max_agent_a_button.clicked.connect(lambda
                                                                  checked, max=True, minimax=False, player='a',
-                                                                 weights=None:
+                                                                 weights=self.board_graphic.eval_func_training_end_dialog_box.final_weight:
                                                              self.set_max_and_minimax_agent_weights(player=player,
                                                                                                     is_max=max,
                                                                                                     is_minimax=minimax,
@@ -313,7 +313,7 @@ class GameManager:
         self.board_graphic.eval_func_training_end_dialog_box. \
             apply_weights_max_agent_b_button.clicked.connect(lambda
                                                                  checked, max=True, minimax=False, player='b',
-                                                                 weights=None:
+                                                                 weights=self.board_graphic.eval_func_training_end_dialog_box.final_weight:
                                                              self.set_max_and_minimax_agent_weights(player=player,
                                                                                                     is_max=max,
                                                                                                     is_minimax=minimax,
@@ -323,7 +323,7 @@ class GameManager:
         self.board_graphic.eval_func_training_end_dialog_box. \
             apply_weights_minimax_agent_a_button.clicked.connect(lambda
                                                                      checked, max=False, minimax=True, player='a',
-                                                                     weights=None:
+                                                                     weights=self.board_graphic.eval_func_training_end_dialog_box.final_weight:
                                                                  self.set_max_and_minimax_agent_weights(player=player,
                                                                                                         is_max=max,
                                                                                                         is_minimax=minimax,
@@ -333,12 +333,53 @@ class GameManager:
         self.board_graphic.eval_func_training_end_dialog_box. \
             apply_weights_minimax_agent_b_button.clicked.connect(lambda
                                                                      checked, max=False, minimax=True, player='b',
-                                                                     weights=None:
+                                                                     weights=self.board_graphic.eval_func_training_end_dialog_box.final_weight:
                                                                  self.set_max_and_minimax_agent_weights(player=player,
                                                                                                         is_max=max,
                                                                                                         is_minimax=minimax,
                                                                                                         weights=weights)
                                                                  )
+
+        self.board_graphic.update_weights_dialog_box. \
+            apply_weights_max_agent_a_button.clicked.connect(lambda
+                                                                 checked, max=True, minimax=False, player='a',
+                                                                 weights=self.board_graphic.update_weights_dialog_box.final_weight:
+                                                             self.set_max_and_minimax_agent_weights(player=player,
+                                                                                                    is_max=max,
+                                                                                                    is_minimax=minimax,
+                                                                                                    weights=weights)
+                                                             )
+
+        self.board_graphic.update_weights_dialog_box. \
+            apply_weights_max_agent_b_button.clicked.connect(lambda
+                                                                 checked, max=True, minimax=False, player='b',
+                                                                 weights=self.board_graphic.update_weights_dialog_box.final_weight:
+                                                             self.set_max_and_minimax_agent_weights(player=player,
+                                                                                                    is_max=max,
+                                                                                                    is_minimax=minimax,
+                                                                                                    weights=weights)
+                                                             )
+
+        self.board_graphic.update_weights_dialog_box. \
+            apply_weights_minimax_agent_a_button.clicked.connect(lambda
+                                                                     checked, max=False, minimax=True, player='a',
+                                                                     weights=self.board_graphic.update_weights_dialog_box.final_weight:
+                                                                 self.set_max_and_minimax_agent_weights(player=player,
+                                                                                                        is_max=max,
+                                                                                                        is_minimax=minimax,
+                                                                                                        weights=weights)
+                                                                 )
+
+        self.board_graphic.update_weights_dialog_box. \
+            apply_weights_minimax_agent_b_button.clicked.connect(lambda
+                                                                     checked, max=False, minimax=True, player='b',
+                                                                     weights=self.board_graphic.update_weights_dialog_box.final_weight:
+                                                                 self.set_max_and_minimax_agent_weights(player=player,
+                                                                                                        is_max=max,
+                                                                                                        is_minimax=minimax,
+                                                                                                        weights=weights)
+                                                                 )
+
 
         self.board_graphic.multiple_games_dialog_box.buttonBox.accepted.connect(self.run_multiple_games)
 
@@ -840,6 +881,8 @@ class GameManager:
                 self.set_player_agent_index(player, 1)
 
     def set_max_and_minimax_agent_weights(self, player, is_max, is_minimax, weights):
+
+        print("updating...." + str(weights))
 
         if weights is None:
             weights = self.board_graphic.eval_func_training_end_dialog_box.final_weight
