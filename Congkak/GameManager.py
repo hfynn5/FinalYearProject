@@ -191,7 +191,7 @@ class GameManager:
         # training evaluation function
         self.trainer_pop_size = 40
         self.trainer_chromosome_size = 6
-        self.trainer_std_dev = 0.01
+        self.trainer_std_dev = 0.1
         self.eval_func_trainer = EvalFuncTrainer(10, 20,
                                                  self.trainer_chromosome_size,
                                                  self.trainer_std_dev)

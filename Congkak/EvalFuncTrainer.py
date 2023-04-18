@@ -1,5 +1,6 @@
 import math
 import random
+import statistics
 from dataclasses import dataclass, field
 
 
@@ -108,13 +109,17 @@ class EvalFuncTrainer:
             for individual in self.population:
                 values.append(individual.weight_chromosome[i])
 
-            value_range = max(values) - min(values)
+            # value_range = max(values) - min(values)
+            #
+            # value_ranges.append(value_range)
 
-            value_ranges.append(value_range)
+            std_dev = statistics.stdev(values)
 
-            if value_range > tolerance:
+            if std_dev > tolerance:
+                print("no converge")
                 return False
 
+        print("converge")
         return True
 
     def crossover_individuals(self, individual_a, individual_b):
