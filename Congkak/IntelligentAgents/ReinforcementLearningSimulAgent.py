@@ -90,7 +90,7 @@ class ReinforcementLearningSimulAgent:
         if state.value_player_b[state.player_b_choice] < 0:
             state.value_player_b[state.player_b_choice] = 0
 
-        state.learning_rate = min(increase - 0.001, 0.01)
+        state.learning_rate = max(increase - 0.001, 0.01)
 
         return state
 
