@@ -275,6 +275,9 @@ class GameManager:
         self.board_graphic.update_graphics_menu_toggle_action.triggered.connect(self.toggle_update_graphics)
         self.board_graphic.train_state_agent_menu_toggle_action.triggered.connect(self.toggle_learning_state_agents)
 
+        self.board_graphic.show_rl_state_button_action.triggered.connect(self.print_rl_states)
+        self.board_graphic.show_q_state_button_action.triggered.connect(self.print_q_states)
+
         self.board_graphic.player_a_agent_dropdown. \
             activated.connect(lambda
                                   index=self.board_graphic.player_a_agent_dropdown.
@@ -612,7 +615,11 @@ class GameManager:
                 else:
 
                     update_graphics_status(self.board_graphic, "Multi game has ended")
-                    self.rl_simul_agent.print_all_states()
+                    if self.player_a_agent_simul == self.rl_simul_agent or self.player_b_agent_simul == self.rl_simul_agent:
+                        self.rl_simul_agent.print_all_states()
+
+                    if self.player_a_agent_simul == self.q_simul_agent or self.player_b_agent_simul == self.q_simul_agent:
+                        self.q_simul_agent.print_all_states()
                     self.board_graphic.multi_end_game_prompt(self.game_results)
 
                     self.current_mode = self.NORMAL_MODE
@@ -787,11 +794,11 @@ class GameManager:
     # prompt agent for move. returns  move
     def prompt_agent_for_input(self, player, simul):
 
+        update_graphics_status(self.board_graphic, "Prompting agent " + player.upper() + " for a move...")
+
         move = -1
         while move not in self.board_model.available_moves(player):
             copied_board = copy.deepcopy(self.board_model)
-
-            update_graphics_status(self.board_graphic, "Prompting agent " + player.upper() + " for a move...")
 
             if simul:
                 if player == 'a':
@@ -1159,6 +1166,18 @@ class GameManager:
         if self.move_counter >= len(self.loaded_moves):
             print("Game Loaded")
             self.current_mode = self.NORMAL_MODE
+
+    def print_rl_states(self):
+        self.rl_simul_agent.print_all_states()
+        self.board_graphic.message_box.setText(self.rl_simul_agent.state_to_string())
+        self.board_graphic.message_box.setWindowTitle("RL states")
+        self.board_graphic.message_box.exec()
+
+    def print_q_states(self):
+        self.q_simul_agent.print_all_states()
+        self.board_graphic.message_box.setText(self.q_simul_agent.state_to_string())
+        self.board_graphic.message_box.setWindowTitle("Q states")
+        self.board_graphic.message_box.exec()
 
     # toggles whether the graphics should update
     def toggle_update_graphics(self, state):

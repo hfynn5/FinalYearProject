@@ -12,7 +12,7 @@ from Congkak.DialogueBoxes.EvalFuncTrainingEndDialogBox import EvalFuncTrainingE
 from Congkak.DialogueBoxes.UpdateWeightsDialogBox import UpdateWeightsDialogBox
 import sys
 
-from PyQt6.QtWidgets import QApplication, QWidget, QLabel, QMainWindow
+from PyQt6.QtWidgets import QApplication, QWidget, QLabel, QMainWindow, QMessageBox
 from PyQt6.QtWidgets import *
 from PyQt6.QtGui import QIcon, QFont, QPixmap, QMovie, QRegion
 from PyQt6.QtCore import Qt, QPoint
@@ -84,6 +84,9 @@ class BoardGraphic(QMainWindow):
 
         self.update_weights_dialog_box = UpdateWeightsDialogBox()
 
+        self.show_rl_state_button_action = QAction()
+        self.show_q_state_button_action = QAction()
+
         self.eval_func_training_dialog_box = EvalFuncTrainingDialogBox()
         self.eval_func_training_end_dialog_box = EvalFuncTrainingEndDialogBox()
 
@@ -92,6 +95,9 @@ class BoardGraphic(QMainWindow):
 
         self.tournament_dialog_box = TournamentDialogBox()
         self.tournament_end_dialog_box = TournamentEndDialogBox()
+
+        self.message_box = QMessageBox()
+        self.message_box.setStyleSheet("QLabel{min-width: 1000px;}")
 
         self.acceptDrops()
 
@@ -351,6 +357,14 @@ class BoardGraphic(QMainWindow):
         self.train_state_agent_menu_toggle_action.setCheckable(True)
         self.train_state_agent_menu_toggle_action.setChecked(False)
         train_menu.addAction(self.train_state_agent_menu_toggle_action)
+
+        train_menu.addSeparator()
+
+        self.show_rl_state_button_action = QAction("Show all RL states", self)
+        train_menu.addAction(self.show_rl_state_button_action)
+
+        self.show_q_state_button_action = QAction("Show all Q states", self)
+        train_menu.addAction(self.show_q_state_button_action)
 
         train_menu.addSeparator()
 

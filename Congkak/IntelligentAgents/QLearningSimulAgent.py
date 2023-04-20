@@ -149,9 +149,30 @@ class QLearningSimulAgent:
         return len(self.loaded_states) - 1
 
     def print_all_states(self):
-        print("number of found states: " + str(len(self.loaded_states)) + " all states: ")
+        print("QL: number of found states: " + str(len(self.loaded_states)) + " all states: ")
+        print(self.state_to_string())
+        # for state in self.loaded_states:
+        #     print(state)
+
+    def state_to_string(self):
+        msg = "Q: number of found states: " + str(len(self.loaded_states)) + " all states: \n"
         for state in self.loaded_states:
-            print(state)
+            msg_x = ""
+            msg_x += "house A state: "
+            msg_x += str(state.house_a_values)
+            msg_x += " house B state: "
+            msg_x += str(state.house_b_values)
+            msg_x += " player A value: "
+            msg_x += str(state.q_value_player_a)
+            msg_x += " player B value: "
+            msg_x += str(state.q_value_player_b)
+
+            msg += msg_x
+            msg += "\n"
+
+            print(msg)
+
+        return msg
 
     def load_states(self):
         pass

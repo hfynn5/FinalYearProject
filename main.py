@@ -5,7 +5,16 @@
 
 import Congkak.GameManager as CongkakGame
 import sys
+import traceback
+import winsound
 
 sys.setrecursionlimit(4000)
-congkak = CongkakGame.GameManager()
 
+try:
+    congkak = CongkakGame.GameManager()
+except:
+    traceback.print_exc()
+
+    # while True:
+    #     winsound.Beep(987, 200)
+    #     winsound.Beep(1396, 200)

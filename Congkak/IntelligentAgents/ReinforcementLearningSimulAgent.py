@@ -35,6 +35,8 @@ class ReinforcementLearningSimulAgent:
 
     def choose_move(self, player, board_model):
 
+        available_moves = board_model.available_moves(player)
+
         # self.learning_rate = min(self.learning_rate + 0.001, 0.1)
 
         state_index = self.find_state_index(board_model)
@@ -44,15 +46,17 @@ class ReinforcementLearningSimulAgent:
 
         current_state = self.loaded_states[state_index]
 
-        self.loaded_states[state_index].learning_rate = min(self.loaded_states[state_index].learning_rate - 0.001, 0.1)
+        # self.loaded_states[state_index].learning_rate = min(self.loaded_states[state_index].learning_rate - 0.001, 0.1)
 
         choice = 0
 
         if player == 'a':
             choice = random.choices([1, 2, 3, 4, 5, 6, 7], current_state.value_player_a)[0]
+            # choice = random.choice(available_moves)
             self.loaded_states[state_index].player_a_choice = choice - 1
         elif player == 'b':
             choice = random.choices([1, 2, 3, 4, 5, 6, 7], current_state.value_player_b)[0]
+            # choice = random.choice(available_moves)
             self.loaded_states[state_index].player_b_choice = choice - 1
 
         return choice
@@ -117,9 +121,28 @@ class ReinforcementLearningSimulAgent:
         return len(self.loaded_states) - 1
 
     def print_all_states(self):
-        print("number of found states: " + str(len(self.loaded_states)) + " all states: ")
+        print("RL: number of found states: " + str(len(self.loaded_states)) + " all states: ")
+        print(self.state_to_string())
+        # for state in self.loaded_states:
+        #     print(state)
+
+    def state_to_string(self):
+        msg = "RL: number of found states: " + str(len(self.loaded_states)) + " all states: \n"
         for state in self.loaded_states:
-            print(state)
+            msg_x = ""
+            msg_x += "house A state: "
+            msg_x += str(state.house_a_values)
+            msg_x += " house B state: "
+            msg_x += str(state.house_b_values)
+            msg_x += " player A value: "
+            msg_x += str(state.value_player_a)
+            msg_x += " player B value: "
+            msg_x += str(state.value_player_b)
+
+            msg += msg_x
+            msg += "\n"
+
+        return msg
 
     def load_states(self):
         pass
