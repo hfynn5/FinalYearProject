@@ -60,7 +60,11 @@ class QLearningSimulAgent:
 
         for state_index in reversed(self.used_states_index):
             curr_state = self.loaded_states[state_index]
-            self.loaded_states[state_index], prev_reward = self.update_q_value(curr_state, winner_player, prev_reward)
+            print(curr_state)
+            state, prev_reward = self.update_q_value(curr_state,
+                                                     winner_player,
+                                                     prev_reward)
+            self.loaded_states[state_index] = state
 
     def clear_used_states(self):
 
@@ -80,7 +84,7 @@ class QLearningSimulAgent:
         if winner_player == 'a':
 
             if state.player_a_choice < 0:
-                return state
+                return state, prev_reward
 
             increase = self.learning_rate * \
                        (1 + self.discount_rate * prev_reward - current_q_value_a)

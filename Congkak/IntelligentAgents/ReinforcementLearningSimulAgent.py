@@ -17,7 +17,7 @@ class State:
     value_player_b: list[int]
     player_a_choice: int = 0
     player_b_choice: int = 0
-    learning_rate: float = 0.01
+    learning_rate: float = 0.1
 
     # 0, 0, 0, 0, 0, 0, 0
     # 1, 1, 1, 1, 1, 1, 1
@@ -76,12 +76,12 @@ class ReinforcementLearningSimulAgent:
         current_value_a = state.value_player_a[state.player_a_choice]
         current_value_b = state.value_player_b[state.player_b_choice]
 
+        increase = state.learning_rate
+
         if winner_player == 'a':
-            increase = state.learning_rate
             state.value_player_a[state.player_a_choice] = round(current_value_a + increase, 5)
 
         elif winner_player == 'b':
-            increase = state.learning_rate
             state.value_player_b[state.player_b_choice] = round(current_value_b + increase, 5)
 
         if state.value_player_a[state.player_a_choice] < 0:
@@ -89,6 +89,8 @@ class ReinforcementLearningSimulAgent:
 
         if state.value_player_b[state.player_b_choice] < 0:
             state.value_player_b[state.player_b_choice] = 0
+
+        state.learning_rate = min(increase - 0.001, 0.01)
 
         return state
 
