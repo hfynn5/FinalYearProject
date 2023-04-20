@@ -165,19 +165,19 @@ class GameManager:
         # create Intelligent Agents
         self.max_depth = 5
         self.minmax_depth = 5
+        self.default_weights = [0.15, 0.363, 0.806, 0.335, 0.014, 0.828]
         self.is_training_state_agents = False
 
         self.random_agent = RandomAgent()
         # self.max_agent = MaxAgent(max_depth=self.max_depth, weights=[0, 0, 0, 0, 0, 1])
         # self.minimax_agent = MinimaxAgent(weights=[0, 0, 0, 0, 0, 1], maximum_depth=self.minmax_depth, maximum_self_depth=0,
         #                                   maximum_number_node=0)
-
-        self.max_agent_a = MaxAgent(max_depth=self.max_depth, weights=[0, 0, 0, 0, 0, 1])
-        self.max_agent_b = MaxAgent(max_depth=self.max_depth, weights=[0, 0, 0, 0, 0, 1])
-        self.minimax_agent_a = MinimaxAgent(weights=[0, 0, 0, 0, 0, 1], maximum_depth=self.minmax_depth,
+        self.max_agent_a = MaxAgent(max_depth=self.max_depth, weights=self.default_weights)
+        self.max_agent_b = MaxAgent(max_depth=self.max_depth, weights=self.default_weights)
+        self.minimax_agent_a = MinimaxAgent(weights=self.default_weights, maximum_depth=self.minmax_depth,
                                             maximum_self_depth=0,
                                             maximum_number_node=0)
-        self.minimax_agent_b = MinimaxAgent(weights=[0, 0, 0, 0, 0, 1], maximum_depth=self.minmax_depth,
+        self.minimax_agent_b = MinimaxAgent(weights=self.default_weights, maximum_depth=self.minmax_depth,
                                             maximum_self_depth=0,
                                             maximum_number_node=0)
 
@@ -231,8 +231,8 @@ class GameManager:
         # for brute force
         self.bfpm_player_a_choice = -1
         self.bfpm_player_b_choice = -1
-        self.payoff_matrix = [[0 for x in range(6)]
-                                    for x in range(6)]
+        self.payoff_matrix = [[0 for x in range(7)]
+                                    for x in range(7)]
 
         # declare threadpool
         self.threadpool = QThreadPool()
@@ -740,10 +740,8 @@ class GameManager:
 
                 if result == self.PLAYER_A_WIN:
                     self.payoff_matrix[self.bfpm_player_a_choice-1][self.bfpm_player_b_choice-1] += 1
-                    self.payoff_matrix[self.bfpm_player_b_choice-1][self.bfpm_player_a_choice-1] -= 1
                 elif result == self.PLAYER_B_WIN:
                     self.payoff_matrix[self.bfpm_player_a_choice-1][self.bfpm_player_b_choice-1] -= 1
-                    self.payoff_matrix[self.bfpm_player_b_choice-1][self.bfpm_player_a_choice-1] += 1
 
                 if self.no_of_games_left > 0:
                     print("BFPM: " + str(self.no_of_games_left) + " games left...")
@@ -839,9 +837,9 @@ class GameManager:
                 if player == 'a':
 
                     if self.current_mode == self.BFPM_MODE and self.board_model.house_a_values == [7,7,7,7,7,7,7]:
-                        print("tests")
                         move = self.bfpm_player_a_choice
                     else:
+                        print("random")
                         move = self.player_a_agent_simul.choose_move(player, copied_board)
 
                 elif player == 'b':
@@ -849,6 +847,7 @@ class GameManager:
                     if self.current_mode == self.BFPM_MODE and self.board_model.house_b_values == [7,7,7,7,7,7,7]:
                         move = self.bfpm_player_b_choice
                     else:
+                        print("random")
                         move = self.player_b_agent_simul.choose_move(player, copied_board)
 
             else:
@@ -1031,7 +1030,6 @@ class GameManager:
             print("BFPM: current a choice: " + str(self.bfpm_player_a_choice) + " current b choice: " + str(
                 self.bfpm_player_b_choice))
 
-        print(self.player_a_agent)
 
         if self.current_mode not in [self.ROUND_ROBIN_MODE, self.EVAL_TRAINING_MODE, self.BFPM_MODE]:
             self.current_mode = self.MULTI_GAME_MODE
@@ -1122,6 +1120,11 @@ class GameManager:
                                 simul_agent_b=self.round_robin_simul_agent)
 
     def brute_force_payoff_matrix(self, no_of_games=10):
+
+        no_of_games = 10
+
+        print(self.payoff_matrix)
+
         self.bfpm_player_a_choice = 1
         self.bfpm_player_b_choice = 1
 
@@ -1131,7 +1134,7 @@ class GameManager:
 
         self.no_of_games_to_run = no_of_games
 
-        self.run_multiple_games(no_of_games=no_of_games,
+        self.run_multiple_games(no_of_games=self.no_of_games_to_run,
                                 agent_a_name=self.AGENT_MINIMAX,
                                 agent_b_name=self.AGENT_MINIMAX,
                                 simul_agent_a=self.random_agent,
