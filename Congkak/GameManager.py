@@ -570,12 +570,6 @@ class GameManager:
 
                 update_graphics_status(self.board_graphic, "Game has ended")
 
-                if self.player_a_agent_simul == self.rl_simul_agent or self.player_b_agent_simul == self.rl_simul_agent:
-                    self.rl_simul_agent.print_all_states()
-
-                if self.player_a_agent_simul == self.q_simul_agent or self.player_b_agent_simul == self.q_simul_agent:
-                    self.q_simul_agent.print_all_states()
-
                 self.board_graphic.end_game_prompt(winner, self.board_model.storeroom_a_value,
                                                    self.board_model.storeroom_b_value)
                 print("Game has ended. Moves made: ")
@@ -615,11 +609,7 @@ class GameManager:
                 else:
 
                     update_graphics_status(self.board_graphic, "Multi game has ended")
-                    if self.player_a_agent_simul == self.rl_simul_agent or self.player_b_agent_simul == self.rl_simul_agent:
-                        self.rl_simul_agent.print_all_states()
 
-                    if self.player_a_agent_simul == self.q_simul_agent or self.player_b_agent_simul == self.q_simul_agent:
-                        self.q_simul_agent.print_all_states()
                     self.board_graphic.multi_end_game_prompt(self.game_results)
 
                     self.current_mode = self.NORMAL_MODE

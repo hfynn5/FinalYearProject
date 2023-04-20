@@ -60,7 +60,6 @@ class QLearningSimulAgent:
 
         for state_index in reversed(self.used_states_index):
             curr_state = self.loaded_states[state_index]
-            print(curr_state)
             state, prev_reward = self.update_q_value(curr_state,
                                                      winner_player,
                                                      prev_reward)
