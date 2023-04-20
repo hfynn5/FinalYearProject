@@ -141,6 +141,7 @@ class GameManager:
     ROUND_ROBIN_MODE = 2
     LOADING_MODE = 3
     EVAL_TRAINING_MODE = 4
+    BFPM_MODE = 5
 
     def __init__(self):
 
@@ -227,6 +228,12 @@ class GameManager:
         self.tournament_participants = []
         self.round_robin_simul_agent = RandomAgent()
 
+        # for brute force
+        self.bfpm_player_a_choice = -1
+        self.bfpm_player_b_choice = -1
+        self.payoff_matrix = [[0 for x in range(6)]
+                                    for x in range(6)]
+
         # declare threadpool
         self.threadpool = QThreadPool()
         self.threadpool.setMaxThreadCount(3)
@@ -298,8 +305,7 @@ class GameManager:
                                   index=self.board_graphic.player_b_agent_dropdown.
                                       currentIndex(): self.set_player_simul_agent_index('b', index))
 
-        # self.board_graphic.run_eval_func_training_menu_button_action.\
-        #     triggered.connect(self.start_training_eval_function)
+        self.board_graphic.run_bfpm_menu_button_action.triggered.connect(self.brute_force_payoff_matrix)
 
         self.board_graphic.eval_func_training_dialog_box.buttonBox.accepted.connect(self.start_training_eval_function)
 
@@ -730,6 +736,44 @@ class GameManager:
                                                 simul_agent_b=self.round_robin_simul_agent)
                 pass
 
+            case self.BFPM_MODE:
+
+                if result == self.PLAYER_A_WIN:
+                    self.payoff_matrix[self.bfpm_player_a_choice-1][self.bfpm_player_b_choice-1] += 1
+                    self.payoff_matrix[self.bfpm_player_b_choice-1][self.bfpm_player_a_choice-1] -= 1
+                elif result == self.PLAYER_B_WIN:
+                    self.payoff_matrix[self.bfpm_player_a_choice-1][self.bfpm_player_b_choice-1] -= 1
+                    self.payoff_matrix[self.bfpm_player_b_choice-1][self.bfpm_player_a_choice-1] += 1
+
+                if self.no_of_games_left > 0:
+                    print("BFPM: " + str(self.no_of_games_left) + " games left...")
+                    self.no_of_games_left -= 1
+                    self.new_game(True)
+                else:
+
+                    self.bfpm_player_b_choice += 1
+
+                    if self.bfpm_player_b_choice > 7:
+                        self.bfpm_player_a_choice += 1
+                        self.bfpm_player_b_choice = 1
+
+                    if self.bfpm_player_a_choice > 7:
+                        update_graphics_status(self.board_graphic, "BFPM has ended")
+
+                        print(self.payoff_matrix)
+
+                        self.current_mode = self.NORMAL_MODE
+                    else:
+                        print("BFPM: current a choice: " + str(self.bfpm_player_a_choice) + " current b choice" + str(
+                            self.bfpm_player_b_choice))
+                        self.run_multiple_games(no_of_games=self.no_of_games_to_run,
+                                                agent_a_name=self.AGENT_MINIMAX,
+                                                agent_b_name=self.AGENT_MINIMAX,
+                                                simul_agent_a=self.random_agent,
+                                                simul_agent_b=self.random_agent)
+                pass
+
+
             case self.LOADING_MODE:
                 print("Game has loaded.")
                 self.current_mode = self.NORMAL_MODE
@@ -791,11 +835,21 @@ class GameManager:
             copied_board = copy.deepcopy(self.board_model)
 
             if simul:
+
                 if player == 'a':
-                    move = self.player_a_agent_simul.choose_move(player, copied_board)
+
+                    if self.current_mode == self.BFPM_MODE and self.board_model.house_a_values == [7,7,7,7,7,7,7]:
+                        print("tests")
+                        move = self.bfpm_player_a_choice
+                    else:
+                        move = self.player_a_agent_simul.choose_move(player, copied_board)
 
                 elif player == 'b':
-                    move = self.player_b_agent_simul.choose_move(player, copied_board)
+
+                    if self.current_mode == self.BFPM_MODE and self.board_model.house_b_values == [7,7,7,7,7,7,7]:
+                        move = self.bfpm_player_b_choice
+                    else:
+                        move = self.player_b_agent_simul.choose_move(player, copied_board)
 
             else:
                 if player == 'a':
@@ -973,9 +1027,17 @@ class GameManager:
             print("running " + str(no_of_games) + " games. player a: " + str(
                 self.player_a_agent.heuristics_weights) +
                   ". player b: " + str(self.player_b_agent.heuristics_weights))
+        elif self.current_mode == self.BFPM_MODE:
+            print("BFPM: current a choice: " + str(self.bfpm_player_a_choice) + " current b choice: " + str(
+                self.bfpm_player_b_choice))
 
-        if not self.current_mode == self.ROUND_ROBIN_MODE and not self.current_mode == self.EVAL_TRAINING_MODE:
+        print(self.player_a_agent)
+
+        if self.current_mode not in [self.ROUND_ROBIN_MODE, self.EVAL_TRAINING_MODE, self.BFPM_MODE]:
             self.current_mode = self.MULTI_GAME_MODE
+
+        # if not self.current_mode == self.ROUND_ROBIN_MODE and not self.current_mode == self.EVAL_TRAINING_MODE and not self.BFPM_MODE:
+        #     self.current_mode = self.MULTI_GAME_MODE
 
         self.new_game(False)
 
@@ -1058,6 +1120,22 @@ class GameManager:
                                 agent_b=self.TEF_individual_b,
                                 simul_agent_a=self.round_robin_simul_agent,
                                 simul_agent_b=self.round_robin_simul_agent)
+
+    def brute_force_payoff_matrix(self, no_of_games=10):
+        self.bfpm_player_a_choice = 1
+        self.bfpm_player_b_choice = 1
+
+        self.current_mode = self. BFPM_MODE
+
+        print("BFPM: current a choice: " + str(self.bfpm_player_a_choice) + " current b choice: " + str(self.bfpm_player_b_choice))
+
+        self.no_of_games_to_run = no_of_games
+
+        self.run_multiple_games(no_of_games=no_of_games,
+                                agent_a_name=self.AGENT_MINIMAX,
+                                agent_b_name=self.AGENT_MINIMAX,
+                                simul_agent_a=self.random_agent,
+                                simul_agent_b=self.random_agent)
 
     # Restarts a new game
     def new_game(self, autorun):

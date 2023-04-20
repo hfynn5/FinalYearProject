@@ -90,6 +90,8 @@ class BoardGraphic(QMainWindow):
         self.eval_func_training_dialog_box = EvalFuncTrainingDialogBox()
         self.eval_func_training_end_dialog_box = EvalFuncTrainingEndDialogBox()
 
+        self.run_bfpm_menu_button_action = QAction()
+
         self.multiple_games_dialog_box = MultiGameDialogBox()
         self.multi_game_end_dialog_box = MultiGameEndDialogBox()
 
@@ -376,6 +378,9 @@ class BoardGraphic(QMainWindow):
         self.run_eval_func_training_menu_button_action.setStatusTip("Run Evaluation Function Training")
         self.run_eval_func_training_menu_button_action.triggered.connect(self.eval_func_training_dialog_box.exec)
         train_menu.addAction(self.run_eval_func_training_menu_button_action)
+
+        self.run_bfpm_menu_button_action = QAction("Run Brute Force Payof Matrix", self)
+        train_menu.addAction(self.run_bfpm_menu_button_action)
 
         # View Menu
         view_menu = self.menuBar().addMenu("View")
