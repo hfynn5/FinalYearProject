@@ -173,8 +173,6 @@ class QLearningSimulAgent:
             msg += msg_x
             msg += "\n"
 
-            print(msg)
-
         return msg
 
     def load_states(self):

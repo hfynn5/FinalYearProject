@@ -1137,8 +1137,8 @@ class GameManager:
         self.run_multiple_games(no_of_games=self.no_of_games_to_run,
                                 agent_a_name=self.AGENT_MINIMAX,
                                 agent_b_name=self.AGENT_MINIMAX,
-                                simul_agent_a=self.random_agent,
-                                simul_agent_b=self.random_agent)
+                                simul_agent_a=self.player_a_agent_simul,
+                                simul_agent_b=self.player_a_agent_simul)
 
     # Restarts a new game
     def new_game(self, autorun):
