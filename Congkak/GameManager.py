@@ -838,6 +838,8 @@ class GameManager:
 
                     if self.current_mode == self.BFPM_MODE and self.board_model.house_a_values == [7,7,7,7,7,7,7]:
                         move = self.bfpm_player_a_choice
+                    # if self.board_model.house_a_values == [7,7,7,7,7,7,7]:
+                    #     move = 7
                     else:
                         print("random")
                         move = self.player_a_agent_simul.choose_move(player, copied_board)
@@ -846,6 +848,8 @@ class GameManager:
 
                     if self.current_mode == self.BFPM_MODE and self.board_model.house_b_values == [7,7,7,7,7,7,7]:
                         move = self.bfpm_player_b_choice
+                    # if self.board_model.house_b_values == [7,7,7,7,7,7,7]:
+                    #     move = 3
                     else:
                         print("random")
                         move = self.player_b_agent_simul.choose_move(player, copied_board)
