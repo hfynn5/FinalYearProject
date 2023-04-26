@@ -8,7 +8,7 @@ a = Analysis(
     ['main.py'],
     pathex=[],
     binaries=[],
-    datas=[],
+    datas=[('Congkak/Assets/Sprites/','Congkak/Assets/Sprites/')],
     hiddenimports=[],
     hookspath=[],
     hooksconfig={},
