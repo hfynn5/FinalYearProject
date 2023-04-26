@@ -135,9 +135,13 @@ class BoardModel:
             if self.storeroom_a_value > self.storeroom_b_value:
                 self.player_a_hand = self.progress_hand(self.player_a_hand)
                 self.player_b_hand = self.progress_hand(self.player_b_hand)
+                self.update_hand_status(self.player_a_hand)
+                self.update_hand_status(self.player_b_hand)
             else:
                 self.player_b_hand = self.progress_hand(self.player_b_hand)
                 self.player_a_hand = self.progress_hand(self.player_a_hand)
+                self.update_hand_status(self.player_b_hand)
+                self.update_hand_status(self.player_a_hand)
             self.wait_micromove()
 
         if self.player_a_hand.current_state == Hand.IDLE_STATE and self.player_b_hand.current_state == Hand.IDLE_STATE:
@@ -214,8 +218,6 @@ class BoardModel:
             case Hand.TIKAM_STATE_3:
                 hand = self.tikam_step_3(hand)
                 pass
-
-        self.update_hand_status(hand)
 
         return hand
 
