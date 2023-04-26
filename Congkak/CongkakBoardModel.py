@@ -91,6 +91,7 @@ class BoardModel:
         while not hand.current_state == Hand.IDLE_STATE and not hand.current_state == Hand.PROMPTING_STATE:
             hand = self.progress_hand(hand)
             self.update_player_hands_from_current_hand(hand)
+            self.update_hand_status(hand)
             self.wait_micromove()
 
         if hand.current_state == Hand.IDLE_STATE:
