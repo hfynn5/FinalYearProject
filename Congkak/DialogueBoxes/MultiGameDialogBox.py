@@ -68,17 +68,6 @@ class MultiGameDialogBox(QDialog):
 
         self.setLayout(layout)
 
-    def exec(self) -> int:
-        self.number_of_games = 1
-        self.player_a_agent = 1
-        self.player_b_agent = 1
-
-        self.player_a_dropdown.setCurrentIndex(0)
-        self.player_b_dropdown.setCurrentIndex(0)
-        self.game_count_spin_box.setValue(1)
-
-        super().exec()
-
     def no_games_changed(self, count):
         self.number_of_games = count
 
