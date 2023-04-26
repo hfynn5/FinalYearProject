@@ -12,11 +12,18 @@ from Congkak.DialogueBoxes.EvalFuncTrainingEndDialogBox import EvalFuncTrainingE
 from Congkak.DialogueBoxes.UpdateWeightsDialogBox import UpdateWeightsDialogBox
 import sys
 
-from PyQt6.QtWidgets import QApplication, QWidget, QLabel, QMainWindow, QMessageBox
+from PyQt6.QtWidgets import QApplication, QWidget, QLabel, QMainWindow, QMessageBox, QFrame
 from PyQt6.QtWidgets import *
 from PyQt6.QtGui import QIcon, QFont, QPixmap, QMovie, QRegion
 from PyQt6.QtCore import Qt, QPoint
 import sys
+
+#
+# class VLine(QFrame):
+#     # a simple VLine, like the one you get from designer
+#     def __init__(self):
+#         super(VLine, self).__init__()
+#         self.setFrameShape(self.VLine|self.Sunken)
 
 
 class BoardGraphic(QMainWindow):
@@ -111,8 +118,26 @@ class BoardGraphic(QMainWindow):
 
         self.set_pictures()
 
-        self.status_bar = QStatusBar(self)
-        self.setStatusBar(self.status_bar)
+        self.status_current_status_label = QLabel("Status: ")
+        self.status_mode_label = QLabel("Mode: ")
+        self.status_games_left_label = QLabel("Games left: ")
+        self.status_random_label = QLabel("")
+
+        self.statusBar().reformat()
+        self.statusBar().setStyleSheet('border: 0; background-color: #FFF8DC;')
+        self.statusBar().setStyleSheet("QStatusBar::item {border: none;}")
+
+        self.statusBar().addPermanentWidget(self.status_current_status_label)
+        # self.statusBar().addPermanentWidget(VLine())
+        self.statusBar().addPermanentWidget(self.status_mode_label)
+        # self.statusBar().addPermanentWidget(VLine())
+        self.statusBar().addPermanentWidget(self.status_games_left_label)
+        # self.statusBar().addPermanentWidget(VLine())
+        self.statusBar().addPermanentWidget(self.status_random_label)
+        # self.statusBar().addPermanentWidget(VLine())
+
+
+
 
         # show all the widgets
         self.show()
@@ -518,9 +543,32 @@ class BoardGraphic(QMainWindow):
 
         self.eval_func_training_end_dialog_box.exec()
         pass
+    #
+    # def update_status_bar_message(self, message):
+    #     self.status_bar.showMessage(message)
 
-    def update_status_bar_message(self, message):
-        self.status_bar.showMessage(message)
+    def update_status_bar_message(self, status, mode, games_left, random):
+
+        self.status_current_status_label.setText(status)
+
+        match mode:
+            case 0:
+                self.status_mode_label.setText("Mode: Normal")
+            case 1:
+                self.status_mode_label.setText("Mode: Multi-Game")
+            case 2:
+                self.status_mode_label.setText("Mode: Round Robin Tournament")
+            case 3:
+                self.status_mode_label.setText("Mode: Loading")
+            case 4:
+                self.status_mode_label.setText("Mode: Evaluation Function Training")
+            case 5:
+                self.status_mode_label.setText("Mode: Payoff Matrix Brute Force")
+
+        self.status_games_left_label.setText("Games Left: " + str(games_left))
+
+        self.status_random_label.setText(random)
+
 
     # enable or disable the inputs
     def set_enable_inputs(self, enable):
