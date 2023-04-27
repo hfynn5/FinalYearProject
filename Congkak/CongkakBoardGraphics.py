@@ -317,7 +317,7 @@ class BoardGraphic(QMainWindow):
 
         self.player_a_simul_agent_dropdown = QComboBox(self)
         self.player_a_simul_agent_dropdown.move(500, 100)
-        self.player_a_simul_agent_dropdown.addItems(['Human', 'Random', 'R Learning', 'Q Learning'])
+        self.player_a_simul_agent_dropdown.addItems(['Human', 'Random', 'R Learning', 'Q Learning', 'Preset'])
 
         label_a = QLabel(self)
         label_a.move(500, 410)
@@ -325,7 +325,7 @@ class BoardGraphic(QMainWindow):
 
         self.player_b_simul_agent_dropdown = QComboBox(self)
         self.player_b_simul_agent_dropdown.move(500, 380)
-        self.player_b_simul_agent_dropdown.addItems(['Human', 'Random', 'R Learning', 'Q Learning'])
+        self.player_b_simul_agent_dropdown.addItems(['Human', 'Random', 'R Learning', 'Q Learning', 'Preset'])
 
         slider_label = QLabel(self)
         slider_label.move(360, 500)
@@ -363,19 +363,19 @@ class BoardGraphic(QMainWindow):
         # Edit Menu
         edit_menu = self.menuBar().addMenu("Edit")
 
-        submenu = edit_menu.addMenu("Edit Player")
-
-        button_action = QAction("Player A", self)
-        submenu.addAction(button_action)
-
-        button_action = QAction("Player B", self)
-        submenu.addAction(button_action)
+        # submenu = edit_menu.addMenu("Edit Player")
+        #
+        # button_action = QAction("Player A", self)
+        # submenu.addAction(button_action)
+        #
+        # button_action = QAction("Player B", self)
+        # submenu.addAction(button_action)
 
         button_action = QAction("Edit Marble Count", self)
         edit_menu.addAction(button_action)
 
-        button_action = QAction("Change Speed", self)
-        edit_menu.addAction(button_action)
+        # button_action = QAction("Change Speed", self)
+        # edit_menu.addAction(button_action)
 
         # Training Menu
         train_menu = self.menuBar().addMenu("Training")

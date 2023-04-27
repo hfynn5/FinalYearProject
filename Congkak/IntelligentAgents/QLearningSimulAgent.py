@@ -27,7 +27,7 @@ class QLearningSimulAgent:
 
         self.loaded_states = []
         self.used_states_index = []
-        self.learning_rate = 0.9
+        self.learning_rate = 0.3
         self.discount_rate = 0.9
 
         pass

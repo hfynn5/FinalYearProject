@@ -15,6 +15,7 @@ from Congkak.IntelligentAgents.MinimaxAgent import MinimaxAgent
 from Congkak.IntelligentAgents.QLearningSimulAgent import QLearningSimulAgent
 from Congkak.IntelligentAgents.ReinforcementLearningSimulAgent import ReinforcementLearningSimulAgent
 from Congkak.IntelligentAgents.RandomAgent import RandomAgent
+from Congkak.IntelligentAgents.PresetSimulAgent import PresetSimulAgent
 
 from statistics import mean
 
@@ -123,9 +124,10 @@ class GameManager:
 
     AGENT_Q_SIMUL = 'q simul'
     AGENT_R_SIMUL = 'r simul'
+    AGENT_PRESET_SIMUL = 'preset simul'
 
     LIST_OF_AGENTS_NAME = [AGENT_USER, AGENT_RANDOM, AGENT_MAX, AGENT_MINIMAX]
-    LIST_OF_SIMUL_AGENTS_NAME = [AGENT_USER, AGENT_RANDOM, AGENT_R_SIMUL, AGENT_Q_SIMUL]
+    LIST_OF_SIMUL_AGENTS_NAME = [AGENT_USER, AGENT_RANDOM, AGENT_R_SIMUL, AGENT_Q_SIMUL, AGENT_PRESET_SIMUL]
     # if update, make sure to update the list below.
 
     PLAYER_A_WIN = 1
@@ -179,10 +181,11 @@ class GameManager:
 
         self.q_simul_agent = QLearningSimulAgent()
         self.rl_simul_agent = ReinforcementLearningSimulAgent()
+        self.preset_simul_agent = PresetSimulAgent()
 
         self.list_of_art_agents_a = [None, self.random_agent, self.max_agent_a, self.minimax_agent_a]
         self.list_of_art_agents_b = [None, self.random_agent, self.max_agent_a, self.minimax_agent_a]
-        self.list_of_simul_art_agents = [None, self.random_agent, self.rl_simul_agent, self.q_simul_agent]
+        self.list_of_simul_art_agents = [None, self.random_agent, self.rl_simul_agent, self.q_simul_agent, self.preset_simul_agent]
         # if update, make sure to update the list above.
 
         # training evaluation function
@@ -476,7 +479,7 @@ class GameManager:
     # performs the next action based on given or the board model
     def next_action(self, action=None):
 
-        update_board_graphics(board_graphic=self.board_graphic, board_model=self.board_model)
+        # update_board_graphics(board_graphic=self.board_graphic, board_model=self.board_model)
 
         # update_board_graphics(board_graphic=self.board_graphic, board_model=self.board_model)
 
@@ -582,13 +585,13 @@ class GameManager:
 
                 try:
                     print("max a: average leaf count: " + str(mean(self.max_agent_a.all_leaves)))
-                    print("max a: depths: " + str(self.max_agent_a.all_depths))
+                    print("max a: average depths: " + str(mean(self.max_agent_a.all_depths)))
                 except:
                     pass
 
                 try:
                     print("max b: average leaf count: " + str(mean(self.max_agent_b.all_leaves)))
-                    print("max b: depths: " + str(self.max_agent_b.all_depths))
+                    print("max b: average depths: " + str(mean(self.max_agent_b.all_depths)))
                 except:
                     pass
 
@@ -841,9 +844,9 @@ class GameManager:
                     if self.current_mode == self.BFPM_MODE and self.board_model.house_a_values == [7,7,7,7,7,7,7]:
                         move = self.bfpm_player_a_choice
                     # if self.board_model.house_a_values == [7,7,7,7,7,7,7]:
-                    #     move = 7
+                    #     move = 5
                     else:
-                        print("random")
+                        # print("random")
                         move = self.player_a_agent_simul.choose_move(player, copied_board)
 
                 elif player == 'b':
@@ -851,10 +854,11 @@ class GameManager:
                     if self.current_mode == self.BFPM_MODE and self.board_model.house_b_values == [7,7,7,7,7,7,7]:
                         move = self.bfpm_player_b_choice
                     # if self.board_model.house_b_values == [7,7,7,7,7,7,7]:
-                    #     move = 3
+                    #     move = 7
                     else:
-                        print("random")
+                        # print("random")
                         move = self.player_b_agent_simul.choose_move(player, copied_board)
+                        print("random choice: " + str(move))
 
             else:
                 if player == 'a':
@@ -1127,14 +1131,14 @@ class GameManager:
 
     def brute_force_payoff_matrix(self, no_of_games=10):
 
-        no_of_games = 10
+        no_of_games = 1
 
         print(self.payoff_matrix)
 
         self.bfpm_player_a_choice = 1
         self.bfpm_player_b_choice = 1
 
-        self.current_mode = self. BFPM_MODE
+        self.current_mode = self.BFPM_MODE
 
         print("BFPM: current a choice: " + str(self.bfpm_player_a_choice) + " current b choice: " + str(self.bfpm_player_b_choice))
 
@@ -1265,7 +1269,7 @@ class GameManager:
         self.is_training_state_agents = state
 
     def update_graphics_status(self, message="", random=""):
-        self.board_graphic.update_status_bar_message(message, self.current_mode, self.no_of_games_left, random)
+        self.board_graphic.update_status_bar_message(message, self.current_mode, self.no_of_games_left+1, random)
 
     # closes the program
     def close_program(self):
