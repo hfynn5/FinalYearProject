@@ -4,6 +4,10 @@ import traceback
 
 from Congkak.Hand import Hand
 
+class GameDisabledError(Exception):
+    def __init__(self):
+        super().__init__("Game is Disabled")
+
 
 class BoardModel:
     CONTINUE_SOWING = "CONTINUE SOWING"
@@ -521,7 +525,8 @@ class BoardModel:
 
         if not self.running:
             self.print_all_data()
-            raise Exception("Running the game is disabled.")
+
+            raise GameDisabledError()
 
     def update_board_state_dict(self):
         self.board_state_dict["player a house"] = self.house_a_values

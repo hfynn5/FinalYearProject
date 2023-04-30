@@ -4,6 +4,7 @@
 # Press Double Shift to search everywhere for classes, files, tool windows, actions, and settings.
 
 import Congkak.GameManager as CongkakGame
+import Congkak.CongkakBoardModel as BoardModel
 import sys
 import traceback
 import winsound
@@ -12,9 +13,16 @@ sys.setrecursionlimit(4000)
 
 try:
     congkak = CongkakGame.GameManager()
+except BoardModel.GameDisabledError:
+    # traceback.print_exc()
+
+    print("Game was disabled. ")
+
+    while True:
+        pass
 except:
+    print("Unknown error encountered.")
+
     traceback.print_exc()
 
-    # while True:
-    #     winsound.Beep(987, 200)
-    #     winsound.Beep(1396, 200)
+    print("if error code is '0xC0000374', it is recommended to run the game with the graphics disabled and the move speed set to maximum.")
