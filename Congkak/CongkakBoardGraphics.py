@@ -2,6 +2,7 @@ from PyQt6.QtGui import QPixmap, QPainter, QPen, QAction, QIcon, QPalette
 from PyQt6 import QtCore, QtGui, QtWidgets, uic
 from PyQt6.QtCore import QPoint, Qt
 from Congkak.Hand import Hand
+from Congkak.DialogueBoxes.CounterEditDialogBox import CounterEditDialogBox
 from Congkak.DialogueBoxes.MultiGameDialogBox import MultiGameDialogBox
 from Congkak.DialogueBoxes.TournamentDialogBox import TournamentDialogBox
 from Congkak.DialogueBoxes.GameEndDialogBox import GameEndDialogBox
@@ -78,6 +79,8 @@ class BoardGraphic(QMainWindow):
         self.new_game_menu_button_action = QAction()
         self.save_game_menu_button_action = QAction()
         self.load_game_menu_button_action = QAction()
+
+        self.counter_edit_dialog_box = CounterEditDialogBox()
 
         self.update_graphics_menu_toggle_action = QAction()
 
@@ -372,6 +375,7 @@ class BoardGraphic(QMainWindow):
         # submenu.addAction(button_action)
 
         button_action = QAction("Edit Marble Count", self)
+        button_action.triggered.connect(self.counter_edit_dialog_box.exec)
         edit_menu.addAction(button_action)
 
         # button_action = QAction("Change Speed", self)

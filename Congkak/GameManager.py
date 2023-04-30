@@ -393,6 +393,8 @@ class GameManager:
 
         self.board_graphic.tournament_dialog_box.buttonBox.accepted.connect(self.run_round_robin_tournament)
 
+        self.board_graphic.counter_edit_dialog_box.buttonBox.accepted.connect(self.edit_marble_count)
+
     # makes worker constantly update graphics
     def start_worker_graphic_updater(self):
         worker = Worker(self.update_board_graphics_constantly)
@@ -1267,6 +1269,19 @@ class GameManager:
     # toggles whether the simul state agents should learn
     def toggle_learning_state_agents(self, state):
         self.is_training_state_agents = state
+
+    def edit_marble_count(self):
+
+        house_a_value = self.board_graphic.counter_edit_dialog_box.player_a_houses
+        house_b_value = self.board_graphic.counter_edit_dialog_box.player_b_houses
+
+        storeroom_a_value = self.board_graphic.counter_edit_dialog_box.player_a_storeroom
+        storeroom_b_value = self.board_graphic.counter_edit_dialog_box.player_b_storeroom
+
+        self.board_model.house_a_values = house_a_value
+        self.board_model.house_b_values = house_b_value
+        self.board_model.storeroom_a_value = storeroom_a_value
+        self.board_model.storeroom_b_value = storeroom_b_value
 
     def update_graphics_status(self, message="", random=""):
         self.board_graphic.update_status_bar_message(message, self.current_mode, self.no_of_games_left+1, random)
