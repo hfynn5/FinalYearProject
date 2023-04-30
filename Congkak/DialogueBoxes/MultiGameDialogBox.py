@@ -28,12 +28,12 @@ class MultiGameDialogBox(QDialog):
         layout = QGridLayout()
 
         self.player_a_dropdown = QComboBox(self)
-        self.player_a_dropdown.addItems(['Random', 'Max', 'Minimax', 'MCTS'])
+        self.player_a_dropdown.addItems(['Random', 'Max', 'Minimax'])
         self.player_a_dropdown.activated.\
             connect(lambda index=self.player_a_dropdown.currentIndex(): self.set_player_a_agent(index))
 
         self.player_b_dropdown = QComboBox(self)
-        self.player_b_dropdown.addItems(['Random', 'Max', 'Minimax', 'MCTS'])
+        self.player_b_dropdown.addItems(['Random', 'Max', 'Minimax'])
         self.player_b_dropdown.activated.\
             connect(lambda index=self.player_b_dropdown.currentIndex(): self.set_player_b_agent(index))
 

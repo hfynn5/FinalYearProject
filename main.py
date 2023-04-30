@@ -18,11 +18,13 @@ except BoardModel.GameDisabledError:
 
     print("Game was disabled. ")
 
-    while True:
-        pass
 except:
     print("Unknown error encountered.")
 
     traceback.print_exc()
 
     print("if error code is '0xC0000374', it is recommended to run the game with the graphics disabled and the move speed set to maximum.")
+
+finally:
+    while True:
+        pass

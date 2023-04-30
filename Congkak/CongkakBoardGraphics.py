@@ -145,20 +145,6 @@ class BoardGraphic(QMainWindow):
         # show all the widgets
         self.show()
 
-        # comment out afterwards
-
-        # msg = QMessageBox()
-        # msg.setWindowTitle("Round Robin Result")
-        # msg.setText("Results\n\n"
-        #             "Rounds: 100\n"
-        #             "Random: 2 wins"
-        #             "Minimax: 60 wins\n"
-        #             "MCTS: 40 wins\n"
-        #             "Q-Learning: 40 wins"
-        #             )
-        #
-        # x = msg.exec()
-
     # what to do if close window
     def closeEvent(self, a0: QtGui.QCloseEvent) -> None:
         self.active = False
@@ -304,7 +290,7 @@ class BoardGraphic(QMainWindow):
 
         self.player_a_agent_dropdown = QComboBox(self)
         self.player_a_agent_dropdown.move(650, 100)
-        self.player_a_agent_dropdown.addItems(['Human', 'Random', 'Max', 'Minimax', 'MCTS'])
+        self.player_a_agent_dropdown.addItems(['Human', 'Random', 'Max', 'Minimax'])
 
         label_a = QLabel(self)
         label_a.move(650, 410)
@@ -312,7 +298,7 @@ class BoardGraphic(QMainWindow):
 
         self.player_b_agent_dropdown = QComboBox(self)
         self.player_b_agent_dropdown.move(650, 380)
-        self.player_b_agent_dropdown.addItems(['Human', 'Random', 'Max', 'Minimax', 'MCTS'])
+        self.player_b_agent_dropdown.addItems(['Human', 'Random', 'Max', 'Minimax'])
 
         label_a = QLabel(self)
         label_a.move(500, 70)
