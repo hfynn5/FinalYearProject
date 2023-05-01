@@ -102,7 +102,7 @@ class QLearningSimulAgent:
         elif winner_player == 'b':
 
             if state.player_b_choice < 0:
-                return state
+                return state, prev_reward
 
             increase = self.learning_rate * \
                         (1 + self.discount_rate * prev_reward - current_q_value_b)

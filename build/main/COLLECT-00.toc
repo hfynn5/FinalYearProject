@@ -1,5 +1,5 @@
-([('Congakak Experimenter.exe',
-   'C:\\Users\\USER\\PycharmProjects\\FinalYearProject\\build\\main\\Congakak '
+([('Congkak Experimenter.exe',
+   'C:\\Users\\USER\\PycharmProjects\\FinalYearProject\\build\\main\\Congkak '
    'Experimenter.exe',
    'EXECUTABLE'),
   ('python310.dll',

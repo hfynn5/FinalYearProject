@@ -1,4 +1,4 @@
-('C:\\Users\\USER\\PycharmProjects\\FinalYearProject\\build\\main\\Congakak '
+('C:\\Users\\USER\\PycharmProjects\\FinalYearProject\\build\\main\\Congkak '
  'Experimenter.pkg',
  {'BINARY': True,
   'DATA': True,
