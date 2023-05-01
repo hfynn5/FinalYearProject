@@ -37,7 +37,7 @@ class TournamentEndDialogBox(QDialog):
 
                 layout.addWidget(QLabel(str(results[m][n])), m + y_offset + 1, n + x_offset + 1)
 
-        layout.addWidget(self.buttonBox, len(participants) + y_offset + 1, 1)
+        layout.addWidget(self.buttonBox, len(participants) + y_offset + 2, 1)
 
         self.setLayout(layout)
 
