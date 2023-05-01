@@ -418,10 +418,10 @@ class BoardGraphic(QMainWindow):
         self.run_tournament_menu_button_action.setStatusTip("Run Round Robin Tournament")
         self.run_tournament_menu_button_action.triggered.connect(self.tournament_dialog_box.exec)
         game_menu.addAction(self.run_tournament_menu_button_action)
-
-        help_menu = self.menuBar().addMenu("Help")
-
-        about_menu = self.menuBar().addMenu("About")
+        #
+        # help_menu = self.menuBar().addMenu("Help")
+        #
+        # about_menu = self.menuBar().addMenu("About")
 
     def update_values(self, house_a_values, house_b_values,
                       storeroom_a_value, storeroom_b_value,

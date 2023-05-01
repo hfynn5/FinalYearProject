@@ -1207,6 +1207,8 @@ class GameManager:
         self.board_model.reset_game()
         self.current_mode = self.LOADING_MODE
 
+        self.loaded_moves.clear()
+
         file = open("moves.txt", 'r')
         for line in file:
             if not (line == 'END'):
@@ -1214,6 +1216,8 @@ class GameManager:
             else:
                 break
         file.close()
+
+        print(self.loaded_moves)
 
         self.move_counter = 0
         self.do_next_move_from_loaded_moves(BoardModel.PROMPT_SOWING_BOTH)
