@@ -18,6 +18,9 @@ except BoardModel.GameDisabledError:
 
     print("Game was disabled. ")
 
+except SystemExit:
+    print("Program has closed")
+
 except:
     print("Unknown error encountered.")
 

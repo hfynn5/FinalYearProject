@@ -526,7 +526,7 @@ class BoardModel:
         if not self.running:
             self.print_all_data()
 
-            raise GameDisabledError()
+            raise GameDisabledError
 
     def update_board_state_dict(self):
         self.board_state_dict["player a house"] = self.house_a_values
