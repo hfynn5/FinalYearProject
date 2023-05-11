@@ -207,7 +207,7 @@ class GameManager:
         self.autoplay_hands = False
 
         # For graphics
-        self.graphic_refresh_rate = 0.01
+        self.graphic_refresh_rate = 0.1
         self.update_graphic = True
 
         self.current_mode = self.NORMAL_MODE
@@ -545,7 +545,7 @@ class GameManager:
 
         self.board_model.active_players.clear()
 
-        update_board_graphics(board_graphic=self.board_graphic, board_model=self.board_model)
+        # update_board_graphics(board_graphic=self.board_graphic, board_model=self.board_model)
 
         result = self.DRAW
         winner = "None"
