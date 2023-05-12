@@ -38,8 +38,7 @@ class MinimaxAgent:
 
         self.heuristics_weights = [0, 0, 0, 0, 0, 0]
 
-        for weight in weights:
-            self.heuristics_weights = weight
+        self.heuristics_weights = weights
 
         self.all_leaves = []
 

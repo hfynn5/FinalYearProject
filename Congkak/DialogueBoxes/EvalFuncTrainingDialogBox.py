@@ -8,8 +8,8 @@ class EvalFuncTrainingDialogBox(QDialog):
         super().__init__()
 
         self.max_generation_count = 0
-        self.no_of_games = 3
-        self.pop_size = 8
+        self.no_of_games = 1
+        self.pop_size = 4
 
         self.setWindowTitle("Train Evaluation Function")
 
