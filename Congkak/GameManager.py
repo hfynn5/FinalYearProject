@@ -727,12 +727,23 @@ class GameManager:
                         print("running round robin with agent no " + str(self.TEF_individual_a_index) +
                               " and agent no " + str(self.TEF_individual_b_index))
 
-                        self.TEF_individual_a = MaxAgent(max_depth=self.max_depth,
-                                                         weights=self.TEF_population[
-                                                             self.TEF_individual_a_index].weight_chromosome)
-                        self.TEF_individual_b = MaxAgent(max_depth=self.max_depth,
-                                                         weights=self.TEF_population[
-                                                             self.TEF_individual_b_index].weight_chromosome)
+                        # self.TEF_individual_a = MaxAgent(max_depth=self.max_depth,
+                        #                                  weights=self.TEF_population[
+                        #                                      self.TEF_individual_a_index].weight_chromosome)
+                        # self.TEF_individual_b = MaxAgent(max_depth=self.max_depth,
+                        #                                  weights=self.TEF_population[
+                        #                                      self.TEF_individual_b_index].weight_chromosome)
+
+                        self.TEF_individual_a = MinimaxAgent(weights=self.TEF_population[
+                                                             self.TEF_individual_a_index].weight_chromosome,
+                                                             maximum_depth=self.minmax_depth,
+                                                             maximum_self_depth=0,
+                                                             maximum_number_node=0)
+                        self.TEF_individual_b = MinimaxAgent(weights=self.TEF_population[
+                                                             self.TEF_individual_b_index].weight_chromosome,
+                                                             maximum_depth=self.minmax_depth,
+                                                             maximum_self_depth=0,
+                                                             maximum_number_node=0)
 
                         self.run_multiple_games(no_of_games=self.no_of_games_to_run,
                                                 agent_a=self.TEF_individual_a,
@@ -858,9 +869,7 @@ class GameManager:
                     # if self.board_model.house_b_values == [7,7,7,7,7,7,7]:
                     #     move = 7
                     else:
-                        # print("random")
                         move = self.player_b_agent_simul.choose_move(player, copied_board)
-                        print("random choice: " + str(move))
 
             else:
                 if player == 'a':
@@ -1035,6 +1044,7 @@ class GameManager:
             print("running " + str(no_of_games) + " games. player a: " + str(
                 self.player_a_agent_name) + ". player b: " + str(self.player_b_agent_name))
         elif self.current_mode == self.EVAL_TRAINING_MODE:
+
             print("running " + str(no_of_games) + " games. player a: " + str(
                 self.player_a_agent.heuristics_weights) +
                   ". player b: " + str(self.player_b_agent.heuristics_weights))
@@ -1117,8 +1127,15 @@ class GameManager:
         self.TEF_individual_a_index = 0
         self.TEF_individual_b_index = 1
 
-        self.TEF_individual_a = MaxAgent(max_depth=self.max_depth, weights=self.TEF_population[0].weight_chromosome)
-        self.TEF_individual_b = MaxAgent(max_depth=self.max_depth, weights=self.TEF_population[1].weight_chromosome)
+        # self.TEF_individual_a = MaxAgent(max_depth=self.max_depth, weights=self.TEF_population[0].weight_chromosome)
+        # self.TEF_individual_b = MaxAgent(max_depth=self.max_depth, weights=self.TEF_population[1].weight_chromosome)
+
+        self.TEF_individual_a = MinimaxAgent(weights=self.TEF_population[0].weight_chromosome, maximum_depth=self.minmax_depth,
+                                            maximum_self_depth=0,
+                                            maximum_number_node=0)
+        self.TEF_individual_b = MinimaxAgent(weights=self.TEF_population[1].weight_chromosome, maximum_depth=self.minmax_depth,
+                                            maximum_self_depth=0,
+                                            maximum_number_node=0)
 
         self.round_robin_simul_agent = self.random_agent
 
