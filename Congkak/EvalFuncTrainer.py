@@ -1,3 +1,4 @@
+import copy
 import math
 import random
 import statistics
@@ -19,7 +20,7 @@ class EvalFuncTrainer:
     def __init__(self, max_generation_count, pop_size, size_of_chromosome, initial_std_dev):
 
         self.max_generation_count = max_generation_count
-        self.generation_count = 0
+        self.generation_count = 1
 
         self.population = []
 
@@ -39,6 +40,8 @@ class EvalFuncTrainer:
 
     def generate_next_population(self):
 
+        print(self.population)
+
         self.generation_count += 1
 
         print("generating.... generation: " + str(self.generation_count))
@@ -53,7 +56,16 @@ class EvalFuncTrainer:
         random.shuffle(self.population)
 
         first_half = self.population[:math.floor(self.pop_size/4)]
+        first_half = copy.deepcopy(first_half)
         second_half = self.population[math.floor(self.pop_size/4):]
+        second_half = copy.deepcopy(second_half)
+
+        print("first half", first_half)
+        print("secomd half", second_half)
+
+        print("pop", self.population)
+
+        new_population = []
 
         for index, individual_a in enumerate(first_half):
 
@@ -61,13 +73,25 @@ class EvalFuncTrainer:
 
             new_individual_a, new_individual_b = self.crossover_individuals(individual_a, individual_b)
 
-            self.population.append(new_individual_a)
-            self.population.append(new_individual_b)
+            print(new_individual_a)
+            print(new_individual_b)
+
+            new_population.append(new_individual_a)
+            new_population.append(new_individual_b)
+
+        print("pop", self.population)
+        print("new pop", new_population)
+
+        self.population += new_population
+
+        print(self.population)
 
         for index, individual in enumerate(self.population):
             individual = self.mutate_chromosome(individual, self.gaus_std_dev)
 
             individual.score = 0
+
+        print(self.population)
 
         self.individual_a_index = 0
         self.individual_b_index = -1
@@ -123,8 +147,11 @@ class EvalFuncTrainer:
         return True
 
     def crossover_individuals(self, individual_a, individual_b):
+        #
+        # print("ind a: ", individual_a)
+        # print("ind b: ", individual_b)
 
-        crossover_point = random.randint(0, self.size_of_chromosome)
+        crossover_point = random.randint(1, self.size_of_chromosome-2)
 
         new_chromosome_a = individual_a.weight_chromosome[:crossover_point] + \
                            individual_b.weight_chromosome[crossover_point:]
@@ -133,6 +160,13 @@ class EvalFuncTrainer:
 
         individual_a.weight_chromosome = new_chromosome_a
         individual_b.weight_chromosome = new_chromosome_b
+
+        # print("ind a", individual_a.weight_chromosome)
+        #
+        # print("chr a: ", new_chromosome_a)
+        # print("chr b: ", new_chromosome_b)
+        #
+        # print("ind a", individual_a)
 
         return individual_a, individual_b
 
