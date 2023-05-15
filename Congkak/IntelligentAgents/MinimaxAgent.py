@@ -5,12 +5,44 @@ from Congkak.CongkakBoardModel import BoardModel
 from Congkak.Hand import Hand
 
 
-def evaluate_position(board_model, player):
-    best_value = 0
+def evaluate_position(board_model, player, chain_count, heuristic_weights):
 
-    best_value = board_model.storeroom_a_value - board_model.storeroom_b_value
+    heuristics = [0, 0, 0, 0, 0, 0]
 
-    return best_value
+    if player == 'a':
+        heuristics[0] = sum(board_model.house_a_values)
+
+        for house in board_model.house_a_values:
+            if house > 0:
+                heuristics[1] += 1
+
+        heuristics[2] = board_model.storeroom_a_value
+
+        heuristics[3] = -board_model.storeroom_b_value
+
+        heuristics[5] = board_model.storeroom_a_value - board_model.storeroom_b_value
+
+    elif player == 'b':
+        heuristics[0] = sum(board_model.house_b_values)
+
+        for house in board_model.house_b_values:
+            if house > 0:
+                heuristics[1] += 1
+
+        heuristics[2] = board_model.storeroom_b_value
+
+        heuristics[3] = -board_model.storeroom_a_value
+
+        heuristics[5] = board_model.storeroom_b_value - board_model.storeroom_a_value
+
+    heuristics[4] = chain_count
+
+    best_value = sum([w*h for (w, h) in zip(heuristic_weights, heuristics)])
+
+    if player == 'a':
+        return best_value
+    elif player == 'b':
+        return -best_value
 
 
 class MinimaxAgent:
@@ -83,7 +115,7 @@ class MinimaxAgent:
                 final_best_move = move
                 optimal_board = board
 
-            # print("total nodes searched: " + str(self.node_count) + " leaf nodes reached: " + str(self.leaf_node_count))
+            print("minimax: total nodes searched: " + str(self.node_count) + " leaf nodes reached: " + str(self.leaf_node_count))
             # print("optimal board so far: ")
             # optimal_board.print_all_data()
 
@@ -91,7 +123,7 @@ class MinimaxAgent:
 
         # print("optimal board: ")
         # optimal_board.print_all_data()
-        print("minimax: total nodes searched: " + str(self.node_count) + " leaf nodes reached: " + str(self.leaf_node_count))
+        # print("minimax: total nodes searched: " + str(self.node_count) + " leaf nodes reached: " + str(self.leaf_node_count))
 
         return final_best_move
 
