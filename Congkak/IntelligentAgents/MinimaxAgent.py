@@ -104,7 +104,9 @@ class MinimaxAgent:
         for move in available_moves:
             self.checked_opponent = False
             new_board = copy.deepcopy(board_model)
-            evaluation, board = self.minimax(board_model=new_board, move=move, depth=self.maximum_depth, self_depth=self.maximum_self_depth, player=player, alpha=-math.inf, beta=math.inf)
+            evaluation, board = self.minimax(board_model=new_board, move=move,
+                                             depth=self.maximum_depth, self_depth=self.maximum_self_depth,
+                                             player=player, alpha=-math.inf, beta=math.inf, chain_count=0)
 
             if player == 'a' and (evaluation >= final_best_value):
                 final_best_value = evaluation
@@ -127,7 +129,7 @@ class MinimaxAgent:
 
         return final_best_move
 
-    def minimax(self, board_model, move, depth, self_depth, player, alpha, beta):
+    def minimax(self, board_model, move, depth, self_depth, player, alpha, beta, chain_count):
 
         self.node_count += 1
 
@@ -139,7 +141,7 @@ class MinimaxAgent:
         # if depth == 0 or self_depth == 0:
         if depth == 0:
             self.leaf_node_count += 1
-            return evaluate_position(board_model, player), board_model
+            return evaluate_position(board_model, player, chain_count, self.heuristics_weights), board_model
 
         hole = 0
         if player == 'a':
@@ -159,7 +161,7 @@ class MinimaxAgent:
 
         if depth == 0 or len(available_moves) == 0:
             self.leaf_node_count += 1
-            return evaluate_position(board_model, player), board_model
+            return evaluate_position(board_model, player, chain_count, self.heuristics_weights), board_model
 
         if player == 'a':
             max_eva = -math.inf
@@ -168,13 +170,13 @@ class MinimaxAgent:
 
                 case BoardModel.PROMPT_SOWING_BOTH:
 
-                    return evaluate_position(board_model, player), board_model
+                    return evaluate_position(board_model, player, chain_count, self.heuristics_weights), board_model
 
                 case BoardModel.PROMPT_SOWING_A:
                     available_moves = board_model.available_moves('a')
                     for move in available_moves:
                         new_board = copy.deepcopy(board_model)
-                        eva, board = self.minimax(new_board, move, depth - 1, self_depth, 'a', alpha, beta)
+                        eva, board = self.minimax(new_board, move, depth - 1, self_depth, 'a', alpha, beta, chain_count+1)
                         if eva > max_eva:
                             max_eva = eva
                             optimal_board = board
@@ -188,7 +190,7 @@ class MinimaxAgent:
                     for move in available_moves:
                         new_board = copy.deepcopy(board_model)
 
-                        eva, board = self.minimax(new_board, move, depth - 1, self_depth, 'b', alpha, beta)
+                        eva, board = self.minimax(new_board, move, depth - 1, self_depth, 'b', alpha, beta, 0)
                         if eva > max_eva:
                             max_eva = eva
                             optimal_board = board
@@ -207,14 +209,14 @@ class MinimaxAgent:
 
                 case BoardModel.PROMPT_SOWING_BOTH:
 
-                    return evaluate_position(board_model, player), board_model
+                    return evaluate_position(board_model, player, chain_count, self.heuristics_weights), board_model
 
                 case BoardModel.PROMPT_SOWING_A:
                     available_moves = board_model.available_moves('a')
                     for move in available_moves:
                         new_board = copy.deepcopy(board_model)
 
-                        eva, board = self.minimax(new_board, move, depth - 1, self_depth, 'a', alpha, beta)
+                        eva, board = self.minimax(new_board, move, depth - 1, self_depth, 'a', alpha, beta, 0)
                         if eva < min_eva:
                             min_eva = eva
                             optimal_board = board
@@ -228,7 +230,7 @@ class MinimaxAgent:
                     for move in available_moves:
                         new_board = copy.deepcopy(board_model)
 
-                        eva, board = self.minimax(new_board, move, depth - 1, self_depth, 'b', alpha, beta)
+                        eva, board = self.minimax(new_board, move, depth - 1, self_depth, 'b', alpha, beta, chain_count)
                         if eva < min_eva:
                             min_eva = eva
                             optimal_board = board
