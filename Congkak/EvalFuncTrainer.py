@@ -60,11 +60,6 @@ class EvalFuncTrainer:
         second_half = self.population[math.floor(self.pop_size/4):]
         second_half = copy.deepcopy(second_half)
 
-        print("first half", first_half)
-        print("secomd half", second_half)
-
-        print("pop", self.population)
-
         new_population = []
 
         for index, individual_a in enumerate(first_half):
@@ -78,9 +73,6 @@ class EvalFuncTrainer:
 
             new_population.append(new_individual_a)
             new_population.append(new_individual_b)
-
-        print("pop", self.population)
-        print("new pop", new_population)
 
         self.population += new_population
 
@@ -118,7 +110,7 @@ class EvalFuncTrainer:
 
         self.population.sort(key=get_score, reverse=True)
 
-        return self.population[1]
+        return self.population[0]
 
     def update_score(self, individual_a_score, individual_b_score):
         self.population[self.individual_a_index].score += individual_a_score
@@ -182,9 +174,44 @@ class EvalFuncTrainer:
 
         self.population = []
 
-        for x in range(pop_size):
-            random_weight = []
-            for c in range(self.size_of_chromosome):
-                random_weight.append(round(random.random(), 5))
+        weight = [1, 0, 0, 0, 0, 0]
+        self.population.append(Individual(weight, 0))
 
-            self.population.append(Individual(random_weight, 0))
+        weight = [0, 1, 0, 0, 0, 0]
+        self.population.append(Individual(weight, 0))
+
+        weight = [0, 0, 1, 0, 0, 0]
+        self.population.append(Individual(weight, 0))
+
+        weight = [0, 0, 0, 1, 0, 0]
+        self.population.append(Individual(weight, 0))
+
+        weight = [0, 0, 0, 0, 1, 0]
+        self.population.append(Individual(weight, 0))
+
+        weight = [0, 0, 0, 0, 0, 1]
+        self.population.append(Individual(weight, 0))
+
+        # weight = [0.14, 0.3, 0.82, 0.16, 0.76, 0.78]
+        # self.population.append(Individual(weight, 0))
+        #
+        # weight = [0.521, 0.435, 0.924, 0.407, 0.262, 0.713]
+        # self.population.append(Individual(weight, 0))
+
+        for x in range(pop_size-6):
+
+            # minimax
+            # random_weight = [0.54, 0.5, 0.54, 0.76, 0.08, 0.58]
+
+            # max
+            random_weight = [0.14, 0.3, 0.82, 0.16, 0.76, 0.78]
+
+            individual = Individual(random_weight, 0)
+
+            for point in range(self.size_of_chromosome):
+                individual.weight_chromosome[point] = round(gaussian_mutator(individual.weight_chromosome[point],
+                                                                             0.1), 5)
+
+            self.population.append(individual)
+
+        print(self.population)

@@ -191,10 +191,11 @@ class GameManager:
         # training evaluation function
         self.trainer_pop_size = 40
         self.trainer_chromosome_size = 6
-        self.trainer_std_dev = 0.1
+        self.trainer_std_dev = 0.05
         self.eval_func_trainer = EvalFuncTrainer(10, 20,
                                                  self.trainer_chromosome_size,
                                                  self.trainer_std_dev)
+        self.TEF_agent = self.AGENT_MAX
         self.TEF_individual_a = MaxAgent(max_depth=5, weights=[0, 0, 0, 0, 0, 0])
         self.TEF_individual_b = MaxAgent(max_depth=5, weights=[0, 0, 0, 0, 0, 0])
         self.TEF_population = None
@@ -690,7 +691,9 @@ class GameManager:
                                 self.eval_func_trainer.check_if_converge():
                             # end training.
 
-                            self.update_graphics_status(message="Round Robin has ended")
+                            self.update_graphics_status(message="Training has ended")
+
+                            print(self.eval_func_trainer.population)
 
                             best_individual = self.eval_func_trainer.get_best_individual()
                             weight = best_individual.weight_chromosome
@@ -713,10 +716,21 @@ class GameManager:
                             self.TEF_individual_a_index = 0
                             self.TEF_individual_b_index = 1
 
-                            self.TEF_individual_a = MaxAgent(max_depth=self.max_depth,
-                                                             weights=self.TEF_population[0].weight_chromosome)
-                            self.TEF_individual_b = MaxAgent(max_depth=self.max_depth,
-                                                             weights=self.TEF_population[1].weight_chromosome)
+                            match self.TEF_agent:
+                                case self.AGENT_MAX:
+                                    self.TEF_individual_a = MaxAgent(max_depth=self.max_depth,
+                                                                     weights=self.TEF_population[0].weight_chromosome)
+                                    self.TEF_individual_b = MaxAgent(max_depth=self.max_depth,
+                                                                     weights=self.TEF_population[1].weight_chromosome)
+                                case self.AGENT_MINIMAX:
+                                    self.TEF_individual_a = MinimaxAgent(weights=self.TEF_population[0].weight_chromosome,
+                                                                         maximum_depth=self.minmax_depth,
+                                                                         maximum_self_depth=0,
+                                                                         maximum_number_node=0)
+                                    self.TEF_individual_b = MinimaxAgent(weights=self.TEF_population[1].weight_chromosome,
+                                                                         maximum_depth=self.minmax_depth,
+                                                                         maximum_self_depth=0,
+                                                                         maximum_number_node=0)
 
                             self.run_multiple_games(no_of_games=self.no_of_games_to_run,
                                                     agent_a=self.TEF_individual_a,
@@ -727,23 +741,25 @@ class GameManager:
                         print("running round robin with agent no " + str(self.TEF_individual_a_index) +
                               " and agent no " + str(self.TEF_individual_b_index))
 
-                        # self.TEF_individual_a = MaxAgent(max_depth=self.max_depth,
-                        #                                  weights=self.TEF_population[
-                        #                                      self.TEF_individual_a_index].weight_chromosome)
-                        # self.TEF_individual_b = MaxAgent(max_depth=self.max_depth,
-                        #                                  weights=self.TEF_population[
-                        #                                      self.TEF_individual_b_index].weight_chromosome)
-
-                        self.TEF_individual_a = MinimaxAgent(weights=self.TEF_population[
-                                                             self.TEF_individual_a_index].weight_chromosome,
-                                                             maximum_depth=self.minmax_depth,
-                                                             maximum_self_depth=0,
-                                                             maximum_number_node=0)
-                        self.TEF_individual_b = MinimaxAgent(weights=self.TEF_population[
-                                                             self.TEF_individual_b_index].weight_chromosome,
-                                                             maximum_depth=self.minmax_depth,
-                                                             maximum_self_depth=0,
-                                                             maximum_number_node=0)
+                        match self.TEF_agent:
+                            case self.AGENT_MAX:
+                                self.TEF_individual_a = MaxAgent(max_depth=self.max_depth,
+                                                                 weights=self.TEF_population[
+                                                                     self.TEF_individual_a_index].weight_chromosome)
+                                self.TEF_individual_b = MaxAgent(max_depth=self.max_depth,
+                                                                 weights=self.TEF_population[
+                                                                     self.TEF_individual_b_index].weight_chromosome)
+                            case self.AGENT_MINIMAX:
+                                self.TEF_individual_a = MinimaxAgent(weights=self.TEF_population[
+                                                                     self.TEF_individual_a_index].weight_chromosome,
+                                                                     maximum_depth=self.minmax_depth,
+                                                                     maximum_self_depth=0,
+                                                                     maximum_number_node=0)
+                                self.TEF_individual_b = MinimaxAgent(weights=self.TEF_population[
+                                                                     self.TEF_individual_b_index].weight_chromosome,
+                                                                     maximum_depth=self.minmax_depth,
+                                                                     maximum_self_depth=0,
+                                                                     maximum_number_node=0)
 
                         self.run_multiple_games(no_of_games=self.no_of_games_to_run,
                                                 agent_a=self.TEF_individual_a,
@@ -1113,6 +1129,8 @@ class GameManager:
         if pop_size is None:
             pop_size = self.board_graphic.eval_func_training_dialog_box.pop_size
 
+        self.TEF_agent = self.LIST_OF_AGENTS_NAME[self.board_graphic.eval_func_training_dialog_box.player_agent]
+
         self.current_mode = self.EVAL_TRAINING_MODE
 
         self.eval_func_trainer = EvalFuncTrainer(max_generation_count=max_no_generations,
@@ -1127,15 +1145,19 @@ class GameManager:
         self.TEF_individual_a_index = 0
         self.TEF_individual_b_index = 1
 
-        # self.TEF_individual_a = MaxAgent(max_depth=self.max_depth, weights=self.TEF_population[0].weight_chromosome)
-        # self.TEF_individual_b = MaxAgent(max_depth=self.max_depth, weights=self.TEF_population[1].weight_chromosome)
-
-        self.TEF_individual_a = MinimaxAgent(weights=self.TEF_population[0].weight_chromosome, maximum_depth=self.minmax_depth,
-                                            maximum_self_depth=0,
-                                            maximum_number_node=0)
-        self.TEF_individual_b = MinimaxAgent(weights=self.TEF_population[1].weight_chromosome, maximum_depth=self.minmax_depth,
-                                            maximum_self_depth=0,
-                                            maximum_number_node=0)
+        match self.TEF_agent:
+            case self.AGENT_MAX:
+                self.TEF_individual_a = MaxAgent(max_depth=self.max_depth, weights=self.TEF_population[0].weight_chromosome)
+                self.TEF_individual_b = MaxAgent(max_depth=self.max_depth, weights=self.TEF_population[1].weight_chromosome)
+            case self.AGENT_MINIMAX:
+                self.TEF_individual_a = MinimaxAgent(weights=self.TEF_population[0].weight_chromosome,
+                                                     maximum_depth=self.minmax_depth,
+                                                     maximum_self_depth=0,
+                                                     maximum_number_node=0)
+                self.TEF_individual_b = MinimaxAgent(weights=self.TEF_population[1].weight_chromosome,
+                                                     maximum_depth=self.minmax_depth,
+                                                     maximum_self_depth=0,
+                                                     maximum_number_node=0)
 
         self.round_robin_simul_agent = self.random_agent
 
